@@ -1,5 +1,6 @@
 //Conner Taylor
-//2019 FRC Competitive Season BOM
+//FRC 2019 Robot Competitive BOM
+
 
 /*----------------------------------------------------------------------------*/
 /* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
@@ -10,7 +11,9 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.TimedRobot;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -20,7 +23,16 @@ import edu.wpi.first.wpilibj.TimedRobot;
  * project.
  */
 public class Robot extends TimedRobot {
+
+  /**Classes
+   * Subsystems of Robots Import
+   */
+  private DriveTrain m_DriveTrain = new DriveTrain();
+  private Elevator m_Elevator = new Elevator();
+  private Gurny m_Gurny = new Gurny();
+  private Manipulator m_Manipulator = new Manipulator();
   
+
 
   /**
    * This function is run when the robot is first started up and should be
@@ -28,7 +40,11 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-   
+    m_DriveTrain.robotInit();
+    m_Elevator.robotInit();
+    m_Gurny.robotInit();
+    m_Manipulator.robotInit();
+
   }
 
   /**
@@ -41,7 +57,11 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    
+    m_DriveTrain.report();
+    m_Elevator.report();
+    m_Gurny.report();
+    m_Manipulator.report();
+
   }
 
   /**
@@ -57,6 +77,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
+    m_DriveTrain.autonomousInit();
+    m_Elevator.autonomousInit();
+    m_Gurny.autonomousInit();
+    m_Manipulator.autonomousInit();
 
   }
 
@@ -65,15 +89,24 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
+    m_DriveTrain.autonomousPeriodic();
+    m_Elevator.autonomousPeriodic();
+    m_Gurny.autonomousPeriodic();
+    m_Manipulator.autonomousPeriodic();
 
-    }
+
+  }
 
   /**
    * This function is called periodically during operator control.
    */
   @Override
   public void teleopPeriodic() {
-
+    m_DriveTrain.teleopPeriodic();
+    m_Elevator.teleopPeriodic();
+    m_Gurny.teleopPeriodic();
+    m_Manipulator.teleopPeriodic();
+  
   }
 
   /**
@@ -81,6 +114,9 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
-
+    m_DriveTrain.testPeriodic();
+    m_Elevator.testPeriodic();
+    m_Gurny.testPeriodic();
+    m_Manipulator.testPeriodic();
   }
 }
