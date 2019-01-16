@@ -1,3 +1,6 @@
+//Conner Taylor
+//2019 FRC Competitive Season BOM
+
 /*----------------------------------------------------------------------------*/
 /* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
