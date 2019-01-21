@@ -7,8 +7,10 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motion.MotionProfileStatus;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.Encoder;
@@ -39,9 +41,24 @@ public class Robot extends TimedRobot {
 
     joy = new Joystick(0);
     motor = new WPI_TalonSRX(13);
-    motor.setSensorPhase(true);
+
+    motor.configFactoryDefault();
+
+
+    motor.setSensorPhase(false);
     motor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 30);
-    motor.config_kF(0, 0.2);
+    motor.config_kF(0, 4);
+    motor.config_kP(0, 3.7);
+    motor.config_kI(0, 0.0035);
+    motor.config_kD(0, 37);
+    motor.config_IntegralZone(0, 20);
+
+    motor.configNominalOutputForward(0);
+    motor.configNominalOutputReverse(0);
+    motor.configPeakOutputForward(1);
+    motor.configPeakOutputReverse(-1);
+
+    motor.setNeutralMode(NeutralMode.Brake);
   }
 
   /**
@@ -85,8 +102,24 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    double rpm1 = joy.getRawAxis(0) * 50 * 128/600;
-    motor.set(ControlMode.Velocity, rpm1);
+
+    double sensPos = motor.getSelectedSensorPosition(0);
+    double sensVel = motor.getSelectedSensorVelocity(0);
+    SmartDashboard.putNumber("Sensor Velocity", sensVel);
+    SmartDashboard.putNumber("Sensor RPM", sensVel * 600/512);
+    SmartDashboard.putNumber("Sensor Pos", sensPos);
+    SmartDashboard.putNumber("Closed Loop Error", motor.getClosedLoopError(0));
+
+    if (joy.getRawButton(1) == true) {
+     
+      double targSmplPerPeriod = joy.getRawAxis(0) * 100;
+      double rpm1 = 0;
+      SmartDashboard.putNumber("Velocity Demand", targSmplPerPeriod);
+
+      motor.set(ControlMode.Velocity, targSmplPerPeriod);
+    } else {
+      motor.set(ControlMode.PercentOutput, joy.getRawAxis(0));
+    }
   }
 
   /**
@@ -94,5 +127,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
+
   }
 }
