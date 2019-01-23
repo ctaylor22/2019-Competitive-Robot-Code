@@ -15,15 +15,9 @@ public class TalonConfig  {
     WPI_TalonSRX motor6;
 
 
+  public void driveMotors(WPI_TalonSRX talon1, WPI_TalonSRX talon2, WPI_TalonSRX talon3, WPI_TalonSRX talon4, WPI_TalonSRX talon5, WPI_TalonSRX talon6) {
 
-  public void TalonInit(WPI_TalonSRX... talon) {
 
-    motor1 = talon[1];
-    motor2 = talon[2];
-    motor3 = talon[3];
-    motor4 = talon[4];
-    motor5 = talon[5];
-    motor6 = talon[6];
 
     motor1.configFactoryDefault();
     motor2.configFactoryDefault();

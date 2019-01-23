@@ -11,7 +11,9 @@
 
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+
+
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 
 
@@ -31,6 +33,8 @@ public class Robot extends TimedRobot {
   private Elevator m_Elevator = new Elevator();
   private Gurny m_Gurny = new Gurny();
   private Manipulator m_Manipulator = new Manipulator();
+
+  Joystick m_joy;
   
   
 
@@ -43,7 +47,9 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    m_DriveTrain.robotInit();
+    m_joy = new Joystick(0);
+
+    m_DriveTrain.robotInit(m_joy);
     m_Elevator.robotInit();
     m_Gurny.robotInit();
     m_Manipulator.robotInit();

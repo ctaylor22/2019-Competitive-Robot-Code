@@ -47,11 +47,11 @@ public class Robot extends TimedRobot {
 
     motor.setSensorPhase(false);
     motor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 30);
-    motor.config_kF(0, 4);
-    motor.config_kP(0, 3.7);
-    motor.config_kI(0, 0.0035);
-    motor.config_kD(0, 37);
-    motor.config_IntegralZone(0, 20);
+    motor.config_kF(0, 5);
+    motor.config_kP(0, 0);
+    motor.config_kI(0, 0);
+    motor.config_kD(0, 0);
+    motor.config_IntegralZone(0, 0);
 
     motor.configNominalOutputForward(0);
     motor.configNominalOutputReverse(0);
@@ -111,8 +111,10 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Closed Loop Error", motor.getClosedLoopError(0));
 
     if (joy.getRawButton(1) == true) {
+
+      double joyy = joy.getRawAxis(0);
      
-      double targSmplPerPeriod = joy.getRawAxis(0) * 100;
+      double targSmplPerPeriod =  joy.getRawAxis(0) * 200;
       double rpm1 = 0;
       SmartDashboard.putNumber("Velocity Demand", targSmplPerPeriod);
 
