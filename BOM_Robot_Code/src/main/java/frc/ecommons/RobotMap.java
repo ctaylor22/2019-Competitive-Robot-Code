@@ -1,6 +1,13 @@
 package frc.ecommons;
 
 public class RobotMap {
+//Joysticks
+    public static int driveJoy = 0;
+
+/* Elevator IDS
+    Talons: 10 */
+
+    public static int elevator = 10;
 
 /* Drive Train IDS      
     Talons: 13(R), 14(L)      Victors: 15(R), 16(R), 17(L), 18(L) 
