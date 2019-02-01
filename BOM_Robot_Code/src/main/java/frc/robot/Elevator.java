@@ -14,14 +14,19 @@ import frc.ecommons.RobotMap;
 public class Elevator  {
   WPI_TalonSRX m_elevator;
   Joystick m_joy;
+  int mode = 0;
   
 
 
 
   public void robotInit(Joystick j) {
     m_elevator = new WPI_TalonSRX(RobotMap.elevator);
+    m_elevator.configFactoryDefault();
+    m_elevator.setSensorPhase(true);
 
     m_joy = j;
+
+    
 
   }
 
@@ -37,26 +42,18 @@ public class Elevator  {
 
   }
 
- 
+  public void teleopInit() {
+    m_elevator.setSelectedSensorPosition(0);
+  }
   
   public void teleopPeriodic() {
     
 //Elevator Goes Up and Down using Triggers on xBox controller
-    if (m_joy.getRawButton(Constants.elevatorUp)) {
-      m_elevator.set(ControlMode.PercentOutput, 0.3);
+    if (m_joy.getRawAxis(2) == 0) {
+      m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(3) * 1);
 
-    } else if (!m_joy.getRawButton(Constants.elevatorUp)) {
-      m_elevator.set(ControlMode.PercentOutput, 0);
-
-    }
-
-
-    if (m_joy.getRawButton(Constants.elevatorDown)) {
-      m_elevator.set(ControlMode.PercentOutput, -0.3);
-
-    } else if (!m_joy.getRawButton(Constants.elevatorDown)) {
-      m_elevator.set(ControlMode.PercentOutput, 0);
-
+    } else if (m_joy.getRawAxis(3) == 0) {
+      m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(2) * -1);
     }
 
   }
