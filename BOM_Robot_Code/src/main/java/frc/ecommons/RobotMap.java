@@ -24,11 +24,8 @@ public class RobotMap {
 
 /* Drive Train */
     //Dog Gear
-        public static int leftDogGear1 = 0;
-        public static int leftDogGear2 = 1;
-        
-        public static int rightDogGear1 = 2;
-        public static int rightDogGear2 = 3;
+        public static int dogGearSolenoid1 = 4;
+        public static int dogGearSolenoid2 = 5;
 
               
     /* Talons: 13(R), 14(L)      Victors: 15(R), 16(R), 17(L), 18(L) 

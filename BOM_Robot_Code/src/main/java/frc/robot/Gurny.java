@@ -54,18 +54,20 @@ public class Gurny  {
  
   
   public void teleopPeriodic() {
+
     gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * 0.7);
 
     gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpBack) * -0.7);
      
-    if (m_joy.getRawAxis(Constants.gDriveBack) == 0) {
-      gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveForward) * 0.3);
-    }
+
     if (m_joy.getRawAxis(Constants.gDriveForward) == 0) {
-      gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -0.3);
 
+      gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveForward) * 0.3);
+      
     }
-
+    if (m_joy.getRawAxis(Constants.gDriveBack) == 0) {
+      gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -0.3);
+    }
   }
 
 
