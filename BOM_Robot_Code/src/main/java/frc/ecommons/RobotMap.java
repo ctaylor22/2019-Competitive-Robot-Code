@@ -24,6 +24,7 @@ public class RobotMap {
         public static int rSlave1 = 15;
         public static int rSlave2 = 16;
 
+        public static int ahrsAddress = 1;
 
 
 

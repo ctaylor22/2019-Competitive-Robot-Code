@@ -29,6 +29,7 @@ public class Robot extends TimedRobot {
   private Elevator m_Elevator = new Elevator();
   private Gurny m_Gurny = new Gurny();
   private Manipulator m_Manipulator = new Manipulator();
+  private NavX m_NavX = new NavX();
 
   Joystick m_driveJoy;
   Compressor m_comp;
@@ -98,5 +99,6 @@ public class Robot extends TimedRobot {
     m_Elevator.testPeriodic();
     m_Gurny.testPeriodic();
     m_Manipulator.testPeriodic();
+    m_NavX.testPeriodic();
   }
 }
