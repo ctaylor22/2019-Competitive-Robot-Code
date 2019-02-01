@@ -16,6 +16,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
+import frc.ecommons.Constants;
 import frc.ecommons.RobotMap;
 
 
@@ -31,7 +32,9 @@ public class Robot extends TimedRobot {
   private Manipulator m_Manipulator = new Manipulator();
 
   Joystick m_driveJoy;
+  Joystick m_gJoy;
   Compressor m_comp;
+  Boolean compLoop = true;
   
   
 
@@ -43,10 +46,11 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     m_driveJoy = new Joystick(RobotMap.driveJoy);
 
+    m_gJoy = new Joystick(RobotMap.gJoy);
     m_DriveTrain.robotInit(m_driveJoy);
     m_Elevator.robotInit(m_driveJoy);
-    m_Gurny.robotInit();
-    m_Manipulator.robotInit();
+    m_Gurny.robotInit(m_gJoy);
+    m_Manipulator.robotInit(m_gJoy);
 
   }
 
@@ -81,6 +85,15 @@ public class Robot extends TimedRobot {
 
   }
 
+  @Override
+  public void teleopInit() {
+    m_Elevator.teleopInit();
+   m_Manipulator.teleopInit();
+   m_DriveTrain.teleopInit();
+
+    // m_comp.setClosedLoopControl(false);
+  }
+
 
   @Override
   public void teleopPeriodic() {
@@ -88,7 +101,16 @@ public class Robot extends TimedRobot {
     m_Elevator.teleopPeriodic();
     m_Gurny.teleopPeriodic();
     m_Manipulator.teleopPeriodic();
-  
+    
+    
+
+    if (m_driveJoy.getRawButton(Constants.compressor) && compLoop) {
+      compLoop = false;
+      m_comp.setClosedLoopControl(!m_comp.getClosedLoopControl());
+    }
+    if (!m_driveJoy.getRawButton(Constants.compressor)) {
+      compLoop = true;
+    }
   }
 
 

@@ -8,7 +8,9 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import frc.ecommons.RobotMap;
 import frc.ecommons.Constants;
 
@@ -30,6 +32,13 @@ public class DriveTrain  {
   WPI_VictorSPX m_lSlave1;
   WPI_VictorSPX m_lSlave2;
 
+  //Solenoids
+  DoubleSolenoid leftSolenoid;
+  DoubleSolenoid rightSolenoid;
+
+
+  //Loops
+  boolean dgLoop = false;
 
 
   public void TalonConfig() {
@@ -71,6 +80,10 @@ public class DriveTrain  {
     m_lSlave1 = new WPI_VictorSPX(RobotMap.lSlave1);
     m_lSlave2 = new WPI_VictorSPX(RobotMap.lSlave2);
 
+    //DoubleSolenoid
+    leftSolenoid = new DoubleSolenoid(RobotMap.leftDogGear1, RobotMap.leftDogGear2);
+    rightSolenoid = new DoubleSolenoid(RobotMap.rightDogGear1, RobotMap.rightDogGear2);
+
     TalonConfig();
   }
 
@@ -93,7 +106,28 @@ public class DriveTrain  {
    * This function is called periodically during operator control.
    */
   
+  public void teleopInit() {
+    rightSolenoid.set(DoubleSolenoid.Value.kForward);
+    leftSolenoid.set(DoubleSolenoid.Value.kForward);
+
+  } 
   public void teleopPeriodic() {
+    //Dog Gear Shift
+    if (m_joy.getRawButton(Constants.gearShift) && !dgLoop) {
+      dgLoop = true;
+      if (rightSolenoid.get() == (Value.kForward) && leftSolenoid.get() == (Value.kForward)) {
+        rightSolenoid.set(DoubleSolenoid.Value.kReverse);
+        leftSolenoid.set(DoubleSolenoid.Value.kReverse);
+      } else if (rightSolenoid.get() == (Value.kReverse) && leftSolenoid.get() == (Value.kReverse)) {
+        rightSolenoid.set(DoubleSolenoid.Value.kForward);
+        leftSolenoid.set(DoubleSolenoid.Value.kForward);
+      }
+
+    }
+    if (!m_joy.getRawButton(Constants.gearShift)) {
+      dgLoop = false;
+    }
+
     
     //Equation for ARCADE DRIVE
     double xAxis, yAxis;
