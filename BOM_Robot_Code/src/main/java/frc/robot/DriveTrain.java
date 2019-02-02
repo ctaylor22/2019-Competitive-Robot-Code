@@ -33,8 +33,7 @@ public class DriveTrain  {
   WPI_VictorSPX m_lSlave2;
 
   //Solenoids
-  DoubleSolenoid leftSolenoid;
-  DoubleSolenoid rightSolenoid;
+  DoubleSolenoid dogGearSolenoid;
 
 
   //Loops
@@ -81,8 +80,7 @@ public class DriveTrain  {
     m_lSlave2 = new WPI_VictorSPX(RobotMap.lSlave2);
 
     //DoubleSolenoid
-    leftSolenoid = new DoubleSolenoid(RobotMap.leftDogGear1, RobotMap.leftDogGear2);
-    rightSolenoid = new DoubleSolenoid(RobotMap.rightDogGear1, RobotMap.rightDogGear2);
+    dogGearSolenoid = new DoubleSolenoid(RobotMap.dogGearSolenoid1, RobotMap.dogGearSolenoid2);
 
     TalonConfig();
   }
@@ -107,20 +105,18 @@ public class DriveTrain  {
    */
   
   public void teleopInit() {
-    rightSolenoid.set(DoubleSolenoid.Value.kForward);
-    leftSolenoid.set(DoubleSolenoid.Value.kForward);
+    dogGearSolenoid.set(DoubleSolenoid.Value.kForward);
+
 
   } 
   public void teleopPeriodic() {
     //Dog Gear Shift
     if (m_joy.getRawButton(Constants.gearShift) && !dgLoop) {
       dgLoop = true;
-      if (rightSolenoid.get() == (Value.kForward) && leftSolenoid.get() == (Value.kForward)) {
-        rightSolenoid.set(DoubleSolenoid.Value.kReverse);
-        leftSolenoid.set(DoubleSolenoid.Value.kReverse);
-      } else if (rightSolenoid.get() == (Value.kReverse) && leftSolenoid.get() == (Value.kReverse)) {
-        rightSolenoid.set(DoubleSolenoid.Value.kForward);
-        leftSolenoid.set(DoubleSolenoid.Value.kForward);
+      if (dogGearSolenoid.get() == (Value.kForward)) {
+        dogGearSolenoid.set(DoubleSolenoid.Value.kReverse);
+      } else if (dogGearSolenoid.get() == (Value.kReverse)) {
+        dogGearSolenoid.set(DoubleSolenoid.Value.kForward);
       }
 
     }

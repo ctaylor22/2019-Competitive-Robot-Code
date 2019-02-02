@@ -53,6 +53,8 @@ public class Robot extends TimedRobot {
     m_Gurny.robotInit(m_gJoy);
     m_Manipulator.robotInit(m_gJoy);
 
+    m_comp = new Compressor();
+
   }
 
  
@@ -92,7 +94,7 @@ public class Robot extends TimedRobot {
    m_Manipulator.teleopInit();
    m_DriveTrain.teleopInit();
 
-    // m_comp.setClosedLoopControl(false);
+    m_comp.setClosedLoopControl(false);
   }
 
 
