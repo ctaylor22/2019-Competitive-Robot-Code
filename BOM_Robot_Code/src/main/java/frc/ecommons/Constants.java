@@ -28,4 +28,8 @@ public static int compressor = 8;
         public static double gBackwardRate = -0.3;
 
     
+//The angle at which the RoboRio and NavX board are tilted measured counterclockwise from the right, back, and top
+    public static double rioYaw = 0;
+    public static double rioPitch = 0;
+    public static double rioRoll = 0;
 }

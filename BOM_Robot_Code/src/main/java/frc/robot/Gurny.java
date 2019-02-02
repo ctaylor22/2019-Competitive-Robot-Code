@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.ecommons.Constants;
 import frc.ecommons.RobotMap;
+import frc.robot.NavX;
 
 public class Gurny  {
 
@@ -25,7 +26,7 @@ public class Gurny  {
   WPI_TalonSRX gDrive;
   double dashFrontSpeed, dashBackSpeed, dashDriveSpeed;
   
-
+  NavX m_navX;
 
 
   public void robotInit(Joystick j) {
@@ -41,6 +42,7 @@ public class Gurny  {
 
     gDrive = new WPI_TalonSRX(RobotMap.gDrive);
 
+    m_navX = new NavX();
   }
 
   
@@ -74,9 +76,19 @@ public class Gurny  {
     
   }
 
-
-
+  public void balanceAtVelocity(double output) {
+    double pitch = m_navX.getPitch();
+    setFront(output-(pitch/90));
+    setBack(output+(pitch/90));
+  }
   
+  public void setFront(double output) {
+    gFront.set(ControlMode.PercentOutput, output);
+  }
+
+  public void setBack(double output) {
+    gBack.set(ControlMode.PercentOutput, output);
+  }
 
   public void report() {
     dashFrontSpeed = SmartDashboard.getNumber("Front Gurney Speed", 0);

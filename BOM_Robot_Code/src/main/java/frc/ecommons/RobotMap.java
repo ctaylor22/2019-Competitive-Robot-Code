@@ -42,12 +42,13 @@ public class RobotMap {
         public static int rSlave1 = 15;
         public static int rSlave2 = 16;
 
-/* Manipulator */
+        public static int ahrsAddress = 1;
+        /* Manipulator */
 
-    public static int grab1 = 4;
-    public static int grab2 = 5;
+            public static int grab1 = 4;
+            public static int grab2 = 5;
 
-    public static int grabWheels = 12;
+            public static int grabWheels = 12;
 
 
 
