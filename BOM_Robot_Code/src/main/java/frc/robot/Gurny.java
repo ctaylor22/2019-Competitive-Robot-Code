@@ -11,6 +11,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import edu.wpi.first.wpilibj.Joystick;
 import frc.ecommons.Constants;
 import frc.ecommons.RobotMap;
+import frc.robot.NavX;
 
 public class Gurny  {
 
@@ -23,7 +24,7 @@ public class Gurny  {
 
   WPI_TalonSRX gDrive;
   
-
+  NavX m_navX;
 
 
   public void robotInit(Joystick j) {
@@ -37,6 +38,7 @@ public class Gurny  {
 
     gDrive = new WPI_TalonSRX(RobotMap.gDrive);
 
+    m_navX = new NavX();
   }
 
   
@@ -65,12 +67,21 @@ public class Gurny  {
       gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -0.3);
 
     }
-
   }
 
-
-
+  public void balanceAtVelocity(double output) {
+    double pitch = m_navX.getPitch();
+    setFront(output-(pitch/90));
+    setBack(output+(pitch/90));
+  }
   
+  public void setFront(double output) {
+    gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * 0.7);
+  }
+
+  public void setBack(double output) {
+    gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * 0.7);
+  }
 
   public void report() {
       
