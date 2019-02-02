@@ -11,6 +11,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.ecommons.RobotMap;
 import frc.ecommons.Constants;
 
@@ -35,9 +36,10 @@ public class DriveTrain  {
   //Solenoids
   DoubleSolenoid dogGearSolenoid;
 
-
   //Loops
   boolean dgLoop = false;
+
+  double driveSpeed;
 
 
   public void TalonConfig() {
@@ -83,6 +85,7 @@ public class DriveTrain  {
     dogGearSolenoid = new DoubleSolenoid(RobotMap.dogGearSolenoid1, RobotMap.dogGearSolenoid2);
 
     TalonConfig();
+    SmartDashboard.putNumber("Drive Train", 1);
   }
 
   
@@ -136,17 +139,18 @@ public class DriveTrain  {
         leftSide = xAxis - yAxis;
     
     //Percent drive output with slave follows
-    m_rMaster.set(ControlMode.PercentOutput, rightSide);
+    m_rMaster.set(ControlMode.PercentOutput, rightSide * driveSpeed);
       m_rSlave1.follow(m_rMaster);
       m_rSlave2.follow(m_rMaster);
 
-    m_lMaster.set(ControlMode.PercentOutput, leftSide);
+    m_lMaster.set(ControlMode.PercentOutput, leftSide * driveSpeed);
       m_lSlave1.follow(m_lMaster);
       m_lSlave2.follow(m_lMaster);
 
   }
 
   public void report() {
+    driveSpeed = SmartDashboard.getNumber("Drive Train", 1);
 
   }
 
