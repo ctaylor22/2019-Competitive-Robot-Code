@@ -79,11 +79,11 @@ public class Gurny  {
   }
   
   public void setFront(double output) {
-    gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * 0.7);
+    gFront.set(ControlMode.PercentOutput, output);
   }
 
   public void setBack(double output) {
-    gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * 0.7);
+    gBack.set(ControlMode.PercentOutput, output);
   }
 
   public void report() {
