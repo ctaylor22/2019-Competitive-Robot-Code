@@ -3,16 +3,15 @@
 
 package frc.robot;
 
-import java.lang.Math;
-import com.kauailabs.navx.frc.AHRS;
-import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTable;
-import frc.ecommons.Constants;
-import frc.ecommons.RobotMap;
+import com.kauailabs .navx.frc.AHRS;
 
-public class NavX  {
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.SPI;
+import frc.ecommons.Constants;
+
+public class NavX {
     private NetworkTableInstance instance = NetworkTableInstance.getDefault();
     private NetworkTable table = instance.getTable("/gurney");
     private AHRS navX = new AHRS(SPI.Port.kMXP);
