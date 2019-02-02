@@ -9,6 +9,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.ecommons.Constants;
 import frc.ecommons.RobotMap;
 
@@ -22,12 +23,15 @@ public class Gurny  {
   WPI_TalonSRX gFront;
 
   WPI_TalonSRX gDrive;
+  double dashFrontSpeed, dashBackSpeed, dashDriveSpeed;
   
 
 
 
   public void robotInit(Joystick j) {
-
+    SmartDashboard.putNumber("Front Gurney Speed", 0.25);
+    SmartDashboard.putNumber("Back Gurney Speed", 0.25);
+    SmartDashboard.putNumber("Drive Gurney Speed", 0.25);
     m_joy = j;
 
 
@@ -55,19 +59,19 @@ public class Gurny  {
   
   public void teleopPeriodic() {
 
-    gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * 0.7);
+    gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * dashFrontSpeed);
 
-    gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpBack) * -0.7);
+    gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpBack) * -dashBackSpeed);
      
 
-    if (m_joy.getRawAxis(Constants.gDriveForward) == 0) {
+   
 
-      gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveForward) * 0.3);
+      gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveForward) * dashDriveSpeed);
       
-    }
-    if (m_joy.getRawAxis(Constants.gDriveBack) == 0) {
-      gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -0.3);
-    }
+    
+    
+      gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -dashDriveSpeed);
+    
   }
 
 
@@ -75,7 +79,9 @@ public class Gurny  {
   
 
   public void report() {
-      
+    dashFrontSpeed = SmartDashboard.getNumber("Front Gurney Speed", 0);
+    dashBackSpeed = SmartDashboard.getNumber("Back Gurney Speed", 0);
+    dashDriveSpeed = SmartDashboard.getNumber("Drive Gurney Speed", 0);
 }
 
 
