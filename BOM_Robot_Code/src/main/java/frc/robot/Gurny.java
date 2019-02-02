@@ -62,7 +62,7 @@ public class Gurny  {
   public void teleopPeriodic() {
     balanceAtVelocity(m_joy.getRawAxis(Constants.gDriveForward));
     /*
-    gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * 0.7);
+    gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * -dashBackSpeed);
 
     gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpBack) * -dashBackSpeed);
      
@@ -74,7 +74,7 @@ public class Gurny  {
     
     
       gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -dashDriveSpeed);
-    
+    */
   }
 
   public void balanceAtVelocity(double output) {
