@@ -62,10 +62,10 @@ public class Gurny  {
   public void teleopPeriodic() {
     // Y button enable, RT drive
     if (m_joy.getRawButton(Constants.gUpLevelEnable)) {
-      balanceAtVelocity(0.5*m_joy.getRawAxis(Constants.gDriveForward));
+      balanceAtVelocity(0.25*m_joy.getRawAxis(Constants.gDriveForward));
     }
     else {
-      dashBackSpeed = 0.5;
+      dashBackSpeed = 0.25;
       dashDriveSpeed = 0.5;
       gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * -dashBackSpeed);
       gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpBack) * -dashBackSpeed);
