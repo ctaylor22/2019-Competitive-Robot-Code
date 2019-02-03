@@ -60,25 +60,23 @@ public class Gurny  {
  
   
   public void teleopPeriodic() {
-    balanceAtVelocity(m_joy.getRawAxis(Constants.gDriveForward));
-    /*
-    gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * -dashBackSpeed);
-
-    gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpBack) * -dashBackSpeed);
-     
-
-   
+    // Y button enable, RT drive
+    if (m_joy.getRawButton(Constants.gUpLevelEnable)) {
+      balanceAtVelocity(0.5*m_joy.getRawAxis(Constants.gDriveForward));
+    }
+    else {
+      dashBackSpeed = 0.5;
+      dashDriveSpeed = 0.5;
+      gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * -dashBackSpeed);
+      gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpBack) * -dashBackSpeed);
 
       gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveForward) * dashDriveSpeed);
-      
-    
-    
       gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -dashDriveSpeed);
-    */
+    }
   }
 
   public void balanceAtVelocity(double output) {
-    double pitch = m_navX.getYaw();
+    double pitch = m_navX.getPitch();
     setFront(output-(output*(pitch/90)));
     setBack(output+(output*(pitch/90)));
   }
@@ -93,8 +91,8 @@ public class Gurny  {
 
   public void report() {
     dashFrontSpeed = SmartDashboard.getNumber("Front Gurney Speed", 0);
-    dashBackSpeed = SmartDashboard.getNumber("Back Gurney Speed", 0);
-    dashDriveSpeed = SmartDashboard.getNumber("Drive Gurney Speed", 0);
+    // dashBackSpeed = SmartDashboard.getNumber("Back Gurney Speed", 0);
+    // dashDriveSpeed = SmartDashboard.getNumber("Drive Gurney Speed", 0);
 }
 
 

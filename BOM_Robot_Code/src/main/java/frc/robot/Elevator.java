@@ -50,8 +50,8 @@ public class Elevator  {
   }
   
   public void teleopPeriodic() {
-    if (dashSpeed != -1) {
-    
+    // if (dashSpeed != -1) {
+    dashSpeed = 0.4;
 //Elevator Goes Up and Down using Triggers on xBox controller
     if (m_joy.getRawAxis(2) == 0) {
       m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(3) * dashSpeed);
@@ -59,12 +59,12 @@ public class Elevator  {
     } else if (m_joy.getRawAxis(3) == 0) {
       m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(2) * -dashSpeed);
     }
-  }
+  // }
 
   }
 
   public void report() {
-      dashSpeed = SmartDashboard.getNumber("Elevator Speed", 0);
+      // dashSpeed = SmartDashboard.getNumber("Elevator Speed", 0);
       SmartDashboard.putNumber("dashSpeed", dashSpeed);
 }
 
