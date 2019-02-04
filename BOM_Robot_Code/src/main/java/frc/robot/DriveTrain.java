@@ -15,14 +15,18 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.ecommons.RobotMap;
 import frc.ecommons.Constants;
 
+// import edu.wpi.first.wpilibj.shuffleboard;
  
 public class DriveTrain  {
 
+<<<<<<< HEAD
   String lowGear = "Low Gear";
   String highGear = "High Gear";
 
   
 
+=======
+>>>>>>> 751b40738ae9ca847f277a7cb4abd6c49da4cddf
   // Joysticks/Controllers
   Joystick m_joy;
 
@@ -42,8 +46,12 @@ public class DriveTrain  {
   //Loops
   boolean dgLoop = false;
 
-  double driveSpeed;
 
+  // ShuffleboardTab tab = Shuffleboard.getTab("max motor speeds");
+  // private NetworkTableEntry maxSpeed = tab.add("Drive Speed", 0)
+  //                                             .withWidget(BuiltInWidgets.kNumberSlide)
+  //                                             .withProperties(Map.of("min", 0, "max", 1))
+  //                                             .getEntry();
 
   public void TalonConfig() {
     //Configs Talon to default
@@ -157,8 +165,8 @@ public class DriveTrain  {
   }
 
   public void report() {
-    driveSpeed = SmartDashboard.getNumber("Drive Train", 1);
-
+    // driveSpeed = SmartDashboard.getNumber("Drive Train", 1);
+    // driveSpeed = maxSpeed.getDouble(0.3);
   }
 
   /**
