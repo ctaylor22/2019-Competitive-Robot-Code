@@ -18,6 +18,9 @@ import frc.ecommons.Constants;
  
 public class DriveTrain  {
 
+  String lowGear = "Low Gear";
+  String highGear = "High Gear";
+
   
 
   // Joysticks/Controllers
@@ -118,8 +121,12 @@ public class DriveTrain  {
       dgLoop = true;
       if (dogGearSolenoid.get() == (Value.kForward)) {
         dogGearSolenoid.set(DoubleSolenoid.Value.kReverse);
+        
+        SmartDashboard.putString("Gear", lowGear);
       } else if (dogGearSolenoid.get() == (Value.kReverse)) {
         dogGearSolenoid.set(DoubleSolenoid.Value.kForward);
+      
+        SmartDashboard.putString("Gear", highGear);
       }
 
     }
