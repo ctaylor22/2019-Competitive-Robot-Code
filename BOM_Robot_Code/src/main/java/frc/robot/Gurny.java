@@ -76,7 +76,7 @@ public class Gurny  {
   }
 
   public void balanceAtVelocity(double output) {
-    double pitch = m_navX.getYaw();
+    double pitch = m_navX.getPitch();
     double pFactor = output*(pitch/45);
     setFront(output-pFactor);
     setBack(output+pFactor);
