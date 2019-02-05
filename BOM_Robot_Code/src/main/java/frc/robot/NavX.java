@@ -3,7 +3,7 @@
 
 package frc.robot;
 
-import com.kauailabs .navx.frc.AHRS;
+import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -118,6 +118,7 @@ public class NavX {
     public double getPitch() {
         //Rotation about the x axis
         final double rawPitch = navX.getPitch()-zeroPitch;
+        /*
         final double rawRoll = navX.getRoll()-zeroRoll;
         final double rawYaw = navX.getYaw()-zeroYaw;
         //The trigonometcially determined factor each raw value played in the real value
@@ -125,32 +126,40 @@ public class NavX {
         final double rollFactor = rawRoll*Math.sin(rioYaw);
         final double yawFactor = rawYaw*Math.sin(rioRoll);
         final double pitch = (pitchFactor+rollFactor+yawFactor)/2;
+        */
+        final double pitch = rawPitch;
         return pitch;
     }
 
     public double getRoll() {
         //Rotation about the y axis
-        final double rawPitch = navX.getPitch()-zeroPitch;
         final double rawRoll = navX.getRoll()-zeroRoll;
+        /*
         final double rawYaw = navX.getYaw()-zeroYaw;
+        final double rawPitch = navX.getPitch()-zeroPitch;
         //The trigonometcially determined factor each raw value played in the real value
         final double rollFactor = (rawRoll*Math.cos(rioPitch)+rawRoll*Math.cos(rioYaw))/2;
         final double yawFactor = rawYaw*Math.sin(rioPitch);
         final double pitchFactor = rawPitch*Math.sin(rioYaw);
         final double roll = (rollFactor+yawFactor+pitchFactor)/2;
+        */
+        final double roll = rawRoll;
         return roll;
     }
 
     public double getYaw() {
         //Rotation about the z axis
+        final double rawYaw = navX.getYaw()-zeroYaw;
+        /*
         final double rawPitch = navX.getPitch()-zeroPitch;
         final double rawRoll = navX.getRoll()-zeroRoll;
-        final double rawYaw = navX.getYaw()-zeroYaw;
         //The trigonometcially determined factor each raw value played in the real value
         final double yawFactor = (rawYaw*Math.cos(rioPitch)+rawYaw*Math.cos(rioRoll))/2;
         final double pitchFactor = rawPitch*Math.sin(rioRoll);
         final double rollFactor = rawRoll*Math.sin(rioPitch);
         final double yaw = (yawFactor+pitchFactor+rollFactor)/2;
+        */
+        final double yaw = rawYaw;
         return yaw;
     }
 
