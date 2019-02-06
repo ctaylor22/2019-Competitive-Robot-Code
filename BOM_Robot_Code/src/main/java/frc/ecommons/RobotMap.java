@@ -14,12 +14,12 @@ public class RobotMap {
     Talons :11                Victors: ... */
 
     //Back
-    public static int gBack = 19;
+    public static int gBack = 11;
     
     //Right Front
     public static int gFront = 20;
 
-    public static int gDrive = 11;
+    public static int gDrive = 19;
 
 
 /* Drive Train */

@@ -8,8 +8,10 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.ecommons.Constants;
 import frc.ecommons.RobotMap;
 import frc.robot.NavX;
@@ -28,11 +30,19 @@ public class Gurny  {
   
   NavX m_navX;
 
+  ShuffleboardTab MaxSpeed;
+
+  NetworkTableEntry frontGurneyEntry;
+  NetworkTableEntry backGurneyEntry;
+  NetworkTableEntry driveGurneyEntry;
 
   public void robotInit(Joystick j) {
-    SmartDashboard.putNumber("Front Gurney Speed", 0.25);
-    SmartDashboard.putNumber("Back Gurney Speed", 0.25);
-    SmartDashboard.putNumber("Drive Gurney Speed", 0.25);
+    MaxSpeed = Shuffleboard.getTab("Max Speed");
+
+    frontGurneyEntry = MaxSpeed.add("Front Gurney Speed", 0.25).getEntry();
+    backGurneyEntry = MaxSpeed.add("Back Gurney Speed", 0.25).getEntry();
+    driveGurneyEntry = MaxSpeed.add("Drive Gurney Speed", 0.25).getEntry();
+
     m_joy = j;
 
 
@@ -68,11 +78,16 @@ public class Gurny  {
     }
     else {
       
-      gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * -dashBackSpeed);
+      gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * -dashFrontSpeed);
       gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpBack) * -dashBackSpeed);
 
-      gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveForward) * dashDriveSpeed);
-      gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -dashDriveSpeed);
+      if (Constants.gDriveBack == 0) {
+        gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveForward) * dashDriveSpeed);
+      } else if (Constants.gDriveForward == 0) {
+        gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -dashDriveSpeed);
+      }
+      
+     
     }
   }
 
@@ -92,9 +107,9 @@ public class Gurny  {
   }
 
   public void report() {
-    dashFrontSpeed = SmartDashboard.getNumber("Front Gurney Speed", 0);
-    dashBackSpeed = SmartDashboard.getNumber("Back Gurney Speed", 0);
-    dashDriveSpeed = SmartDashboard.getNumber("Drive Gurney Speed", 0);
+    dashFrontSpeed = frontGurneyEntry.getDouble(0);
+    dashBackSpeed = backGurneyEntry.getDouble(0);
+    dashDriveSpeed = driveGurneyEntry.getDouble(0);
     
 }
 
