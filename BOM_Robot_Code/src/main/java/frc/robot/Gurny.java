@@ -43,6 +43,8 @@ public class Gurny  {
     gDrive = new WPI_TalonSRX(RobotMap.gDrive);
 
     m_navX = new NavX();
+    dashBackSpeed = 0.25;
+    dashDriveSpeed = 0.5;
   }
 
   
@@ -65,8 +67,7 @@ public class Gurny  {
       balanceAtVelocity(0.25*m_joy.getRawAxis(Constants.gDriveForward));
     }
     else {
-      dashBackSpeed = 0.25;
-      dashDriveSpeed = 0.5;
+      
       gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * -dashBackSpeed);
       gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpBack) * -dashBackSpeed);
 
@@ -91,8 +92,9 @@ public class Gurny  {
 
   public void report() {
     dashFrontSpeed = SmartDashboard.getNumber("Front Gurney Speed", 0);
-    // dashBackSpeed = SmartDashboard.getNumber("Back Gurney Speed", 0);
-    // dashDriveSpeed = SmartDashboard.getNumber("Drive Gurney Speed", 0);
+    dashBackSpeed = SmartDashboard.getNumber("Back Gurney Speed", 0);
+    dashDriveSpeed = SmartDashboard.getNumber("Drive Gurney Speed", 0);
+    
 }
 
 

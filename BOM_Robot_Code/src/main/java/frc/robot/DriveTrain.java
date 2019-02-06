@@ -5,12 +5,16 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.ecommons.RobotMap;
 import frc.ecommons.Constants;
@@ -19,14 +23,11 @@ import frc.ecommons.Constants;
  
 public class DriveTrain  {
 
-<<<<<<< HEAD
   String lowGear = "Low Gear";
   String highGear = "High Gear";
 
   
 
-=======
->>>>>>> 751b40738ae9ca847f277a7cb4abd6c49da4cddf
   // Joysticks/Controllers
   Joystick m_joy;
 
@@ -45,7 +46,16 @@ public class DriveTrain  {
 
   //Loops
   boolean dgLoop = false;
+  boolean eResetLoop = false;
+  boolean forwardLoop = false;
+  boolean go = false;
 
+  double driveSpeed = 0.3;
+
+  ShuffleboardTab tab;
+  NetworkTableEntry rightEncoderEntry;
+  NetworkTableEntry currentGearEntry;
+  NetworkTableEntry leftEncoderEntry;
 
   // ShuffleboardTab tab = Shuffleboard.getTab("max motor speeds");
   // private NetworkTableEntry maxSpeed = tab.add("Drive Speed", 0)
@@ -95,8 +105,13 @@ public class DriveTrain  {
     //DoubleSolenoid
     dogGearSolenoid = new DoubleSolenoid(RobotMap.dogGearSolenoid1, RobotMap.dogGearSolenoid2);
 
+    m_rMaster.setNeutralMode(NeutralMode.Brake);
+    m_lMaster.setNeutralMode(NeutralMode.Brake);
     TalonConfig();
-    SmartDashboard.putNumber("Drive Train", 1);
+    tab = Shuffleboard.getTab("DriveTrain");
+    rightEncoderEntry = tab.add("Right Encoder", 0).getEntry();
+    currentGearEntry = tab.add("Current Gear", lowGear).getEntry();
+    leftEncoderEntry = tab.add("Left Encoder", 0).getEntry();    
   }
 
   
@@ -124,17 +139,50 @@ public class DriveTrain  {
 
   } 
   public void teleopPeriodic() {
+
+    if (m_joy.getRawButton(3) && forwardLoop == false) {
+      forwardLoop = true;
+      // m_rMaster.setSelectedSensorPosition(0);
+      // m_lMaster.setSelectedSensorPosition(0);
+    }
+    if (m_rMaster.getSelectedSensorPosition() > -50000 && m_lMaster.getSelectedSensorPosition() > -50000 && forwardLoop) {
+     go = true;
+
+    } else {
+      forwardLoop = false;
+      go = false;
+      m_lMaster.set(ControlMode.PercentOutput, 0);
+      m_rMaster.set(ControlMode.PercentOutput, 0);
+    }
+    if (go) {
+      m_rMaster.set(ControlMode.PercentOutput, -0.5);
+      m_lMaster.set(ControlMode.PercentOutput, -0.5);
+
+    }
+
+    if (m_joy.getRawButton(Constants.encoderReset) && eResetLoop == false) {
+      eResetLoop = true;
+
+      m_rMaster.setSelectedSensorPosition(0);
+      m_lMaster.setSelectedSensorPosition(0);
+
+
+    }
+    if (!m_joy.getRawButton(Constants.encoderReset)) {
+      eResetLoop = false;
+    }
+
     //Dog Gear Shift
     if (m_joy.getRawButton(Constants.gearShift) && !dgLoop) {
       dgLoop = true;
       if (dogGearSolenoid.get() == (Value.kForward)) {
         dogGearSolenoid.set(DoubleSolenoid.Value.kReverse);
         
-        SmartDashboard.putString("Gear", lowGear);
+        currentGearEntry.setString(lowGear);
       } else if (dogGearSolenoid.get() == (Value.kReverse)) {
         dogGearSolenoid.set(DoubleSolenoid.Value.kForward);
       
-        SmartDashboard.putString("Gear", highGear);
+        currentGearEntry.setString(highGear);
       }
 
     }
@@ -162,11 +210,14 @@ public class DriveTrain  {
       m_lSlave1.follow(m_lMaster);
       m_lSlave2.follow(m_lMaster);
 
+      
+
   }
 
   public void report() {
-    // driveSpeed = SmartDashboard.getNumber("Drive Train", 1);
-    // driveSpeed = maxSpeed.getDouble(0.3);
+
+    rightEncoderEntry.setDouble(m_rMaster.getSelectedSensorPosition());
+    leftEncoderEntry.setDouble(m_lMaster.getSelectedSensorPosition());
   }
 
   /**

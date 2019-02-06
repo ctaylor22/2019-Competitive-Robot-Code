@@ -26,6 +26,7 @@ public class Constants {
 public static int compressor = 8;
     //Drive Train
         public static int gearShift = 1;
+        public static int encoderReset = 7;
     //Manipulator
         public static int manipPToggle = 1;
         public static int manipMToggle = 2;
