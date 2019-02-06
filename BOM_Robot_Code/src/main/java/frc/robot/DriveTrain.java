@@ -4,8 +4,11 @@
 
 package frc.robot;
 
+import java.util.Map;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
@@ -14,10 +17,13 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.ecommons.RobotMap;
 import frc.ecommons.Constants;
+
+// import edu.wpi.first.wpilibj.shuffleboard.BuiltInTypes;
 
 // import edu.wpi.first.wpilibj.shuffleboard;
  
@@ -47,20 +53,16 @@ public class DriveTrain  {
   //Loops
   boolean dgLoop = false;
 
-  double driveSpeed = 0.3;
-
-
-  ShuffleboardTab tab;
-
-  NetworkTableEntry rightEncoderEntry;
-  NetworkTableEntry currentGearEntry;
-  NetworkTableEntry leftEncoderEntry;
-  NetworkTableEntry driveSpeedEntry;
-  // ShuffleboardTab tab = Shuffleboard.getTab("max motor speeds");
-  // private NetworkTableEntry maxSpeed = tab.add("Drive Speed", 0)
-  //                                             .withWidget(BuiltInWidgets.kNumberSlide)
-  //                                             .withProperties(Map.of("min", 0, "max", 1))
-  //                                             .getEntry();
+  double driveSpeed = 0.5;
+  
+  ShuffleboardTab tab = Shuffleboard.getTab("DriveTrain");
+  NetworkTableEntry rightEncoderEntry = tab.add("Right Encoder", 0).getEntry();
+  NetworkTableEntry currentGearEntry = tab.add("Current Gear", lowGear).getEntry();
+  NetworkTableEntry leftEncoderEntry = tab.add("Left Encoder", 0).getEntry(); 
+  NetworkTableEntry driveSpeedEntry = tab.add("Drive Speed", 0.5)
+                                          .withWidget(BuiltInWidgets.kNumberSlider)
+                                          .withProperties(Map.of("Min", 0, "Max", 1))
+                                          .getEntry();
 
   public void TalonConfig() {
     //Configs Talon to default
@@ -70,22 +72,53 @@ public class DriveTrain  {
     m_rSlave2.configFactoryDefault();
     m_lSlave1.configFactoryDefault();
     m_lSlave2.configFactoryDefault();
-
+    m_rSlave1.follow(m_rMaster);
+    m_rSlave2.follow(m_rMaster);
+    m_lSlave1.follow(m_lMaster);
+    m_lSlave2.follow(m_lMaster);  
     //Motors go right way
     m_rMaster.setSensorPhase(false);
     m_lMaster.setSensorPhase(false);
-    m_rSlave1.setSensorPhase(false);
-    m_rSlave2.setSensorPhase(false);
-    m_lSlave1.setSensorPhase(false);
-    m_lSlave2.setSensorPhase(false);
 
 
-    m_rMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0, 0);
-    m_lMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0, 0);
+    m_rMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
+    m_lMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
 
     m_rMaster.setInverted(false);
+    m_rSlave1.setInverted(InvertType.FollowMaster);
+    m_rSlave2.setInverted(InvertType.FollowMaster);
+
     m_lMaster.setInverted(false);
+    m_lSlave1.setInverted(InvertType.FollowMaster);
+    m_lSlave2.setInverted(InvertType.FollowMaster);
+
+    m_rMaster.setNeutralMode(NeutralMode.Brake);
+    m_lMaster.setNeutralMode(NeutralMode.Brake);
     
+  
+    //ARGS (Slot, Value)
+    m_rMaster.config_kF(0, 0);
+    m_rMaster.config_kP(0, 0.1);
+    m_rMaster.config_kI(0, 0);
+    m_rMaster.config_kD(0, 0);
+    // m_rMaster.config_IntegralZone(0, 30000);
+
+    m_lMaster.config_kP(0, 0);
+    m_lMaster.config_kF(0, 0.1);
+    m_lMaster.config_kI(0, 0);
+    m_lMaster.config_kD(0, 0);
+    // m_lMaster.config_IntegralZone(0, 30000);
+
+
+    int sensorUnitsPer100ms = 12000;
+    m_rMaster.configMotionCruiseVelocity(sensorUnitsPer100ms);
+    m_lMaster.configMotionCruiseVelocity(sensorUnitsPer100ms);
+
+    int sensorUnitsPer100msPerSec = 4000;
+    m_rMaster.configMotionAcceleration(sensorUnitsPer100msPerSec);
+    m_lMaster.configMotionAcceleration(sensorUnitsPer100msPerSec);
+
+
   }
   public void robotInit(Joystick j) {
 
@@ -106,36 +139,16 @@ public class DriveTrain  {
     //DoubleSolenoid
     dogGearSolenoid = new DoubleSolenoid(RobotMap.dogGearSolenoid1, RobotMap.dogGearSolenoid2);
 
-    m_rMaster.setNeutralMode(NeutralMode.Brake);
-    m_lMaster.setNeutralMode(NeutralMode.Brake);
     TalonConfig();
 
-    m_rSlave1.follow(m_rMaster);
-    m_rSlave2.follow(m_rMaster);
-    m_lSlave1.follow(m_lMaster);
-    m_lSlave2.follow(m_lMaster);
-
-    tab = Shuffleboard.getTab("DriveTrain");
-    rightEncoderEntry = tab.add("Right Encoder", 0)
-    .withWidget(BuiltInWidgets.kNumberSlider)
-    .withProperties(Map.of("min", 0, "max", 1))
-    .getEntry();
-    currentGearEntry = tab.add("Current Gear", lowGear).getEntry();
-    leftEncoderEntry = tab.add("Left Encoder", 0).getEntry();    
+ 
   }
 
-  
-
-
-  
   public void autonomousInit() {
 
   }
-
-
   
   public void autonomousPeriodic() {
-
 
   }
 
@@ -168,53 +181,33 @@ public class DriveTrain  {
       dgLoop = false;
     }
 
+    if (m_joy.getRawButton(Constants.encoderReset)) {
+      m_rMaster.setSelectedSensorPosition(0, 0, 0);
+      m_lMaster.setSelectedSensorPosition(0, 0, 0);
+    }
     
     //Equation for ARCADE DRIVE
     double xAxis, yAxis;
     xAxis = m_joy.getRawAxis(Constants.xAxis);
-    yAxis = m_joy.getRawAxis(Constants.yAxis);
+    // * -1 to correct axis sign
+    yAxis = -1*m_joy.getRawAxis(Constants.yAxis);
     
     //Equation for Arcade Drive
     double leftSide, rightSide;
-    rightSide = yAxis + xAxis;
-    leftSide = xAxis - yAxis;
+    rightSide = -(yAxis - xAxis);
+    leftSide = yAxis + xAxis;
 
     //Percent drive output with slave follows
     if (m_joy.getRawButton(3)) {
-      int ticksPerRev = 1023;
+      int ticksPerRev = 4096;
+      int encoderToWheelGearRatio = 6;
       int wheelDiameter = 6;
       int targDistance = 60;
       double pi = 3.1415;
-      double targPos = yAxis * ticksPerRev * targDistance / (wheelDiameter * pi);
+      double targPos = yAxis * ticksPerRev * encoderToWheelGearRatio * targDistance / (wheelDiameter * pi);
 
-      m_rMaster.setSensorPhase(false);
-      m_lMaster.setSensorPhase(false);
-
-      m_rMaster.setSelectedSensorPosition(0);
-      m_lMaster.setSelectedSensorPosition(0);
-
-      //ARGS (Slot, Value)
-      m_rMaster.config_kF(0, 0);
-      m_rMaster.config_kP(0, 0);
-      m_rMaster.config_kI(0, 0);
-      m_rMaster.config_kD(0, 0);
-
-      m_lMaster.config_kP(0, 0);
-      m_lMaster.config_kF(0, 0);
-      m_lMaster.config_kI(0, 0);
-      m_lMaster.config_kD(0, 0);
-
-
-      int sensorUnitsPer100ms = 0;
-      m_rMaster.configMotionCruiseVelocity(sensorUnitsPer100ms);
-      m_lMaster.configMotionCruiseVelocity(sensorUnitsPer100ms);
-
-      int sensorUnitsPer100msPerSec = 0;
-      m_rMaster.configMotionAcceleration(sensorUnitsPer100msPerSec);
-      m_lMaster.configMotionAcceleration(sensorUnitsPer100msPerSec);
-
-      m_rMaster.set(ControlMode.MotionMagic, targPos);
-
+      m_lMaster.set(ControlMode.MotionMagic, targPos);
+      m_rMaster.set(ControlMode.MotionMagic, -targPos);
     } else {
 
       TalonConfig();
@@ -228,7 +221,7 @@ public class DriveTrain  {
   }
 
   public void report() {
-
+    driveSpeed = driveSpeedEntry.getDouble(0.5);
     rightEncoderEntry.setDouble(m_rMaster.getSelectedSensorPosition());
     leftEncoderEntry.setDouble(m_lMaster.getSelectedSensorPosition());
   }

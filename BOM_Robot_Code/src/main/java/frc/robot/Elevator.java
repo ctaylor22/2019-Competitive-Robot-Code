@@ -14,39 +14,32 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.ecommons.RobotMap;
 
 public class Elevator  {
   WPI_TalonSRX m_elevator;
   Joystick m_joy;
   int mode = 0;
-  double dashSpeed;
+  double elevSpeed;
 
-  ShuffleboardTab maxSpeed;
-  NetworkTableEntry elevatorSpeedEntry;
-  
-
-
+  ShuffleboardTab maxSpeedTab = Shuffleboard.getTab("Max Speed");
+  NetworkTableEntry elevatorSpeedEntry = maxSpeedTab.add("Elevator Speed", 0.5)
+                                  .withWidget(BuiltInWidgets.kNumberSlider)
+                                  .withProperties(Map.of("Min", 0, "Max", 1))
+                                  .getEntry();
 
   public void robotInit(Joystick j) {
     m_elevator = new WPI_TalonSRX(RobotMap.elevator);
     m_elevator.configFactoryDefault();
     m_elevator.setSensorPhase(true);
+    m_elevator.setSelectedSensorPosition(0);
 
     m_joy = j;
-
-    maxSpeed = Shuffleboard.getTab("Max Speed");
-    
-    elevatorSpeedEntry = maxSpeed.add("Elevator Speed", 0.4)
-                                  .withWidget(BuiltInWidgets.kNumberSlider)
-                                  .withProperties(Map.of("min", 0, "max", 1))
-                                  .getEntry();
-
   }
 
   
   public void autonomousInit() {
+    m_elevator.setSelectedSensorPosition(0);
 
   }
 
@@ -58,17 +51,16 @@ public class Elevator  {
   }
 
   public void teleopInit() {
-    m_elevator.setSelectedSensorPosition(0);
   }
   
   public void teleopPeriodic() {
     // if (dashSpeed != -1) {
 //Elevator Goes Up and Down using Triggers on xBox controller
     if (m_joy.getRawAxis(2) == 0) {
-      m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(3) * dashSpeed);
+      m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(3) * elevSpeed);
 
     } else if (m_joy.getRawAxis(3) == 0) {
-      m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(2) * -dashSpeed);
+      m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(2) * -elevSpeed);
     }
   // }
 
@@ -76,7 +68,7 @@ public class Elevator  {
 
   public void report() {
       // dashSpeed = SmartDashboard.getNumber("Elevator Speed", 0);
-      dashSpeed = elevatorSpeedEntry.getDouble(0);
+      elevSpeed = elevatorSpeedEntry.getDouble(0);
 }
 
 

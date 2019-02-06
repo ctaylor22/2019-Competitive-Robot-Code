@@ -4,12 +4,15 @@
 
 package frc.robot;
 
+import java.util.Map;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.ecommons.Constants;
@@ -30,21 +33,24 @@ public class Gurny  {
   
   NavX m_navX;
 
-  ShuffleboardTab MaxSpeed;
+  ShuffleboardTab MaxSpeedTab = Shuffleboard.getTab("Max Speed");
+  NetworkTableEntry frontGurneyEntry = MaxSpeedTab.add("Front Gurney Speed", 0.5)
+                                                  .withWidget(BuiltInWidgets.kNumberSlider)
+                                                  .withProperties(Map.of("Min", 0, "Max", 1))
+                                                  .getEntry();
+  NetworkTableEntry backGurneyEntry = MaxSpeedTab.add("Back Gurney Speed", 0.5)
+                                                .withWidget(BuiltInWidgets.kNumberSlider)
+                                                .withProperties(Map.of("Min", 0, "Max", 1))
+                                                .getEntry();
+  NetworkTableEntry driveGurneyEntry = MaxSpeedTab.add("Drive Gurney Speed", 0.5)
+                                                  .withWidget(BuiltInWidgets.kNumberSlider)
+                                                  .withProperties(Map.of("Min", 0, "Max", 1))
+                                                  .getEntry();
 
-  NetworkTableEntry frontGurneyEntry;
-  NetworkTableEntry backGurneyEntry;
-  NetworkTableEntry driveGurneyEntry;
 
   public void robotInit(Joystick j) {
-    MaxSpeed = Shuffleboard.getTab("Max Speed");
-
-    frontGurneyEntry = MaxSpeed.add("Front Gurney Speed", 0.25).getEntry();
-    backGurneyEntry = MaxSpeed.add("Back Gurney Speed", 0.25).getEntry();
-    driveGurneyEntry = MaxSpeed.add("Drive Gurney Speed", 0.25).getEntry();
 
     m_joy = j;
-
 
     gBack = new WPI_VictorSPX(RobotMap.gBack);
 
@@ -53,8 +59,6 @@ public class Gurny  {
     gDrive = new WPI_TalonSRX(RobotMap.gDrive);
 
     m_navX = new NavX();
-    dashBackSpeed = 0.25;
-    dashDriveSpeed = 0.5;
   }
 
   
@@ -74,7 +78,7 @@ public class Gurny  {
   public void teleopPeriodic() {
     // Y button enable, RT drive
     if (m_joy.getRawButton(Constants.gUpLevelEnable)) {
-      balanceAtVelocity(0.25*m_joy.getRawAxis(Constants.gDriveForward));
+      balanceAtVelocity(0.6*m_joy.getRawAxis(Constants.gDriveForward));
     }
     else {
       
@@ -93,9 +97,10 @@ public class Gurny  {
 
   public void balanceAtVelocity(double output) {
     double pitch = m_navX.getPitch();
-    double pFactor = output*(pitch/45);
-    setFront(output-pFactor);
-    setBack(output+pFactor);
+    double pFactorFront = output*(pitch/45);
+    double pFactorBack = output*(pitch/45);
+    setFront(output-pFactorFront);
+    setBack(output+pFactorBack);
   }
   
   public void setFront(double output) {
