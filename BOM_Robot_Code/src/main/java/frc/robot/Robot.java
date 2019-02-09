@@ -31,6 +31,7 @@ public class Robot extends TimedRobot {
   private Gurny m_Gurny = new Gurny();
   private Manipulator m_Manipulator = new Manipulator();
   private NavX m_NavX = new NavX();
+  private Limelight m_Limelight = new Limelight();
 
   Joystick m_driveJoy;
   Joystick m_gJoy;
@@ -53,6 +54,7 @@ public class Robot extends TimedRobot {
     m_Elevator.robotInit(m_driveJoy);
     m_Gurny.robotInit(m_gJoy);
     m_Manipulator.robotInit(m_gJoy);
+    m_Limelight.robotInit(m_gJoy); //functions work with gurney
 
     m_comp = new Compressor();
 
@@ -105,6 +107,7 @@ public class Robot extends TimedRobot {
     m_Elevator.teleopPeriodic();
     m_Gurny.teleopPeriodic();
     m_Manipulator.teleopPeriodic();
+    m_Limelight.teleopPeriodic();
     
     
 
