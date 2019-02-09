@@ -32,6 +32,20 @@ public class Gurny  {
   double dashFrontSpeed, dashBackSpeed, dashDriveSpeed;
   
   NavX m_navX;
+  ShuffleboardTab Gurney;
+  NetworkTableEntry gurneyTiltEntry = Gurney.add("Gurney Pitch", 0)
+                                       .withWidget(BuiltInWidgets.kGyro)
+                                       .getEntry();
+
+  NetworkTableEntry gFrontSpeedEntry = Gurney.add("Gurney Left Motor Speed", 0)
+                                       .withWidget(BuiltInWidgets.kSpeedController)
+                                       .getEntry();
+  NetworkTableEntry gBackSpeedEntry = Gurney.add("Gurney Left Motor Speed", 0)
+                                       .withWidget(BuiltInWidgets.kSpeedController)
+                                       .getEntry();
+  NetworkTableEntry gDriveSpeedEntry = Gurney.add("Gurney Left Motor Speed", 0)
+                                       .withWidget(BuiltInWidgets.kSpeedController)
+                                       .getEntry();
 
   ShuffleboardTab MaxSpeedTab = Shuffleboard.getTab("Max Speed");
   NetworkTableEntry frontGurneyEntry = MaxSpeedTab.add("Front Gurney Speed", 0.5)
@@ -115,6 +129,11 @@ public class Gurny  {
     dashFrontSpeed = frontGurneyEntry.getDouble(0);
     dashBackSpeed = backGurneyEntry.getDouble(0);
     dashDriveSpeed = driveGurneyEntry.getDouble(0);
+
+    gurneyTiltEntry.setDouble(m_navX.getPitch());
+    gDriveSpeedEntry.setDouble(m_joy.getRawAxis(Constants.gDriveForward) * dashDriveSpeed);
+    gFrontSpeedEntry.setDouble(m_joy.getRawAxis(Constants.gUpFront) * -dashFrontSpeed);
+    gBackSpeedEntry.setDouble(m_joy.getRawAxis(Constants.gUpBack) * -dashBackSpeed);
     
 }
 
