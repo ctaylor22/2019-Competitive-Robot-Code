@@ -24,55 +24,64 @@ public class Gurny  {
   Joystick m_joy;
 
 
-  WPI_VictorSPX gBack;
+  WPI_TalonSRX gBack;
   
   WPI_TalonSRX gFront;
 
-  WPI_TalonSRX gDrive;
+  WPI_VictorSPX gDrive;
   double dashFrontSpeed, dashBackSpeed, dashDriveSpeed;
   
-  NavX m_navX;
-  ShuffleboardTab Gurney;
-  NetworkTableEntry gurneyTiltEntry = Gurney.add("Gurney Pitch", 0)
-                                       .withWidget(BuiltInWidgets.kGyro)
-                                       .getEntry();
-
-  NetworkTableEntry gFrontSpeedEntry = Gurney.add("Gurney Left Motor Speed", 0)
-                                       .withWidget(BuiltInWidgets.kSpeedController)
-                                       .getEntry();
-  NetworkTableEntry gBackSpeedEntry = Gurney.add("Gurney Left Motor Speed", 0)
-                                       .withWidget(BuiltInWidgets.kSpeedController)
-                                       .getEntry();
-  NetworkTableEntry gDriveSpeedEntry = Gurney.add("Gurney Left Motor Speed", 0)
-                                       .withWidget(BuiltInWidgets.kSpeedController)
-                                       .getEntry();
+  //NavX m_navX;
+  ShuffleboardTab Gurney = Shuffleboard.getTab("Gurney");
+ // NetworkTableEntry gurneyTiltEntry = Gurney.add("Gurney Pitch", 0)
+ //                                      .withWidget(BuiltInWidgets.kGyro)
+ //                                      .getEntry();
+  NetworkTableEntry gFrontSpeedEntry;
+  NetworkTableEntry gBackSpeedEntry;
+  NetworkTableEntry gDriveSpeedEntry;
+ 
 
   ShuffleboardTab MaxSpeedTab = Shuffleboard.getTab("Max Speed");
-  NetworkTableEntry frontGurneyEntry = MaxSpeedTab.add("Front Gurney Speed", 0.5)
-                                                  .withWidget(BuiltInWidgets.kNumberSlider)
-                                                  .withProperties(Map.of("Min", 0, "Max", 1))
-                                                  .getEntry();
-  NetworkTableEntry backGurneyEntry = MaxSpeedTab.add("Back Gurney Speed", 0.5)
-                                                .withWidget(BuiltInWidgets.kNumberSlider)
-                                                .withProperties(Map.of("Min", 0, "Max", 1))
-                                                .getEntry();
-  NetworkTableEntry driveGurneyEntry = MaxSpeedTab.add("Drive Gurney Speed", 0.5)
-                                                  .withWidget(BuiltInWidgets.kNumberSlider)
-                                                  .withProperties(Map.of("Min", 0, "Max", 1))
-                                                  .getEntry();
+  NetworkTableEntry frontGurneyEntry;
+  NetworkTableEntry backGurneyEntry;
+  NetworkTableEntry driveGurneyEntry;
 
 
   public void robotInit(Joystick j) {
+    gFrontSpeedEntry = Gurney.add("Gurney Front Motor Speed", 0)
+    .withWidget(BuiltInWidgets.kSpeedController)
+    .getEntry();
+    gBackSpeedEntry = Gurney.add("Gurney Back Motor Speed", 0)
+    .withWidget(BuiltInWidgets.kTextView)
+    .getEntry();
+    gDriveSpeedEntry = Gurney.add("Gurney Drive Motor Speed", 0)
+    .withWidget(BuiltInWidgets.kTextView)
+    .getEntry();
+
+    frontGurneyEntry = MaxSpeedTab.add("Front Gurney Speed", 0.5)
+    .withWidget(BuiltInWidgets.kNumberSlider)
+    .withProperties(Map.of("Min", 0, "Max", 1))
+    .getEntry();
+    backGurneyEntry = MaxSpeedTab.add("Back Gurney Speed", 0.5)
+  .withWidget(BuiltInWidgets.kNumberSlider)
+  .withProperties(Map.of("Min", 0, "Max", 1))
+  .getEntry();
+    driveGurneyEntry = MaxSpeedTab.add("Drive Gurney Speed", 0.5)
+    .withWidget(BuiltInWidgets.kNumberSlider)
+    .withProperties(Map.of("Min", 0, "Max", 1))
+    .getEntry();
 
     m_joy = j;
 
-    gBack = new WPI_VictorSPX(RobotMap.gBack);
+    gBack = new WPI_TalonSRX(RobotMap.gBack);
 
     gFront = new WPI_TalonSRX(RobotMap.gFront);
 
-    gDrive = new WPI_TalonSRX(RobotMap.gDrive);
+    gDrive = new WPI_VictorSPX(RobotMap.gDrive);
 
-    m_navX = new NavX();
+    gDrive.configFactoryDefault();
+
+   // m_navX = new NavX();
   }
 
   
@@ -95,26 +104,28 @@ public class Gurny  {
       balanceAtVelocity(0.6*m_joy.getRawAxis(Constants.gDriveForward));
     }
     else {
-      
+      dashFrontSpeed = 0.5;
+      dashBackSpeed = 0.4;
+      dashDriveSpeed = 1;
       gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * -dashFrontSpeed);
       gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpBack) * -dashBackSpeed);
 
-      if (Constants.gDriveBack == 0) {
+      if (m_joy.getRawAxis(Constants.gDriveBack) < 0.1) {
         gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveForward) * dashDriveSpeed);
-      } else if (Constants.gDriveForward == 0) {
-        gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -dashDriveSpeed);
-      }
+      } else if (m_joy.getRawAxis(Constants.gDriveForward) < 0.1) {
+         gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -dashDriveSpeed);
+       }
       
      
     }
   }
 
   public void balanceAtVelocity(double output) {
-    double pitch = m_navX.getPitch();
-    double pFactorFront = output*(pitch/45);
-    double pFactorBack = output*(pitch/45);
-    setFront(output-pFactorFront);
-    setBack(output+pFactorBack);
+    //double pitch = m_navX.getPitch();
+    //double pFactorFront = output*(pitch/45);
+    //double pFactorBack = output*(pitch/45);
+    //setFront(output-pFactorFront);
+    //setBack(output+pFactorBack);
   }
   
   public void setFront(double output) {
@@ -126,11 +137,11 @@ public class Gurny  {
   }
 
   public void report() {
-    dashFrontSpeed = frontGurneyEntry.getDouble(0);
-    dashBackSpeed = backGurneyEntry.getDouble(0);
-    dashDriveSpeed = driveGurneyEntry.getDouble(0);
+    // dashFrontSpeed = frontGurneyEntry.getDouble(0);
+    // dashBackSpeed = backGurneyEntry.getDouble(0);
+    // dashDriveSpeed = driveGurneyEntry.getDouble(0);
 
-    gurneyTiltEntry.setDouble(m_navX.getPitch());
+   // gurneyTiltEntry.setDouble(m_navX.getPitch());
     gDriveSpeedEntry.setDouble(m_joy.getRawAxis(Constants.gDriveForward) * dashDriveSpeed);
     gFrontSpeedEntry.setDouble(m_joy.getRawAxis(Constants.gUpFront) * -dashFrontSpeed);
     gBackSpeedEntry.setDouble(m_joy.getRawAxis(Constants.gUpBack) * -dashBackSpeed);
