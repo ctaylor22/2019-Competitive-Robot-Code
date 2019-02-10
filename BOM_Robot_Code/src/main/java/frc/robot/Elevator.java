@@ -26,15 +26,19 @@ public class Elevator  {
   int mode = 0;
   double elevSpeed;
 
+  // height array for elevator. 0 minimum, 15500 maximum
   int heights[] = new int[]{100, 2000, 4000, 6000, 8000, 10000, 12000, 14000, 15500};
   double previous_target = 1;
   double target_position = 1;
+
   ShuffleboardTab maxSpeedTab = Shuffleboard.getTab("Max Speed");
   NetworkTableEntry elevatorSpeedEntry = maxSpeedTab.add("Elevator Speed", 0.5)
                                   .withWidget(BuiltInWidgets.kNumberSlider)
                                   .withProperties(Map.of("Min", 0, "Max", 1))
                                   .getEntry();
   NetworkTableEntry elevatorEncoderPosition = maxSpeedTab.add("Elev Encoder Position", 0).getEntry();
+  
+  // VALID INDEXES ARE 0 THRU 8. this indexes the heights[] array
   NetworkTableEntry elevatorPositionEntry = maxSpeedTab.add("Elevator Target Position", 50).withWidget(BuiltInWidgets.kTextView).getEntry();
 
   void setUpPID() {
@@ -95,6 +99,7 @@ public class Elevator  {
       }
 
       if (m_joy.getRawButton(4)) {
+        // set target position INDEX, 0 thru 8
         previous_target = target_position;
         target_position =  elevatorPositionEntry.getDouble(0);
         if(target_position >= previous_target) {
@@ -102,6 +107,7 @@ public class Elevator  {
         } else {
           setDownPID();
         }
+        // get index in the heights array, valid indexes are 0 thru 8!
         m_elevator.set(ControlMode.MotionMagic, heights[(int) target_position]);
 
       } else if (m_joy.getRawAxis(2) == 0) {
