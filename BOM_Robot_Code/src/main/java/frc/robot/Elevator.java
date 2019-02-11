@@ -50,6 +50,9 @@ public class Elevator  {
   // encoder position in sensor units                                                  
   NetworkTableEntry elevatorEncoderPosition = maxSpeedTab.add("Elev Encoder Position", 0).getEntry();
   
+
+  // #TODO: replace 'target position' entry with a widget that has 
+  // a better 'select' interface (e.g. selectable radio buttons)
   // VALID INDEXES ARE 0 THRU 8. this indexes the heights[] array
   NetworkTableEntry elevatorPositionEntry = maxSpeedTab.add("Elevator Target Position", 50)
                                                         .withWidget(BuiltInWidgets.kTextView)
@@ -65,6 +68,18 @@ public class Elevator  {
     // HOWEVER, during testing, 10667 worked better
     m_elevator.configMotionCruiseVelocity(10667);
 
+    /* talons interpret 1023 as full, 0 as neutral
+     * kP = (percent_applied * 1023) / error
+     * kP ~ motor output
+     * 
+     * kI should be a very small number
+     * start with 0.0005
+     * set the intergral zone based on the error left over when using just kP
+     *
+     * kD can help smooth abrupt transitions
+     * start with x10 kP and increase
+     * kD is not always useful
+     */
     m_elevator.config_kP(0, 0.38);
     m_elevator.config_kI(0, 0.0013);
     m_elevator.config_kD(0, 0);
@@ -79,12 +94,18 @@ public class Elevator  {
   void setDownPID() {
     // #TODO: THIS LOOP MAY NEED TO SOME TUNING
     // It is not strong enough to help up the elevator at position
-    // see else in line 145 for potential fix
-    m_elevator.configMotionAcceleration(1000);    
-    m_elevator.configMotionCruiseVelocity(1000);
+    // see 'else' statement of the 'if(target_height_index != previous_index)' statement for potential fix
+
+    // increase these if necessary 
+    m_elevator.configMotionAcceleration(500);    
+    m_elevator.configMotionCruiseVelocity(500);
     
-    // start with a very low kP, around 0.1
-    m_elevator.config_kP(0, 0.1);
+    /* start with a very, very low kP since gravity helps a lot on the way down
+     * kP = (percent_applied * 1023) / error
+     * kP = (0.1 * 1023) / 15000     <-- .1 motor output when there is 15000 units of error
+     * kP ~= 0.0068 ~= 0.006
+     */
+    m_elevator.config_kP(0, 0.006);
     m_elevator.config_kI(0, 0);
     m_elevator.config_kD(0, 0);
     m_elevator.config_IntegralZone(0, 0);
@@ -143,11 +164,12 @@ public class Elevator  {
       // else, then target and previous are equal. 
       // This runs during all other loops after the change until a new index is set
       else {
-        // if the closed loop error is within a threshold, re-set to the up PID values
+        // if the closed loop error is within a threshold, re-set to the 'up' PID values
         // uncomment and test carefully. Do not use any threshold larger than 75
         // #TODO: THIS THRESHOLD WILL NEED TO BE TUNED
-        /*
-        int restore_Up_PID_threshold = 10;
+
+        /* UNCOMMENT THIS
+        int restore_Up_PID_threshold = 5;
         if ( Math.abs(m_elevator.getClosedLoopError(0)) < restore_Up_PID_threshold) {
           // maybe put a closed loop ramp config right here
           setUpPID();
