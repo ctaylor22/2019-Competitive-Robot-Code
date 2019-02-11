@@ -5,7 +5,7 @@
 package frc.robot;
 
 import java.util.Map;
-import java.land.Math;
+import java.lang.Math;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
