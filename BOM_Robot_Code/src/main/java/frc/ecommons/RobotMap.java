@@ -17,7 +17,7 @@ public class RobotMap {
     public static int gBack = 11;
     
     //Right Front
-    public static int gFront = 20;
+    public static int gFront = 15;
 
     public static int gDrive = 19;
 
@@ -39,7 +39,7 @@ public class RobotMap {
 
         //Right Side
         public static int rMaster = 13;
-        public static int rSlave1 = 15;
+        public static int rSlave1 = 20;
         public static int rSlave2 = 16;
 
         public static int ahrsAddress = 1;
