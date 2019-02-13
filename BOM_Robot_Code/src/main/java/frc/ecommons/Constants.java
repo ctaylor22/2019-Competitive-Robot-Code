@@ -72,6 +72,9 @@ public class Constants {
     //P factor of back motor
     public static double frontDriveP = 8.5;
 
+    //Current at which the robot will lower safely
+    public static double gSafteySpeed = .075;
+
 // *** other ***
     //Percent Output
     public static double gForwardRate = 0.3;

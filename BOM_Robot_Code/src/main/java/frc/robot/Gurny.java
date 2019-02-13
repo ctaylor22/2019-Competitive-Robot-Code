@@ -99,13 +99,16 @@ public class Gurny  {
  
   
   public void teleopPeriodic() {
-    m_navX.testPeriodic();
     // Y button enable, RT drive
     if (m_joy.getRawButton(Constants.gUpLevelEnable)) {
-      
-      gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpBack));
-
-      balanceFront(Constants.frontDriveP);
+      if (m_joy.getRawAxis(Constants.gDriveForward) < Constants.gSafteySpeed) {
+        gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -dashFrontSpeed);
+        balanceFront(Constants.frontDriveP);
+      } 
+      if (true) { //Needs to activate only when back gurny motor is above a certain point
+        gBack.set(ControlMode.PercentOutput, Constants.gSafteySpeed);
+        balanceFront(Constants.frontDriveP);
+      }
     }
     else {
       dashFrontSpeed = 0.5;
@@ -132,12 +135,15 @@ public class Gurny  {
   }
 
   public void balanceFront(double pfactor) {
-    //TODO: Find correct callibration for pfactor and find correct axis to use (from pitch, roll, and yaw)
+    //Balances the front accoring to the NavX tilt
     double pitch = m_navX.getPitch();
-    double speed = pfactor*(pitch/15);
-    gFront.set(ControlMode.PercentOutput, speed * -dashBackSpeed);
+    double speed = -pfactor*(pitch/15);
+    if (speed < 0) {
+      speed = 0;
+    }
+    gFront.set(ControlMode.PercentOutput, speed * -dashFrontSpeed);
   }
-  
+
   public void setFront(double output) {
     gFront.set(ControlMode.PercentOutput, output);
   }
@@ -159,10 +165,9 @@ public class Gurny  {
 }
 
   public void testInit() {
-    m_navX.testInit();
+
   }
   
   public void testPeriodic() {
-    m_navX.testPeriodic();
   }
 }
