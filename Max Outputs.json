@@ -292,6 +292,72 @@
               "_source0": "network_table:///SmartDashboard/Drive Train",
               "_title": "Drive Train"
             }
+          },
+          "5,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/LimelightArea",
+              "_title": "LimelightArea"
+            }
+          },
+          "6,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/LimelightPipeline",
+              "_title": "LimelightPipeline"
+            }
+          },
+          "7,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/LimelightSkew",
+              "_title": "LimelightSkew"
+            }
+          },
+          "8,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/LimeLightLedMode",
+              "_title": "LimeLightLedMode"
+            }
+          },
+          "9,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/LimelightX",
+              "_title": "LimelightX"
+            }
+          },
+          "0,3": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/LimelightY",
+              "_title": "LimelightY"
+            }
           }
         }
       }
@@ -395,6 +461,33 @@
                   "_title": "Compressor[0]/Enabled",
                   "Colors/Color when true": "#7CFC00FF",
                   "Colors/Color when false": "#8B0000FF"
+                },
+                {
+                  "_type": "Voltage View",
+                  "_source0": "network_table:///LiveWindow/Ungrouped/AnalogInput[0]",
+                  "_title": "LiveWindow/Ungrouped/AnalogInput[0]",
+                  "Range/Min": 0.0,
+                  "Range/Max": 5.0,
+                  "Range/Center": 0.0,
+                  "Visuals/Orientation": "HORIZONTAL",
+                  "Visuals/Number of tick marks": 5
+                },
+                {
+                  "_type": "Text View",
+                  "_source0": "network_table:///LiveWindow/Ungrouped/DoubleSolenoid[0,2]/Value",
+                  "_title": "LiveWindow/Ungrouped/DoubleSolenoid[0,2]/Value"
+                },
+                {
+                  "_type": "Speed Controller",
+                  "_source0": "network_table:///LiveWindow/Ungrouped/Victor SPX [20]",
+                  "_title": "LiveWindow/Ungrouped/Victor SPX [20]",
+                  "Visuals/Orientation": "HORIZONTAL"
+                },
+                {
+                  "_type": "Speed Controller",
+                  "_source0": "network_table:///LiveWindow/Ungrouped/Talon SRX [15]",
+                  "_title": "LiveWindow/Ungrouped/Talon SRX [15]",
+                  "Visuals/Orientation": "HORIZONTAL"
                 }
               ]
             }

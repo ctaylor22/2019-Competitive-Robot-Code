@@ -17,8 +17,10 @@ import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.ecommons.Constants;
 import frc.ecommons.RobotMap;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -41,8 +43,14 @@ public class Robot extends TimedRobot {
   Compressor m_comp;
   Boolean compLoop = true;
   AnalogInput pressure;
-  ShuffleboardTab robotTab = Shuffleboard.getTab("Compressor");
-  NetworkTableEntry pressureEntry = robotTab.add("Pressure", 0).getEntry();
+  double pressureDouble;
+  ShuffleboardTab tab = Shuffleboard.getTab("Comp");
+  NetworkTableEntry pressureEntry = tab.add("Pressure", 0)
+                                       .withWidget(BuiltInWidgets.kDial)
+                                       .getEntry();
+  NetworkTableEntry compressorEntry = tab.add("Compressor", false)
+                                         .withWidget(BuiltInWidgets.kBooleanBox)
+                                         .getEntry();
 
   @Override
   public void robotInit() {
@@ -54,7 +62,7 @@ public class Robot extends TimedRobot {
     m_Gurny.robotInit(m_gJoy);
     m_Manipulator.robotInit(m_gJoy);
     m_Limelight.robotInit(m_gJoy); //functions work with gurney
-
+    
     m_comp = new Compressor();
 
 
@@ -64,10 +72,13 @@ public class Robot extends TimedRobot {
  
   @Override
   public void robotPeriodic() {
+    double pressureCalc = 250 * (pressure.getAverageVoltage()/5) - 25;
     m_DriveTrain.report();
     m_Elevator.report();
     m_Gurny.report();
     m_Manipulator.report();
+    pressureEntry.setDouble(pressureCalc);
+    compressorEntry.setBoolean(m_comp.getClosedLoopControl());
 
   }
 

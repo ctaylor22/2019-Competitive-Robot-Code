@@ -156,9 +156,10 @@ public class Gurny  {
 }
 
   public void testInit() {
-
+    m_navX.testInit();
   }
   
   public void testPeriodic() {
+    m_navX.testPeriodic();
   }
 }
