@@ -13,12 +13,15 @@ package frc.robot;
 
 
 
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.ecommons.Constants;
 import frc.ecommons.RobotMap;
-
+import edu.wpi.first.networktables.NetworkTableEntry;
 
 
 public class Robot extends TimedRobot {
@@ -37,18 +40,14 @@ public class Robot extends TimedRobot {
   Joystick m_gJoy;
   Compressor m_comp;
   Boolean compLoop = true;
-  
-  
-  
-
-  
-
-
+  AnalogInput pressure;
+  ShuffleboardTab robotTab = Shuffleboard.getTab("Compressor");
+  NetworkTableEntry pressureEntry = robotTab.add("Pressure", 0).getEntry();
 
   @Override
   public void robotInit() {
     m_driveJoy = new Joystick(RobotMap.driveJoy);
-
+    pressure = new AnalogInput(0);
     m_gJoy = new Joystick(RobotMap.gJoy);
     m_DriveTrain.robotInit(m_driveJoy);
     m_Elevator.robotInit(m_driveJoy);
@@ -58,6 +57,8 @@ public class Robot extends TimedRobot {
 
     m_comp = new Compressor();
 
+
+    
   }
 
  
