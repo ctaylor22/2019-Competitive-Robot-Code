@@ -72,7 +72,7 @@ public class Robot extends TimedRobot {
  
   @Override
   public void robotPeriodic() {
-    double pressureCalc = 250 * (pressure.getAverageVoltage()/5) - 25;
+    double pressureCalc = 250 * (pressure.getVoltage()/5) - 25;
     m_DriveTrain.report();
     m_Elevator.report();
     m_Gurny.report();
