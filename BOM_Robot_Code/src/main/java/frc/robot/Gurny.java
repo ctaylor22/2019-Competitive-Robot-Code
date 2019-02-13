@@ -99,12 +99,13 @@ public class Gurny  {
  
   
   public void teleopPeriodic() {
+    m_navX.testPeriodic();
     // Y button enable, RT drive
     if (m_joy.getRawButton(Constants.gUpLevelEnable)) {
-      if (m_joy.getRawAxis(Constants.gDriveForward) < 0.1) {
-        gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -dashFrontSpeed);
-      }
-      balanceBack(Constants.backDriveP);
+      
+      gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpBack));
+
+      balanceFront(Constants.frontDriveP);
     }
     else {
       dashFrontSpeed = 0.5;
@@ -130,11 +131,11 @@ public class Gurny  {
     //setBack(output+pFactorBack);
   }
 
-  public void balanceBack(double pfactor) {
+  public void balanceFront(double pfactor) {
     //TODO: Find correct callibration for pfactor and find correct axis to use (from pitch, roll, and yaw)
     double pitch = m_navX.getPitch();
-    double speed = -pfactor*(pitch/45);
-    gBack.set(ControlMode.PercentOutput, speed * -dashBackSpeed);
+    double speed = pfactor*(pitch/15);
+    gFront.set(ControlMode.PercentOutput, speed * -dashBackSpeed);
   }
   
   public void setFront(double output) {

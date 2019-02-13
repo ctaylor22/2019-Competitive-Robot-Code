@@ -70,7 +70,7 @@ public class Constants {
     
 // *** gurney balance calibration ***
     //P factor of back motor
-    public static double backDriveP = .5;
+    public static double frontDriveP = 8.5;
 
 // *** other ***
     //Percent Output
@@ -79,6 +79,6 @@ public class Constants {
     
     //The angle at which the RoboRio and NavX board are tilted measured counterclockwise from the right, back, and top
     public static double rioYaw = 0;
-    public static double rioPitch = 0;
+    public static double rioPitch = 34;
     public static double rioRoll = 0;
 }

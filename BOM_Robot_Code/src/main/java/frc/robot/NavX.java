@@ -124,7 +124,7 @@ public class NavX {
         final double yawFactor = rawYaw*Math.sin(rioRoll);
         final double pitch = (pitchFactor+rollFactor+yawFactor)/2;
         */
-        final double pitch = rawPitch;
+        final double pitch = rawPitch - rioPitch;
         return pitch;
     }
 
