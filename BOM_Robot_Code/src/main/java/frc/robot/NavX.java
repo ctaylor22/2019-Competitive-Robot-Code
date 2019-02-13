@@ -74,7 +74,6 @@ public class NavX {
         //Side to side
         double yaw = getYaw();
         double roll = getRoll();
-        double pitch = getPitch();
         final double rawX = navX.getDisplacementX();
         final double rawY = navX.getDisplacementY();
         final double rawZ = navX.getDisplacementZ();
@@ -88,7 +87,6 @@ public class NavX {
     public double getY() {
         //Front and back
         double yaw = getYaw();
-        double roll = getRoll();
         double pitch = getPitch();
         final double rawX = navX.getDisplacementX();
         final double rawY = navX.getDisplacementY();
@@ -102,7 +100,6 @@ public class NavX {
 
     public double getZ() {
         //Up and down
-        double yaw = getYaw();
         double roll = getRoll();
         double pitch = getPitch();
         final double rawX = navX.getDisplacementX();

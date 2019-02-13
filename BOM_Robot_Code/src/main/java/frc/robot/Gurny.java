@@ -31,7 +31,7 @@ public class Gurny  {
   WPI_VictorSPX gDrive;
   double dashFrontSpeed, dashBackSpeed, dashDriveSpeed;
   
-  //NavX m_navX;
+  NavX m_navX;
   ShuffleboardTab Gurney = Shuffleboard.getTab("Gurney");
  // NetworkTableEntry gurneyTiltEntry = Gurney.add("Gurney Pitch", 0)
  //                                      .withWidget(BuiltInWidgets.kGyro)
@@ -81,7 +81,7 @@ public class Gurny  {
 
     gDrive.configFactoryDefault();
 
-   // m_navX = new NavX();
+    m_navX = new NavX();
   }
 
   
@@ -127,6 +127,13 @@ public class Gurny  {
     //setFront(output-pFactorFront);
     //setBack(output+pFactorBack);
   }
+
+  public void balanceBack(double pfactor) {
+    //TODO: Find correct callibration for pfactor and find correct axis to use (from pitch, roll, and yaw)
+    double pitch = m_navX.getPitch();
+    double speed = pfactor*(pitch/45);
+    setBack(speed);
+  }
   
   public void setFront(double output) {
     gFront.set(ControlMode.PercentOutput, output);
@@ -148,7 +155,9 @@ public class Gurny  {
     
 }
 
+  public void testInit() {
 
+  }
   
   public void testPeriodic() {
   }
