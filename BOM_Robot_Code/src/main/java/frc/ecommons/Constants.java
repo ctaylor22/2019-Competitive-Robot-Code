@@ -68,6 +68,9 @@ public class Constants {
     // enable auto up with leveling
     public static int gUpLevelEnable = 4;
     
+// *** gurney balance calibration ***
+    //P factor of back motor
+    public static double backDriveP = .5;
 
 // *** other ***
     //Percent Output
