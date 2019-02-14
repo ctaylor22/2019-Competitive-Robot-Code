@@ -159,15 +159,16 @@ public class Gurny_josh  {
       gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -dashDriveSpeed);
     }
 
+    // #TODO: add switch button on shuffleboard to have 'fast' / 'slow' mode
     if (m_joy.getRawButton(Constants.gurneyGoUp)) {
-      /*
-       * Robot tilts forward ==> positive pitch ==> add to front output
+      /* Gurney UP on Button 4, Y
        * 
+       * call motion magic with a set point of ~36000
+       *
+       * Robot tilts forward ==> positive pitch ==> add to front output
        */
-      // up
-      // call motion magic with a set point of ~32000
       setUpPID();
-      gBack.set(ControlMode.MotionMagic, 42000);
+      gBack.set(ControlMode.MotionMagic, 36000);
 
       // accelerometer PID for front
       double pitch_error = m_navX.getPitch() - 2;
@@ -175,10 +176,19 @@ public class Gurny_josh  {
       double front_kP = 0.13;
       double output = front_kF + (front_kP)*pitch_error;
       gFront.set(ControlMode.PercentOutput, output);
-      current_postion = gBack.getSelectedSensorPosition();
+
+      /* #TODO: test adding an offset to help the hold PID
+       * this would be the steady state error of the UP
+       */
+      int experimental_steady_state_error = 0;
+      current_postion = gBack.getSelectedSensorPosition() + experimental_steady_state_error;
     }
     else if (m_joy.getRawButton(Constants.gurneyGoDown)) {
-      // down
+      /* Gurney DOWN on Button 3, X
+       *
+       * call motion magic with a target position of 0
+       *
+       */
       setDownPID();
       gBack.set(ControlMode.MotionMagic, 10);
       double pitch_error = m_navX.getPitch() - 2;
@@ -186,10 +196,15 @@ public class Gurny_josh  {
       double front_kP = 0.11;
       double output = front_kF + (front_kP)*pitch_error;
       gFront.set(ControlMode.PercentOutput, output);
+
       current_postion = gBack.getSelectedSensorPosition();
     }
-    else if (gBack.getSelectedSensorPosition() > 5000) {
-      // hold when encoder reads a rotation
+    else if (gBack.getSelectedSensorPosition() > 4096) {
+      /* hold position when encoder reads a rotation or so above 0 position
+       * 
+       *
+       * #TODO: allow manual control while also holding position
+       */
       setHoldPID();
       gBack.set(ControlMode.MotionMagic, current_postion);
 
@@ -201,46 +216,17 @@ public class Gurny_josh  {
       gFront.set(ControlMode.PercentOutput, output);
     }
     else {
-      // manual
-      gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * -dashFrontSpeed);
-      gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpBack) * -dashBackSpeed);
+      /* manual control
+       *
+       * joystick Y axis * -1 to make up direction output a positive number
+       */
+      gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * (-1) * dashFrontSpeed);
+      gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpBack) * (-1)* dashBackSpeed);
     }
     
   }
 
-  public void balanceAtVelocity(double output) {
-    //double pitch = m_navX.getPitch();
-    //double pFactorFront = output*(pitch/45);
-    //double pFactorBack = output*(pitch/45);
-    //setFront(output-pFactorFront);
-    //setBack(output+pFactorBack);
-  }
-
-  public void balanceFront(double pfactor) {
-    //Balances the front accoring to the NavX tilt
-    double pitch = m_navX.getPitch();
-    double speed = -pfactor*(pitch/15);
-    if (speed < 0) {
-      speed = 0;
-    }
-    gFront.set(ControlMode.PercentOutput, speed * -dashFrontSpeed);
-  }
-
-  public void setFront(double output) {
-    gFront.set(ControlMode.PercentOutput, output);
-  }
-
-  public void setBack(double output) {
-    gBack.set(ControlMode.PercentOutput, output);
-  }
-
   public void report() {
-    // dashFrontSpeed = frontGurneyEntry.getDouble(0);
-    // dashBackSpeed = backGurneyEntry.getDouble(0);
-    // dashDriveSpeed = driveGurneyEntry.getDouble(0);
-    // gDriveSpeedEntry.setDouble(m_joy.getRawAxis(Constants.gDriveForward) * dashDriveSpeed);
-    // gFrontSpeedEntry.setDouble(m_joy.getRawAxis(Constants.gUpFront) * -dashFrontSpeed);
-    // gBackSpeedEntry.setDouble(m_joy.getRawAxis(Constants.gUpBack) * -dashBackSpeed);
 
     gurneyPitchEntry.setDouble(m_navX.getPitch());
     
