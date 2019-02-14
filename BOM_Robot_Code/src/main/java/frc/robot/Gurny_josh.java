@@ -59,18 +59,6 @@ public class Gurny_josh  {
 
 
   public void robotInit(Joystick j) {
-  //   frontGurneyEntry = MaxSpeedTab.add("Front Gurney Speed", 0.5)
-  //   .withWidget(BuiltInWidgets.kNumberSlider)
-  //   .withProperties(Map.of("Min", 0, "Max", 1))
-  //   .getEntry();
-  //   backGurneyEntry = MaxSpeedTab.add("Back Gurney Speed", 0.5)
-  // .withWidget(BuiltInWidgets.kNumberSlider)
-  // .withProperties(Map.of("Min", 0, "Max", 1))
-  // .getEntry();
-  //   driveGurneyEntry = MaxSpeedTab.add("Drive Gurney Speed", 0.5)
-  //   .withWidget(BuiltInWidgets.kNumberSlider)
-  //   .withProperties(Map.of("Min", 0, "Max", 1))
-  //   .getEntry();
 
     m_joy = j;
 
@@ -87,6 +75,10 @@ public class Gurny_josh  {
     gBack.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
     gBack.setSelectedSensorPosition(0);
     current_postion = gBack.getSelectedSensorPosition();
+    gBack.configNominalOutputForward(0);
+    gBack.configNominalOutputReverse(0);
+    gBack.configPeakOutputForward(1);
+    gBack.configPeakOutputReverse(-1);
     setUpPID();
 
     gFront.configNominalOutputForward(0);
