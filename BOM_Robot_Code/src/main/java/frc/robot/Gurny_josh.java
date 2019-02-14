@@ -106,7 +106,7 @@ public class Gurny_josh  {
     m_navX = new NavX();
     manual_or_hold_chooser.setDefaultOption("Manual", true);
     manual_or_hold_chooser.addOption("Hold Height", false);
-    gurneyTab.add("Mode", manual_or_hold_chooser).withWidget(BuiltInWidgets.kSplitButtonChooser);
+    // gurneyTab.add("Mode", manual_or_hold_chooser).withWidget(BuiltInWidgets.kSplitButtonChooser);
   }
 
   private void setUpPID() {
@@ -129,13 +129,13 @@ public class Gurny_josh  {
   }
 
   private void setHoldPID() {
-    gBack.config_kP(0, 3);
+    gBack.config_kP(0, 2.7);
     gBack.config_kI(0, 0);
     gBack.config_kD(0, 10);
     gBack.config_kF(0, 0);
     gBack.config_IntegralZone(0, 500);
     gBack.configMotionAcceleration(700);
-    gBack.configMotionCruiseVelocity(450);
+    gBack.configMotionCruiseVelocity(1000);
   }
 
   public void autonomousInit() {
@@ -158,9 +158,9 @@ public class Gurny_josh  {
     }
 
     // drive    
-    dashFrontSpeed = 0.5;
-    dashBackSpeed = 0.4;
-    dashDriveSpeed = 1;
+    dashFrontSpeed = gurneyFrontSpeedEntry.getDouble(0.5);
+    dashBackSpeed = gurneyBackSpeedEntry.getDouble(0.3);
+    dashDriveSpeed = gurneyDriveSpeedEntry.getDouble(0.7);
     if (m_joy.getRawAxis(Constants.gDriveBack) < 0.1) {
       gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveForward) * dashDriveSpeed);
     } else if (m_joy.getRawAxis(Constants.gDriveForward) < 0.1) {
