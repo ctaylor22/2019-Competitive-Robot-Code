@@ -33,7 +33,10 @@ public class Robot extends TimedRobot {
    */
   private DriveTrain m_DriveTrain = new DriveTrain();
   private Elevator m_Elevator = new Elevator();
-  private Gurny m_Gurny = new Gurny();
+  
+  // private Gurny m_Gurny = new Gurny();
+  private Gurny_josh m_Gurny = new Gurny_josh();
+
   private Manipulator m_Manipulator = new Manipulator();
   private NavX m_NavX = new NavX();
   private Limelight m_Limelight = new Limelight();
@@ -106,9 +109,9 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     m_Elevator.teleopInit();
-   m_Manipulator.teleopInit();
-   m_DriveTrain.teleopInit();
-
+    m_Manipulator.teleopInit();
+    m_DriveTrain.teleopInit();
+    m_Gurny.teleopInit();
     m_comp.setClosedLoopControl(false);
   }
 

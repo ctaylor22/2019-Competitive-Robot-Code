@@ -22,7 +22,7 @@ import frc.ecommons.Constants;
 import frc.ecommons.RobotMap;
 import frc.robot.NavX;
 
-public class Gurny  {
+public class Gurny_josh  {
 
   Joystick m_joy;
 
@@ -50,6 +50,7 @@ public class Gurny  {
   .getEntry();
  
   SendableChooser<Boolean> manual_or_hold_chooser = new SendableChooser<Boolean>();
+  int current_postion;
 
   // ShuffleboardTab MaxSpeedTab = Shuffleboard.getTab("Max Speed");
   // NetworkTableEntry frontGurneyEntry;
@@ -83,10 +84,62 @@ public class Gurny  {
     gBack.configFactoryDefault();
     gFront.configFactoryDefault();
 
+    gBack.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
+    gBack.setSelectedSensorPosition(0);
+    current_postion = gBack.getSelectedSensorPosition();
+    setUpPID();
+
+    gFront.configNominalOutputForward(0);
+    gFront.configNominalOutputReverse(0);
+    gFront.configPeakOutputForward(1);
+    gFront.configPeakOutputReverse(-1);
+    gFront.configPeakCurrentLimit(8);
+    gFront.configContinuousCurrentLimit(6);
+
+    gFront.configAllowableClosedloopError(0, 0, 0);
+    gFront.config_kF(0, 0);
+    gFront.config_kP(0, 0.5);
+    gFront.config_kI(0, 0);
+    gFront.config_kD(0, 0);
+    gFront.config_IntegralZone(0, 1);
+
     m_navX = new NavX();
+    manual_or_hold_chooser.setDefaultOption("Manual", true);
+    manual_or_hold_chooser.addOption("Hold Height", false);
+    gurneyTab.add("Mode", manual_or_hold_chooser).withWidget(BuiltInWidgets.kSplitButtonChooser);
+  }
+
+  private void setUpPID() {
+    gBack.config_kP(0, 1);
+    gBack.config_kI(0, 0);
+    gBack.config_kD(0, 0);
+    gBack.config_kF(0, 0);
+    gBack.config_IntegralZone(0, 500);
+    gBack.configMotionAcceleration(700);
+    gBack.configMotionCruiseVelocity(1000);
+  }
+  
+  private void setDownPID() {
+    gBack.config_kP(0, 0.1);
+    gBack.config_kI(0, 0);
+    gBack.config_kD(0, 0);
+    gBack.config_IntegralZone(0, 500);
+    gBack.configMotionAcceleration(700);
+    gBack.configMotionCruiseVelocity(1200);
+  }
+
+  private void setHoldPID() {
+    gBack.config_kP(0, 3);
+    gBack.config_kI(0, 0);
+    gBack.config_kD(0, 10);
+    gBack.config_kF(0, 0);
+    gBack.config_IntegralZone(0, 500);
+    gBack.configMotionAcceleration(700);
+    gBack.configMotionCruiseVelocity(450);
   }
 
   public void autonomousInit() {
+    gBack.setSelectedSensorPosition(0);
   }
 
 
@@ -95,38 +148,72 @@ public class Gurny  {
   }
 
   public void teleopInit() {
+    gBack.setSelectedSensorPosition(0);
   }
-
+  
   public void teleopPeriodic() {
-    // Y button enable, RT drive
+    // reset encoder
+    if (m_joy.getRawButton(Constants.gurneyEncoderReset)) {
+      gBack.setSelectedSensorPosition(0);
+    }
+
+    // drive    
+    dashFrontSpeed = 0.5;
+    dashBackSpeed = 0.4;
+    dashDriveSpeed = 1;
+    if (m_joy.getRawAxis(Constants.gDriveBack) < 0.1) {
+      gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveForward) * dashDriveSpeed);
+    } else if (m_joy.getRawAxis(Constants.gDriveForward) < 0.1) {
+      gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -dashDriveSpeed);
+    }
+
     if (m_joy.getRawButton(Constants.gurneyGoUp)) {
-      if (m_joy.getRawAxis(Constants.gDriveForward) < Constants.gSafteySpeed) {
-        gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -dashFrontSpeed);
-        balanceFront(Constants.frontDriveP);
-      } else if (true) { //Needs to activate only when back gurny motor is above a certain point and is not being driven
-        gBack.set(ControlMode.PercentOutput, Constants.gSafteySpeed);
-        double pitch = m_navX.getPitch();
-        if (pitch > .1 || pitch < -.1) {
-          balanceFront(Constants.frontDriveP);
-        } else {
-          gFront.set(ControlMode.PercentOutput, Constants.gSafteySpeed);
-        }
-      } 
+      /*
+       * Robot tilts forward ==> positive pitch ==> add to front output
+       * 
+       */
+      // up
+      // call motion magic with a set point of ~32000
+      setUpPID();
+      gBack.set(ControlMode.MotionMagic, 42000);
+
+      // accelerometer PID for front
+      double pitch_error = m_navX.getPitch() - 2;
+      double front_kF = 0.5;
+      double front_kP = 0.13;
+      double output = front_kF + (front_kP)*pitch_error;
+      gFront.set(ControlMode.PercentOutput, output);
+      current_postion = gBack.getSelectedSensorPosition();
+    }
+    else if (m_joy.getRawButton(Constants.gurneyGoDown)) {
+      // down
+      setDownPID();
+      gBack.set(ControlMode.MotionMagic, 10);
+      double pitch_error = m_navX.getPitch() - 2;
+      double front_kF = 0.35;
+      double front_kP = 0.11;
+      double output = front_kF + (front_kP)*pitch_error;
+      gFront.set(ControlMode.PercentOutput, output);
+      current_postion = gBack.getSelectedSensorPosition();
+    }
+    else if (gBack.getSelectedSensorPosition() > 5000) {
+      // hold when encoder reads a rotation
+      setHoldPID();
+      gBack.set(ControlMode.MotionMagic, current_postion);
+
+      // accelerometer PID for front
+      double pitch_error = m_navX.getPitch() - 2;
+      double front_kF = 0.4;
+      double front_kP = 0.12;
+      double output = front_kF + (front_kP)*pitch_error;
+      gFront.set(ControlMode.PercentOutput, output);
     }
     else {
-      // manual driving
-      dashFrontSpeed = 0.5;
-      dashBackSpeed = 0.4;
-      dashDriveSpeed = 1;
+      // manual
       gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * -dashFrontSpeed);
       gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpBack) * -dashBackSpeed);
-
-      if (m_joy.getRawAxis(Constants.gDriveBack) < 0.1) {
-        gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveForward) * dashDriveSpeed);
-      } else if (m_joy.getRawAxis(Constants.gDriveForward) < 0.1) {
-        gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -dashDriveSpeed);
-      }
     }
+    
   }
 
   public void balanceAtVelocity(double output) {

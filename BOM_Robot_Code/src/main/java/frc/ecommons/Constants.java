@@ -42,7 +42,7 @@ public class Constants {
     // Winds rear gurney motor
     public static int gUpBack = 1;
 
-    // Left trigget axis
+    // Left trigger axis
     // drive gurney backward
     public static int gDriveBack = 2;
 
@@ -64,10 +64,24 @@ public class Constants {
     // toggles manipulator motor
     public static int manipMToggle = 2;
     
+    // X
+    // go down
+    public static int gurneyGoDown = 3;
+
     // Y button
     // enable auto up with leveling
-    public static int gUpLevelEnable = 4;
-    
+    public static int gurneyGoUp = 4;
+
+    // Left bumper = 5
+
+    // Right bumper
+    public static int gurneyManualDrive = 6;
+
+    public static int gurneyEncoderReset = 7;
+
+    // unused
+    public static int gurneyHoldEnable = 8;
+
 // *** gurney balance calibration ***
     //P factor of back motor
     public static double frontDriveP = 8.5;
