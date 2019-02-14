@@ -104,11 +104,15 @@ public class Gurny  {
       if (m_joy.getRawAxis(Constants.gDriveForward) < Constants.gSafteySpeed) {
         gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -dashFrontSpeed);
         balanceFront(Constants.frontDriveP);
-      } 
-      if (true) { //Needs to activate only when back gurny motor is above a certain point
+      } else if (true) { //Needs to activate only when back gurny motor is above a certain point and is not being driven
         gBack.set(ControlMode.PercentOutput, Constants.gSafteySpeed);
-        balanceFront(Constants.frontDriveP);
-      }
+        double pitch = m_navX.getPitch();
+        if (pitch > .1 || pitch < -.1) {
+          balanceFront(Constants.frontDriveP);
+        } else {
+          gFront.set(ControlMode.PercentOutput, Constants.gSafteySpeed);
+        }
+      } 
     }
     else {
       dashFrontSpeed = 0.5;
