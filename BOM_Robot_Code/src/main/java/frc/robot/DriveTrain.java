@@ -161,7 +161,7 @@ public class DriveTrain  {
 
 
   } 
-  public void teleopPeriodic() {
+  public void teleopPeriodic(double limeX) {
 
     //Dog Gear Shift
     if (m_joy.getRawButton(Constants.gearShift) && !dgLoop) {
@@ -196,6 +196,10 @@ public class DriveTrain  {
     double leftSide, rightSide;
     rightSide = -(yAxis - xAxis);
     leftSide = yAxis + xAxis;
+
+    if(m_joy.getRawButton(9)){
+      autoAlign(limeX);
+    }
 
     //Percent drive output with slave follows
     if (m_joy.getRawButton(3)) {
@@ -232,4 +236,28 @@ public class DriveTrain  {
   
   public void testPeriodic() {
   }
+  
+  public void autoAlign(double X){
+    if (X < -1.0){turnRight();}
+    else if (X > 1.0){turnLeft();}
+  }
+
+  public void turnLeft(){
+    m_rMaster.set(ControlMode.PercentOutput, -1 * 0.10);
+    m_lMaster.set(ControlMode.PercentOutput,  1 * 0.10);
+  }
+  public void turnRight(){
+    m_rMaster.set(ControlMode.PercentOutput, 1 * 0.10);
+    m_lMaster.set(ControlMode.PercentOutput, -1 * 0.10);
+  }
+  public void moveForward(){
+    m_rMaster.set(ControlMode.PercentOutput, 1 * 0.10);
+    m_lMaster.set(ControlMode.PercentOutput, 1 * 0.10);
+  }
+  public void moveBackward(){
+    m_rMaster.set(ControlMode.PercentOutput, -1 * 0.10);
+    m_lMaster.set(ControlMode.PercentOutput, -1 * 0.10);
+  }
+  
+
 }
