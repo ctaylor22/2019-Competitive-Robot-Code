@@ -96,6 +96,7 @@ public class Gurny_josh  {
     gFront.config_IntegralZone(0, 1);
 
     m_navX = new NavX();
+    double filtered_error = m_navX.getPitch();
     manual_or_hold_chooser.setDefaultOption("Manual", true);
     manual_or_hold_chooser.addOption("Hold Height", false);
     // gurneyTab.add("Mode", manual_or_hold_chooser).withWidget(BuiltInWidgets.kSplitButtonChooser);
@@ -140,7 +141,6 @@ public class Gurny_josh  {
   }
 
   public void teleopInit() {
-    gBack.setSelectedSensorPosition(0);
   }
   
   public void teleopPeriodic() {
@@ -159,6 +159,11 @@ public class Gurny_josh  {
       gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -dashDriveSpeed);
     }
 
+    /* #TODO: add low pass filtered error
+    double pitch_error = m_navX.getPitch();
+    filtered_error = low_pass(pitch_error, filtered_error);
+    */
+
     // #TODO: add switch button on shuffleboard to have 'fast' / 'slow' mode
     if (m_joy.getRawButton(Constants.gurneyGoUp)) {
       /* Gurney UP on Button 4, Y
@@ -166,6 +171,7 @@ public class Gurny_josh  {
        * call motion magic with a set point of ~36000
        *
        * Robot tilts forward ==> positive pitch ==> add to front output
+       * #TODO: set max height on encoder for top of gurney
        */
       setUpPID();
       gBack.set(ControlMode.MotionMagic, 36000);
@@ -202,8 +208,13 @@ public class Gurny_josh  {
     else if (gBack.getSelectedSensorPosition() > 4096) {
       /* hold position when encoder reads a rotation or so above 0 position
        * 
-       *
+       * #TODO: replace holdPID with upPID. inconjuction with adding the SS error to 'current_position'
        * #TODO: allow manual control while also holding position
+       *        - move JS to adjust height, then holds that height when JS reset to 0
+       *        - maybe with config kF? set to kF then set back to 0
+       * #TODO: add 'unlock front' option to allow front to raise 
+       *        - in the ideal case, the drive wheels are on the platform and front gurney can just raise with JS axis
+       * #TODO: possible hold angle after front adjustment
        */
       setHoldPID();
       gBack.set(ControlMode.MotionMagic, current_postion);
@@ -238,4 +249,12 @@ public class Gurny_josh  {
   
   public void testPeriodic() {
   }
+
+  private double low_pass(double input, double output) {
+    if (output == null) { return input; }
+
+    output = output + 0.8 (input - output);
+    return output;
+  }
+
 }
