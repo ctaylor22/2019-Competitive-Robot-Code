@@ -13,12 +13,17 @@ package frc.robot;
 
 
 
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.ecommons.Constants;
 import frc.ecommons.RobotMap;
-
+import edu.wpi.first.networktables.NetworkTableEntry;
 
 
 public class Robot extends TimedRobot {
@@ -28,7 +33,10 @@ public class Robot extends TimedRobot {
    */
   private DriveTrain m_DriveTrain = new DriveTrain();
   private Elevator m_Elevator = new Elevator();
-  private Gurny m_Gurny = new Gurny();
+  
+  // private Gurny m_Gurny = new Gurny();
+  private Gurny_josh m_Gurny = new Gurny_josh();
+
   private Manipulator m_Manipulator = new Manipulator();
   private NavX m_NavX = new NavX();
   private Limelight m_Limelight = new Limelight();
@@ -37,36 +45,43 @@ public class Robot extends TimedRobot {
   Joystick m_gJoy;
   Compressor m_comp;
   Boolean compLoop = true;
-  
-  
-  
-
-  
-
-
+  AnalogInput pressure;
+  double pressureDouble;
+  ShuffleboardTab tab = Shuffleboard.getTab("Comp");
+  NetworkTableEntry pressureEntry = tab.add("Pressure", 0)
+                                       .withWidget(BuiltInWidgets.kDial)
+                                       .getEntry();
+  NetworkTableEntry compressorEntry = tab.add("Compressor", false)
+                                         .withWidget(BuiltInWidgets.kBooleanBox)
+                                         .getEntry();
 
   @Override
   public void robotInit() {
     m_driveJoy = new Joystick(RobotMap.driveJoy);
-
+    pressure = new AnalogInput(0);
     m_gJoy = new Joystick(RobotMap.gJoy);
     m_DriveTrain.robotInit(m_driveJoy);
     m_Elevator.robotInit(m_driveJoy);
     m_Gurny.robotInit(m_gJoy);
     m_Manipulator.robotInit(m_gJoy);
     m_Limelight.robotInit(m_gJoy); //functions work with gurney
-
+    
     m_comp = new Compressor();
 
+
+    
   }
 
  
   @Override
   public void robotPeriodic() {
+    double pressureCalc = 250 * (pressure.getVoltage()/5) - 25;
     m_DriveTrain.report();
     m_Elevator.report();
     m_Gurny.report();
     m_Manipulator.report();
+    pressureEntry.setDouble(pressureCalc);
+    compressorEntry.setBoolean(m_comp.getClosedLoopControl());
 
   }
 
@@ -94,9 +109,9 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     m_Elevator.teleopInit();
-   m_Manipulator.teleopInit();
-   m_DriveTrain.teleopInit();
-
+    m_Manipulator.teleopInit();
+    m_DriveTrain.teleopInit();
+    m_Gurny.teleopInit();
     m_comp.setClosedLoopControl(false);
   }
 
