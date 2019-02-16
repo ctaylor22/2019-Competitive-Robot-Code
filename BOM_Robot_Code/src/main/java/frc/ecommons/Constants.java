@@ -24,6 +24,8 @@ public class Constants {
     // Shifts gears of the Drive Train
     public static int gearShift = 1;
 
+    public static int motorTest = 3;
+
     // Y button
     // elevator closed loop control
     // goes to position selected by index of heights array

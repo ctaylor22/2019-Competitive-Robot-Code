@@ -287,8 +287,8 @@ public class DriveTrain  {
     rightSide = -(yAxis - xAxis);
     leftSide = yAxis + xAxis;
 
-    //Percent drive output with slave follows
-    if (m_joy.getRawButton(3)) {
+    // motion magic 
+    if (m_joy.getRawButton(Constants.motorTest)) {
       int ticksPerRev = 4096;
       int encoderToWheelGearRatio = 6;
       int wheelDiameter = 6;
