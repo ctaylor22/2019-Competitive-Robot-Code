@@ -108,5 +108,4 @@ public class Constants {
     public static double camHeight = 0.0;
     public static double targetHeight = 0.0;
     public static double camAngle = 0.0;
-    
 }
