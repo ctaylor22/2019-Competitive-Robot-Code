@@ -38,6 +38,10 @@ public class Constants {
     public static int compressor = 8;
 
 // *** gurney joystick axis ***
+    // Ticks per rotation of the wheels
+    public static double ticksPerRotation = 100;
+
+// *** gurney joystick axis ***
     // Left stick Y axis
     // Winds rear gurney motor
     public static int gUpBack = 1;
@@ -98,4 +102,11 @@ public class Constants {
     public static double rioYaw = 0;
     public static double rioPitch = 34;
     public static double rioRoll = 0;
+
+//Distance measurements for Limelight
+    //Limelight
+    public static double camHeight = 0.0;
+    public static double targetHeight = 0.0;
+    public static double camAngle = 0.0;
+    
 }
