@@ -207,6 +207,7 @@ public class Gurny_josh  {
     }
     else if (gBack.getSelectedSensorPosition() > 4096) {
       /* hold position when encoder reads a rotation or so above 0 position
+       * allows for driving of the robot from the back gurney
        * 
        * #TODO: replace holdPID with upPID. inconjuction with adding the SS error to 'current_position'
        * #TODO: allow manual control while also holding position
@@ -225,7 +226,14 @@ public class Gurny_josh  {
       double front_kP = 0.12;
       double output = front_kF + (front_kP)*pitch_error;
       gFront.set(ControlMode.PercentOutput, output);
-    }
+      
+      // gurney drive foward/backward
+      driveGurneyFoward();
+    } /*else if (m_joy.getRawButton(Constants.gFrontUp)) {
+      gFront.set(ControlMode.PercentOutput, Constants.gDriveUp);
+    } else if (m_joy.getRawButton(Constants.gBackUp)) {
+      gBack.set(ControlMode.PercentOutput, Constants.gDriveUp);
+    }*/
     else {
       /* manual control
        *
@@ -249,7 +257,147 @@ public class Gurny_josh  {
   
   public void testPeriodic() {
   }
+  
+  public void climb() {
+    //Semi-autonomous climbing
+    climbUp();
+    climbMode();
+  }
+  
+  public bool climbMode() {
+    int success = driveWhileRaised();
+    success = tryRaiseFront();
+    success = driveWhileRaised();
+    success = tryRaiseBack();
+  }
+  public int driveWhileRaised() {
+      /* Return codes:
+       * 0: Success
+       * 1: Fatal Error
+       */
+      bool isDone = false;
+      while (!isDone) {
+        driveGurneyFoward();
+        bool isDone = m_joy.getRawButton(gContinueRoutine);
+        if checkForAbort() {
+              return 1;
+        }
+    }
+    return 0;
+  }
+  
+  public int tryRaiseFront() {
+      /* Return codes:
+       * 0: Success
+       * 1: Fatal Error
+       * 2: Exception: handle with other logic
+       */
+      bool isDone = false;
+      bool frontRaiseable = false;
+      while (!frontRaiseable) {
+          frontRaisesble = canRaiseFront();
+          if checkForAbort() {
+                return 1;
+          } else if checkForRewind() {
+              //Checks if user wants to go back to drive-while-raised mode
+                return 2;
+          }
+      }
+      while (!isDone) {
+          isDone = raiseFront();
+          if checkForAbort() {
+                return 1;
+          } else if checkForRewind() {
+              //Checks if user wants to go back to drive-while-raised mode
+              return 2;
+          }
+      }
+      return 0;
+  }
+  
+  public bool canRaiseFront() {
+      //Checks if the front can be raised withoutthe robot tipping
+      //TODO
+      return true
+  }
+  
+  public int raiseFront() {
+      bool isDone = false;
+      while (!isDone) {
+          if checkForAbort() {
+                return 1;
+          } else if checkForRewind() {
+              //Checks if user wants to go back to drive-while-raised mode
+              return 2;
+          }
+          gFront.set(ControlMode.PercentOutput, Constants.gDriveUp);
+          //TODO: Detect when the front is raised with magnetic sensors
+          isDone = m_joy.getRawButton(gContinueRoutine); //sensor.detectWhenPipeIsUp()
+      }
+      return 1
+  }
+  
+  public bool checkForAbort() {
+      if (m_joy.getRawButton(gStopRoutine)) {
+          safeLower();
+          return true;
+      } else {
+          return false;
+      }
+  }
+  
+  public void safeLower() {
+      bool isDone = false;
+      while (!isDone) {
+        gBack.set(ControlMode.PercentOutput, Constants.gSafteySpeed);
+        double pitch = m_navX.getPitch();
+        if (pitch > .1 || pitch < -.1) {
+          setFrontToPid();
+        } else {
+          gFront.set(ControlMode.PercentOutput, Constants.gSafteySpeed);
+        }
+        isDone = gBack.getSelectedSensorPosition() > Constants.gSafeHeight;
+      }
+  }
+  
+  public void driveGurneyFoward() {
+      if (m_joy.getRawAxis(Constants.gDriveBack) < 0.1) {
+        gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveForward) * dashDriveSpeed);
+      } else if (m_joy.getRawAxis(Constants.gDriveForward) < 0.1) {
+        gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -dashDriveSpeed);
+      }
+  }
+  
+  public void setFrontToPID() {
+      // accelerometer PID for front
+      double pitch_error = m_navX.getPitch() - 2;
+      double front_kF = 0.5;
+      double front_kP = 0.13;
+      double output = front_kF + (front_kP)*pitch_error;
+      gFront.set(ControlMode.PercentOutput, output);
+  }
+  
+  public void climbUp() {
+    //Climbs to the third level using a pid loop
+    /* Gurney UP on Button 4, Y
+       * 
+       * call motion magic with a set point of ~36000
+       *
+       * Robot tilts forward ==> positive pitch ==> add to front output
+       * #TODO: set max height on encoder for top of gurney
+       */
+      setUpPID();
+      gBack.set(ControlMode.MotionMagic, 36000);
 
+      setFrontToPID();
+
+      /* #TODO: test adding an offset to help the hold PID
+       * this would be the steady state error of the UP
+       */
+      int experimental_steady_state_error = 0;
+      current_postion = gBack.getSelectedSensorPosition() + experimental_steady_state_error;
+  }
+  
   private double low_pass(double input, double output) {
     if (output == null) { return input; }
 
