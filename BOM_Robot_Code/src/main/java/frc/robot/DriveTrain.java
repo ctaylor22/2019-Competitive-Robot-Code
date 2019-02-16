@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.ecommons.RobotMap;
 import frc.ecommons.Constants;
+import frc.utilities.TurnRadius;
 
 // import edu.wpi.first.wpilibj.shuffleboard.BuiltInTypes;
 
@@ -54,12 +55,25 @@ public class DriveTrain  {
   boolean dgLoop = false;
 
   double driveSpeed = 0.5;
+  ShuffleboardTab testMode = Shuffleboard.getTab("Test Mode");
   
-  ShuffleboardTab tab = Shuffleboard.getTab("DriveTrain");
-  NetworkTableEntry rightEncoderEntry = tab.add("Right Encoder", 0).getEntry();
-  NetworkTableEntry currentGearEntry = tab.add("Current Gear", lowGear).getEntry();
-  NetworkTableEntry leftEncoderEntry = tab.add("Left Encoder", 0).getEntry(); 
+  
+  ShuffleboardTab tab = Shuffleboard.getTab("Beginning Game");
+  NetworkTableEntry rightEncoderEntry = tab.add("Right Encoder", 0)
+                                           .withSize(1, 1)
+                                           .withPosition(1, 1) 
+                                           .getEntry();
+  NetworkTableEntry currentGearEntry = tab.add("Current Gear", lowGear)
+                                          .withSize(2, 1)
+                                          .withPosition(0, 2)
+                                          .getEntry();
+  NetworkTableEntry leftEncoderEntry = tab.add("Left Encoder", 0)
+                                          .withSize(1, 1)
+                                          .withPosition(0, 1)
+                                          .getEntry();
   NetworkTableEntry driveSpeedEntry = tab.add("Drive Speed", 0.5)
+                                          .withSize(2, 1)
+                                          .withPosition(0, 0)
                                           .withWidget(BuiltInWidgets.kNumberSlider)
                                           .withProperties(Map.of("Min", 0, "Max", 1))
                                           .getEntry();
@@ -120,9 +134,8 @@ public class DriveTrain  {
 
 
   }
-  public void robotInit(Joystick j) {
 
-    
+  public void robotInit(Joystick j) {
     //Joysticks
     m_joy = j;
 
@@ -149,7 +162,40 @@ public class DriveTrain  {
   }
   
   public void autonomousPeriodic() {
+    followTurnPath();
+  }
 
+  public void followTurnPath() {
+    double[][] paths = {{2.0, 300.0, 3.0, 1.0, 90.0, 1.0}/*,
+                        {0.0, 100.0, 3.0}*/};
+    double[] motor_speeds = {0, 0, 0, 0};
+    for (double[] piece: paths) {
+      if (piece[0] != 0) {
+        motor_speeds = TurnRadius.calculateTurnRadius(piece[0], piece[1], piece[2], piece[3], piece[4], piece[5]);
+      } else {
+        //Default Velocity
+        motor_speeds[0] = piece[1];
+        motor_speeds[1] = piece[1];
+        //Encoder Offset
+        motor_speeds[2] = piece[2];
+        motor_speeds[3] = piece[2];
+      }
+      double rightEncoderGoal = motor_speeds[2] + m_rMaster.getSelectedSensorPosition();
+      double leftEncoderGoal = motor_speeds[3] + m_lMaster.getSelectedSensorPosition();
+      double righterr = rightEncoderGoal - m_rMaster.getSelectedSensorPosition();
+      double lefterr = leftEncoderGoal - m_lMaster.getSelectedSensorPosition();
+      //Velocity in RPM
+      while (!(righterr <= 10) || !(lefterr <= 10)) {
+        righterr = rightEncoderGoal - m_rMaster.getSelectedSensorPosition();
+        lefterr = rightEncoderGoal - m_lMaster.getSelectedSensorPosition();
+        if (Math.abs(righterr) <= 10) {
+          m_rMaster.set(ControlMode.Velocity, motor_speeds[0]*(righterr/1000));
+        } 
+        if (Math.abs(lefterr) <= 10) {
+          m_lMaster.set(ControlMode.Velocity, motor_speeds[1]*(lefterr/1000));
+        }
+      }
+    }
   }
 
   /**
@@ -161,11 +207,13 @@ public class DriveTrain  {
 
 
   } 
-  public void teleopPeriodic(double limeX) {
+  public void teleopPeriodic() {
 
     //Dog Gear Shift
     if (m_joy.getRawButton(Constants.gearShift) && !dgLoop) {
+
       dgLoop = true;
+      Shuffleboard.selectTab("Beginning Game");
       if (dogGearSolenoid.get() == (Value.kForward)) {
         dogGearSolenoid.set(DoubleSolenoid.Value.kReverse);
         
@@ -196,10 +244,6 @@ public class DriveTrain  {
     double leftSide, rightSide;
     rightSide = -(yAxis - xAxis);
     leftSide = yAxis + xAxis;
-
-    if(m_joy.getRawButton(9)){
-      autoAlign(limeX);
-    }
 
     //Percent drive output with slave follows
     if (m_joy.getRawButton(3)) {
@@ -236,28 +280,4 @@ public class DriveTrain  {
   
   public void testPeriodic() {
   }
-  
-  public void autoAlign(double X){
-    if (X < -1.0){turnRight();}
-    else if (X > 1.0){turnLeft();}
-  }
-
-  public void turnLeft(){
-    m_rMaster.set(ControlMode.PercentOutput, -1 * 0.10);
-    m_lMaster.set(ControlMode.PercentOutput,  1 * 0.10);
-  }
-  public void turnRight(){
-    m_rMaster.set(ControlMode.PercentOutput, 1 * 0.10);
-    m_lMaster.set(ControlMode.PercentOutput, -1 * 0.10);
-  }
-  public void moveForward(){
-    m_rMaster.set(ControlMode.PercentOutput, 1 * 0.10);
-    m_lMaster.set(ControlMode.PercentOutput, 1 * 0.10);
-  }
-  public void moveBackward(){
-    m_rMaster.set(ControlMode.PercentOutput, -1 * 0.10);
-    m_lMaster.set(ControlMode.PercentOutput, -1 * 0.10);
-  }
-  
-
 }

@@ -47,16 +47,21 @@ public class Robot extends TimedRobot {
   Boolean compLoop = true;
   AnalogInput pressure;
   double pressureDouble;
-  ShuffleboardTab tab = Shuffleboard.getTab("Comp");
+  ShuffleboardTab tab = Shuffleboard.getTab("Beginning Game");
   NetworkTableEntry pressureEntry = tab.add("Pressure", 0)
                                        .withWidget(BuiltInWidgets.kDial)
+                                       .withPosition(7, 0)
+                                       .withSize(1, 1)
                                        .getEntry();
   NetworkTableEntry compressorEntry = tab.add("Compressor", false)
+                                         .withPosition(6, 0)
+                                         .withSize(1, 1)
                                          .withWidget(BuiltInWidgets.kBooleanBox)
                                          .getEntry();
 
   @Override
   public void robotInit() {
+    Shuffleboard.selectTab("Beginning Game");
     m_driveJoy = new Joystick(RobotMap.driveJoy);
     pressure = new AnalogInput(0);
     m_gJoy = new Joystick(RobotMap.gJoy);
@@ -118,7 +123,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    m_DriveTrain.teleopPeriodic(m_Limelight.x);
+    m_DriveTrain.teleopPeriodic();
     m_Elevator.teleopPeriodic();
     m_Gurny.teleopPeriodic();
     m_Manipulator.teleopPeriodic();

@@ -45,14 +45,19 @@ public class Elevator  {
   Integer previous_index = 0;
   Integer target_height_index = 0;
 
-  ShuffleboardTab maxSpeedTab = Shuffleboard.getTab("Max Speed");
+  ShuffleboardTab maxSpeedTab = Shuffleboard.getTab("Beginning Game");
   NetworkTableEntry elevatorSpeed_Entry = maxSpeedTab.add("Elevator Manual Speed", 0.5)
                                                     .withWidget(BuiltInWidgets.kNumberSlider)
                                                     .withProperties(Map.of("Min", 0, "minimum", 0.3, "Block increment", 0.1))
+                                                    .withPosition(3, 0)
+                                                    .withSize(2, 1)
                                                     .getEntry();
 
   // encoder position in sensor units                                                  
-  NetworkTableEntry elevatorEncoderPosition_Entry = maxSpeedTab.add("Elev Encoder Position", 0).getEntry();
+  NetworkTableEntry elevatorEncoderPosition_Entry = maxSpeedTab.add("Elev Encoder Position", 0)
+                                                               .withSize(2, 1)
+                                                               .withPosition(3, 1)
+                                                               .getEntry();
 
   // see robot init for added options.
   // use elevator_position_chooser.getSelected() to get selected value
@@ -136,7 +141,10 @@ public class Elevator  {
     elevator_position_chooser.addOption("Height 7", 7);
     elevator_position_chooser.addOption("Height 8", 8);
 
-    maxSpeedTab.add("Elevator Position - Chooser", elevator_position_chooser).withWidget(BuiltInWidgets.kComboBoxChooser);
+    maxSpeedTab.add("Elevator Position - Chooser", elevator_position_chooser)
+               .withWidget(BuiltInWidgets.kComboBoxChooser)
+               .withPosition(3, 2)
+               .withSize(2, 1);
   
     // init PID with UP settings
     setUpPID();
