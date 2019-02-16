@@ -68,12 +68,12 @@ public class Robot extends TimedRobot {
     m_DriveTrain.robotInit(m_driveJoy);
     m_Elevator.robotInit(m_driveJoy);
     m_Gurny.robotInit(m_gJoy);
-    m_Manipulator.robotInit(m_gJoy);
+    m_Manipulator.robotInit(m_driveJoy);
     m_Limelight.robotInit(m_gJoy); //functions work with gurney
     
     m_comp = new Compressor();
 
-
+    m_comp.setClosedLoopControl(false);
     
   }
 
@@ -85,6 +85,7 @@ public class Robot extends TimedRobot {
     m_Elevator.report();
     m_Gurny.report();
     m_Manipulator.report();
+    m_Manipulator.robotPeriodic();
     pressureEntry.setDouble(pressureCalc);
     compressorEntry.setBoolean(m_comp.getClosedLoopControl());
 
@@ -117,7 +118,7 @@ public class Robot extends TimedRobot {
     m_Manipulator.teleopInit();
     m_DriveTrain.teleopInit();
     m_Gurny.teleopInit();
-    m_comp.setClosedLoopControl(false);
+    
   }
 
 
@@ -138,7 +139,7 @@ public class Robot extends TimedRobot {
     if (!m_driveJoy.getRawButton(Constants.compressor)) {
       compLoop = true;
     }
-  }
+   }
 
   @Override
   public void testInit() {

@@ -26,7 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.ecommons.RobotMap;
 import frc.ecommons.Constants;
-import frc.utilities.TurnRadius;
+//import frc.utilities.TurnRadius;
 
 // import edu.wpi.first.wpilibj.shuffleboard.BuiltInTypes;
 
@@ -126,10 +126,10 @@ public class DriveTrain  {
     m_rSlave2.configFactoryDefault();
     m_lSlave1.configFactoryDefault();
     m_lSlave2.configFactoryDefault();
-    m_rSlave1.follow(m_rMaster);
-    m_rSlave2.follow(m_rMaster);
-    m_lSlave1.follow(m_lMaster);
-    m_lSlave2.follow(m_lMaster);  
+    // m_rSlave1.follow(m_rMaster);
+    // m_rSlave2.follow(m_rMaster);
+    // m_lSlave1.follow(m_lMaster);
+    // m_lSlave2.follow(m_lMaster);  
     //Motors go right way
     m_rMaster.setSensorPhase(false);
     m_lMaster.setSensorPhase(false);
@@ -213,7 +213,7 @@ public class DriveTrain  {
     double[] motor_speeds = {0, 0, 0, 0};
     for (double[] piece: paths) {
       if (piece[0] != 0) {
-        motor_speeds = TurnRadius.calculateTurnRadius(piece[0], piece[1], piece[2], piece[3], piece[4], piece[5]);
+  //      motor_speeds = TurnRadius.calculateTurnRadius(piece[0], piece[1], piece[2], piece[3], piece[4], piece[5]);
       } else {
         //Default Velocity
         motor_speeds[0] = piece[1];
@@ -288,17 +288,17 @@ public class DriveTrain  {
     leftSide = yAxis + xAxis;
 
     // motion magic 
-    if (m_joy.getRawButton(Constants.motorTest)) {
-      int ticksPerRev = 4096;
-      int encoderToWheelGearRatio = 6;
-      int wheelDiameter = 6;
-      int targDistance = 60;
-      double pi = 3.1415;
-      double targPos = yAxis * ticksPerRev * encoderToWheelGearRatio * targDistance / (wheelDiameter * pi);
+    // if (m_joy.getRawButton(Constants.motorTest)) {
+    //   int ticksPerRev = 4096;
+    //   int encoderToWheelGearRatio = 6;
+    //   int wheelDiameter = 6;
+    //   int targDistance = 60;
+    //   double pi = 3.1415;
+    //   double targPos = yAxis * ticksPerRev * encoderToWheelGearRatio * targDistance / (wheelDiameter * pi);
 
-      m_lMaster.set(ControlMode.MotionMagic, targPos);
-      m_rMaster.set(ControlMode.MotionMagic, -targPos);
-    } else {
+    //   m_lMaster.set(ControlMode.MotionMagic, targPos);
+    //   m_rMaster.set(ControlMode.MotionMagic, -targPos);
+    // } else {
 
       TalonConfig();
 
@@ -325,7 +325,7 @@ public class DriveTrain  {
     }
       
 
-  }
+  // }
 
   public void report() {
     driveSpeed = driveSpeedEntry.getDouble(0.5);

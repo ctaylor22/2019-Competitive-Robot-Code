@@ -19,7 +19,7 @@ public class RobotMap {
     //Right Front
     public static int gFront = 15;
 
-    public static int gDrive = 19;
+    public static int gDrive = 20;
 
 
 /* Drive Train */
@@ -31,14 +31,17 @@ public class RobotMap {
     R = Rightside Motor
     L = Leftside Motor */
 
+    //Switched Drive Gurney and right slave
+    //Switched right slave and left slave
+
     //Left Side
     public static int lMaster = 14;
-    public static int lSlave1 = 17;
+    public static int lSlave1 = 19;
     public static int lSlave2 = 18;
 
         //Right Side
         public static int rMaster = 13;
-        public static int rSlave1 = 20;
+        public static int rSlave1 = 17;
         public static int rSlave2 = 16;
 
     public static int ahrsAddress = 1;
@@ -48,6 +51,7 @@ public class RobotMap {
     public static int grab1 = 2;
     public static int grab2 = 3;
 
-    public static int grabWheels = 12;
+    public static int manipUpDown = 12;
+    public static int manipWheels = 21;
 
 }
