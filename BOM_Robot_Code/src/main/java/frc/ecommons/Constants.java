@@ -85,15 +85,6 @@ public class Constants {
 
     // unused
     public static int gurneyHoldEnable = 8;
-    
-    // The following button indices are on the gurney-only controler
-    // Drives up the front gurney
-    // Placeholder
-    public static int gFrontUp = 0;
-    
-    //Drives up the back gurney
-    // Placeholder
-    public static int gBackUp = 1;
 
 // *** gurney balance calibration ***
     //P factor of back motor
@@ -101,36 +92,7 @@ public class Constants {
 
     //Current at which the robot will lower safely
     public static double gSafteySpeed = .075;
-    
-    //Current at which the gurneys will rise while getting on the platform
-    public static double gDriveUp = .7;
-    
-    //Height at which to stop giving motors current when lowering
-    public static int gSafeHeight = 400;
 
-    //Amount of change in degrees allowed between tests when checking if the robot is staying stable with a gurney raised
-    public static int gPitchTolerance = 1;
-
-    //Amount of time in milliseconds between pitch readings when the robot checks if it can raise a gurney
-    public static int gWaitTime = 400;
-
-    //Needed change in the gurney after gWaitTime milliseconds to classify the robot as 'not lodged'
-    public static int gValueChange = 100;
-
-// *** gurney subroutine buttons ***
-    
-    //Continues the subroutine when the driver is set up
-    //TODO: Get the real button indice
-    public static int gContinueRoutine = 0;
-    
-    //Stops the climbing routine with a safe lower
-    //TODO: Get the real button indice
-    public static int gStopRoutine = 0;
-
-    //Reverts robot to drive-while-raised mode
-    //TODO: Get the real button indice
-    public static int gRewindRoutine = 0;
-    
 // *** other ***
     //Percent Output
     public static double gForwardRate = 0.3;

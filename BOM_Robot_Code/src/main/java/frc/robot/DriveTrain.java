@@ -55,12 +55,25 @@ public class DriveTrain  {
   boolean dgLoop = false;
 
   double driveSpeed = 0.5;
+  ShuffleboardTab testMode = Shuffleboard.getTab("Test Mode");
   
-  ShuffleboardTab tab = Shuffleboard.getTab("DriveTrain");
-  NetworkTableEntry rightEncoderEntry = tab.add("Right Encoder", 0).getEntry();
-  NetworkTableEntry currentGearEntry = tab.add("Current Gear", lowGear).getEntry();
-  NetworkTableEntry leftEncoderEntry = tab.add("Left Encoder", 0).getEntry(); 
+  
+  ShuffleboardTab tab = Shuffleboard.getTab("Beginning Game");
+  NetworkTableEntry rightEncoderEntry = tab.add("Right Encoder", 0)
+                                           .withSize(1, 1)
+                                           .withPosition(1, 1) 
+                                           .getEntry();
+  NetworkTableEntry currentGearEntry = tab.add("Current Gear", lowGear)
+                                          .withSize(2, 1)
+                                          .withPosition(0, 2)
+                                          .getEntry();
+  NetworkTableEntry leftEncoderEntry = tab.add("Left Encoder", 0)
+                                          .withSize(1, 1)
+                                          .withPosition(0, 1)
+                                          .getEntry();
   NetworkTableEntry driveSpeedEntry = tab.add("Drive Speed", 0.5)
+                                          .withSize(2, 1)
+                                          .withPosition(0, 0)
                                           .withWidget(BuiltInWidgets.kNumberSlider)
                                           .withProperties(Map.of("Min", 0, "Max", 1))
                                           .getEntry();
@@ -198,7 +211,9 @@ public class DriveTrain  {
 
     //Dog Gear Shift
     if (m_joy.getRawButton(Constants.gearShift) && !dgLoop) {
+
       dgLoop = true;
+      Shuffleboard.selectTab("Beginning Game");
       if (dogGearSolenoid.get() == (Value.kForward)) {
         dogGearSolenoid.set(DoubleSolenoid.Value.kReverse);
         
