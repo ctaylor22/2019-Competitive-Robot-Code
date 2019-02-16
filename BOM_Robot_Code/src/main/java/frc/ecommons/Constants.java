@@ -136,4 +136,11 @@ public class Constants {
     public static double rioYaw = 0;
     public static double rioPitch = 34;
     public static double rioRoll = 0;
+
+//Distance measurements for Limelight
+    //Limelight
+    public static double camHeight = 0.0;
+    public static double targetHeight = 0.0;
+    public static double camAngle = 0.0;
+    
 }

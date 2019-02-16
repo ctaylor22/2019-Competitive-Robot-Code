@@ -111,7 +111,7 @@ public class NavX {
         double realZ = zFactor+xFactor+yFactor;
         return realZ;
     }
-
+//h
     public double getPitch() {
         //Rotation about the x axis
         final double rawPitch = navX.getPitch()-zeroPitch;
