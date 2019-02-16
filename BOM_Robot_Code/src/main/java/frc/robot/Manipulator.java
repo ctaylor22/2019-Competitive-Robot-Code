@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.ecommons.Constants;
 import frc.ecommons.RobotMap;
@@ -40,7 +41,13 @@ public class Manipulator  {
                                                     .getEntry();
 
 
+  SendableChooser<Boolean> Enable_OR_Disable = new SendableChooser<Boolean>();
+
   public void robotInit(Joystick j) {
+    Enable_OR_Disable.setDefaultOption("Disable", false);
+    Enable_OR_Disable.addOption("Enable", true);
+    testMode.add("Manip Closed Loop Enable", Enable_OR_Disable).withWidget(BuiltInWidgets.kSplitButtonChooser);
+
 
     m_joy = j;
     grabber = new DoubleSolenoid(RobotMap.grab1, RobotMap.grab2);
@@ -92,11 +99,11 @@ public class Manipulator  {
      * kD is not always useful
      */
     manipUpDown.configMotionAcceleration(50);    
-    manipUpDown.configMotionCruiseVelocity(50);
+    manipUpDown.configMotionCruiseVelocity(100);
 
-    manipUpDown.config_kP(0, 1.5);
+    manipUpDown.config_kP(0, 3);
     manipUpDown.config_kI(0, 0);
-    manipUpDown.config_kD(0, 0);
+    manipUpDown.config_kD(0, 40);
     manipUpDown.config_IntegralZone(0, 100);
   }
 
@@ -159,8 +166,7 @@ public class Manipulator  {
 
 
 
-      SmartDashboard.putNumber("Grab Encoder", manipUpDown.getSelectedSensorPosition());
-
+    if (Enable_OR_Disable.getSelected()) {
     if (m_joy.getRawButton(Constants.manipUpDownBut) && !manipUpDownLoop) {
       manipUpDownLoop = true;
       manipToggle = !manipToggle;
@@ -172,16 +178,16 @@ public class Manipulator  {
 
     if (manipToggle) {
       setDownPID();
-      if (manipUpDown.getSelectedSensorPosition() < -1190) {
+      if (manipUpDown.getSelectedSensorPosition() < -1310) {
         setUpPID();
       }
-      manipUpDown.set(ControlMode.MotionMagic, -1200);
+      manipUpDown.set(ControlMode.MotionMagic, -1330);
     }
     if (!manipToggle) {
       setUpPID();
       manipUpDown.set(ControlMode.MotionMagic, 0);
     }
-
+  }
 
 
     if (!manipulator) {
@@ -218,6 +224,8 @@ public class Manipulator  {
   }
 
   public void report() {
+    
+    SmartDashboard.putNumber("Grab Encoder", manipUpDown.getSelectedSensorPosition());
       
 }
 
