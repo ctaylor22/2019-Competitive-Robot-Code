@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.ecommons.RobotMap;
 import frc.ecommons.Constants;
+import frc.utilities.TurnRadius;
 
 // import edu.wpi.first.wpilibj.shuffleboard.BuiltInTypes;
 
@@ -120,9 +121,8 @@ public class DriveTrain  {
 
 
   }
-  public void robotInit(Joystick j) {
 
-    
+  public void robotInit(Joystick j) {
     //Joysticks
     m_joy = j;
 
@@ -149,7 +149,40 @@ public class DriveTrain  {
   }
   
   public void autonomousPeriodic() {
+    followTurnPath();
+  }
 
+  public void followTurnPath() {
+    double[][] paths = {{2.0, 300.0, 3.0, 1.0, 90.0, 1.0}/*,
+                        {0.0, 100.0, 3.0}*/};
+    double[] motor_speeds = {0, 0, 0, 0};
+    for (double[] piece: paths) {
+      if (piece[0] != 0) {
+        motor_speeds = TurnRadius.calculateTurnRadius(piece[0], piece[1], piece[2], piece[3], piece[4], piece[5]);
+      } else {
+        //Default Velocity
+        motor_speeds[0] = piece[1];
+        motor_speeds[1] = piece[1];
+        //Encoder Offset
+        motor_speeds[2] = piece[2];
+        motor_speeds[3] = piece[2];
+      }
+      double rightEncoderGoal = motor_speeds[2] + m_rMaster.getSelectedSensorPosition();
+      double leftEncoderGoal = motor_speeds[3] + m_lMaster.getSelectedSensorPosition();
+      double righterr = rightEncoderGoal - m_rMaster.getSelectedSensorPosition();
+      double lefterr = leftEncoderGoal - m_lMaster.getSelectedSensorPosition();
+      //Velocity in RPM
+      while (!(righterr <= 10) || !(lefterr <= 10)) {
+        righterr = rightEncoderGoal - m_rMaster.getSelectedSensorPosition();
+        lefterr = rightEncoderGoal - m_lMaster.getSelectedSensorPosition();
+        if (Math.abs(righterr) <= 10) {
+          m_rMaster.set(ControlMode.Velocity, motor_speeds[0]*(righterr/1000));
+        } 
+        if (Math.abs(lefterr) <= 10) {
+          m_lMaster.set(ControlMode.Velocity, motor_speeds[1]*(lefterr/1000));
+        }
+      }
+    }
   }
 
   /**

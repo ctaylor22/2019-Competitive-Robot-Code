@@ -38,6 +38,10 @@ public class Constants {
     public static int compressor = 8;
 
 // *** gurney joystick axis ***
+    // Ticks per rotation of the wheels
+    public static double ticksPerRotation = 100;
+
+// *** gurney joystick axis ***
     // Left stick Y axis
     // Winds rear gurney motor
     public static int gUpBack = 1;
