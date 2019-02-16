@@ -54,12 +54,25 @@ public class DriveTrain  {
   boolean dgLoop = false;
 
   double driveSpeed = 0.5;
+  ShuffleboardTab testMode = Shuffleboard.getTab("Test Mode");
   
-  ShuffleboardTab tab = Shuffleboard.getTab("DriveTrain");
-  NetworkTableEntry rightEncoderEntry = tab.add("Right Encoder", 0).getEntry();
-  NetworkTableEntry currentGearEntry = tab.add("Current Gear", lowGear).getEntry();
-  NetworkTableEntry leftEncoderEntry = tab.add("Left Encoder", 0).getEntry(); 
+  
+  ShuffleboardTab tab = Shuffleboard.getTab("Beginning Game");
+  NetworkTableEntry rightEncoderEntry = tab.add("Right Encoder", 0)
+                                           .withSize(1, 1)
+                                           .withPosition(1, 1) 
+                                           .getEntry();
+  NetworkTableEntry currentGearEntry = tab.add("Current Gear", lowGear)
+                                          .withSize(2, 1)
+                                          .withPosition(0, 2)
+                                          .getEntry();
+  NetworkTableEntry leftEncoderEntry = tab.add("Left Encoder", 0)
+                                          .withSize(1, 1)
+                                          .withPosition(0, 1)
+                                          .getEntry();
   NetworkTableEntry driveSpeedEntry = tab.add("Drive Speed", 0.5)
+                                          .withSize(2, 1)
+                                          .withPosition(0, 0)
                                           .withWidget(BuiltInWidgets.kNumberSlider)
                                           .withProperties(Map.of("Min", 0, "Max", 1))
                                           .getEntry();
@@ -161,11 +174,13 @@ public class DriveTrain  {
 
 
   } 
-  public void teleopPeriodic(double limeX) {
+  public void teleopPeriodic() {
 
     //Dog Gear Shift
     if (m_joy.getRawButton(Constants.gearShift) && !dgLoop) {
+
       dgLoop = true;
+      Shuffleboard.selectTab("Beginning Game");
       if (dogGearSolenoid.get() == (Value.kForward)) {
         dogGearSolenoid.set(DoubleSolenoid.Value.kReverse);
         
@@ -196,10 +211,6 @@ public class DriveTrain  {
     double leftSide, rightSide;
     rightSide = -(yAxis - xAxis);
     leftSide = yAxis + xAxis;
-
-    if(m_joy.getRawButton(9)){
-      autoAlign(limeX);
-    }
 
     //Percent drive output with slave follows
     if (m_joy.getRawButton(3)) {
@@ -236,28 +247,4 @@ public class DriveTrain  {
   
   public void testPeriodic() {
   }
-  
-  public void autoAlign(double X){
-    if (X < -1.0){turnRight();}
-    else if (X > 1.0){turnLeft();}
-  }
-
-  public void turnLeft(){
-    m_rMaster.set(ControlMode.PercentOutput, -1 * 0.10);
-    m_lMaster.set(ControlMode.PercentOutput,  1 * 0.10);
-  }
-  public void turnRight(){
-    m_rMaster.set(ControlMode.PercentOutput, 1 * 0.10);
-    m_lMaster.set(ControlMode.PercentOutput, -1 * 0.10);
-  }
-  public void moveForward(){
-    m_rMaster.set(ControlMode.PercentOutput, 1 * 0.10);
-    m_lMaster.set(ControlMode.PercentOutput, 1 * 0.10);
-  }
-  public void moveBackward(){
-    m_rMaster.set(ControlMode.PercentOutput, -1 * 0.10);
-    m_lMaster.set(ControlMode.PercentOutput, -1 * 0.10);
-  }
-  
-
 }

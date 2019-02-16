@@ -8,14 +8,11 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import java.lang.Math;
-import frc.ecommons.Constants;
+
 
 public class Limelight {
     //Inits n such
@@ -37,13 +34,6 @@ public class Limelight {
     double pipeline;
     double lightMode;
 
-    double targetDistance; 
-
-    ShuffleboardTab LimelightTab = Shuffleboard.getTab("Limelight");
-    //tx = LimelightTab.add("X",0);
-    
-
-
     public void robotInit(Joystick joy){
         m_Joystick = joy;
     }
@@ -52,7 +42,6 @@ public class Limelight {
     }
 
     public void autonomousPeriodic(){
-    
     }
 
     public void teleopPeriodic(){
@@ -64,7 +53,6 @@ public class Limelight {
         skew = tv.getDouble(0.0);
         pipeline = getPipe.getDouble(0.0);
         lightMode = ledMode.getDouble(0.0);
-        targetDistance = equateDistance(Constants.camHeight, Constants.targetHeight, Constants.camAngle, 0);
 
         //Switching Limelight Light Modes
         if (m_Joystick.getRawButtonPressed(8)){
@@ -72,10 +60,6 @@ public class Limelight {
             else {lightMode = 0;}
             ledMode.setNumber(lightMode);
             System.out.println("Limelight in mode: " + lightMode);
-        }
-
-        if (m_Joystick.getRawButtonReleased(9)){
-            
         }
         
         //Placing Limelight Values
@@ -85,20 +69,10 @@ public class Limelight {
         SmartDashboard.putNumber("LimelightSkew", skew);
         SmartDashboard.putNumber("LimelightPipeline", pipeline);
         SmartDashboard.putNumber("LimeLightLedMode", lightMode);
-
-        
     }
     
     public void testPeriodic() {   
     }
-
-    public double equateDistance(double h1, double h2, double a1, double a2){
-        double distance;
-        distance = ((h2 -h1)/Math.tan(a1 + a2));
-        return distance;
-    }
-
-    
     
 
 }
