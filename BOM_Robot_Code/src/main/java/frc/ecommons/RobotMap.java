@@ -3,7 +3,8 @@ package frc.ecommons;
 public class RobotMap {
 //Joysticks
     public static int driveJoy = 0;
-    public static int gJoy = 1;
+    public static int eJoy = 1;
+    public static int gJoy = 2;
 
 /* Elevator IDS
     Talons: 10 */
