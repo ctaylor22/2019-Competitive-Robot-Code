@@ -32,6 +32,7 @@ public class Manipulator  {
   boolean motorBackLoop = false;
   boolean manipUpDownLoop = false;
   boolean manipToggle = false;
+  boolean hasBeenToggled = false;
   double motorGo = 0;
 
   ShuffleboardTab testMode = Shuffleboard.getTab("Test Mode");
@@ -177,10 +178,19 @@ public class Manipulator  {
     }
 
     if (manipToggle) {
+      if (!hasBeenToggled) {
+        /*
+        motorForLoop = true;
+        motorGo = 1;
+        manipulator = true;
+        */
+        hasBeenToggled = true;
+      }
       setDownPID();
       if (manipUpDown.getSelectedSensorPosition() < -1310) {
         setUpPID();
       }
+      hasBeenToggled = false;
       manipUpDown.set(ControlMode.MotionMagic, -1330);
     }
     if (!manipToggle) {
@@ -197,7 +207,6 @@ public class Manipulator  {
       motorForLoop = true;
       motorGo = 1;
       manipulator = !manipulator;
-
     }
     if (!m_joy.getRawButton(Constants.manipWheelForToggle)) {
       motorForLoop = false;

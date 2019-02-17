@@ -162,6 +162,19 @@ public class Gurny_josh  {
     gBack.configMotionCruiseVelocity(1000);
   }
   
+  private void breakPID() {
+    //Breaks the PID loop and stops the back motor
+    //May be dangerous. Needs to be looked over by Josh
+    gBack.config_kP(0, 0);
+    gBack.config_kI(0, 0);
+    gBack.config_kD(0, 0);
+    gBack.config_kF(0, 0);
+    gBack.config_IntegralZone(0, 0);
+    gBack.configMotionAcceleration(0);
+    gBack.configMotionCruiseVelocity(0);
+    gBack.set(ControlMode.PercentOutput, 0);
+  }
+
   private double deadband(double input) {
     /*
      * Takes an input and returns 0 if it is within the deadband
@@ -185,7 +198,6 @@ public class Gurny_josh  {
   public void teleopPeriodic() {
     // reset encoder
     if (climbing) {
-
       if (m_joy.getRawButton(Constants.gStopRoutine)) {
         climbing = false;
         climbingstage = 0;
@@ -193,41 +205,44 @@ public class Gurny_josh  {
         if (climbingstage == 2) {
           climbingstage = 1;
         } else if (climbingstage == 5) {
-          climbingstage = 4;
+          climbingstage = 3;
         }
       } else if (climbingstage == 0) {
         //Robot hasn't climbed
-        raiseGurney();
+        climbUp();
+        if (Math.abs(gBack.getSelectedSensorPosition()-36000) <= 50) {
+          climbingstage += 1;
+        }
       } else if (climbingstage == 1) {
         //Robot has climbed needs to be driven onto platform
         driveWhileRaised();
-        if (m_joy.getRawButton(Constants.gContinue)) {
+        if (m_joy.getRawButton(Constants.gContinueRoutine)) {
           climbingstage += 1;
           breakPID();
         }
-      } else if (climbingstage == 2) {
-        //Robot has been driven onto platform and is testing if it can climb
-        if (tryRaiseFront()) {
+      } if (climbingstage == 2) {
+        //Robot is raising front gurney
+        driveFrontGurney();
+        if (!m_joy.getRawButton(Constants.gContinueRoutine)) {
+          gFront.set(ControlMode.PercentOutput, 0);
           climbingstage += 1;
         }
       } if (climbingstage == 3) {
-        //Robot is raising front gurney
-        if (!m_joy.getRawButton(Constants.gContinue)) {
+        //Robot needs to be driven foward
+        driveWhileRaised();
+        if (m_joy.getRawButton(Constants.gContinueRoutine)) {
           climbingstage += 1;
         }
       } if (climbingstage == 4) {
-        //Robot needs to be driven foward
-        driveWhileRaised();
-        if (m_joy.getRawButton(Constants.gContinue)) {
-          climbingstage += 1;
-      } if (climbingstage == 5) {
         //Robot is raising back gurney
+        gBack.set(ControlMode.PercentOutput, Constants.gDriveUp);
         if (gBack.getSelectedSensorPosition() <= Constants.gBackUp) {
+          gBack.set(ControlMode.PercentOutput, 0);
           climbingstage = 0;
           climbing = false;
         }
       }
-    } else if (m_joy.getRawButton(Constants.gClimbButton)) {
+    } else if (m_joy.getRawButton(Constants.gContinueRoutine)) {
       climbing = true;
       climbingstage = 0;
     } else if (m_joy.getRawButton(Constants.gurneyEncoderReset)) {
@@ -319,7 +334,6 @@ public class Gurny_josh  {
       else {
         gBack.set(ControlMode.Velocity, 100);
       }
-
       // front output math. includes raising front for platform climb
       double front_yaxis = -1 * deadband(m_joy.getRawAxis(Constants.gUpFront));
       if (isSafeToRaiseFront.getSelected()) {
@@ -328,7 +342,7 @@ public class Gurny_josh  {
       else {
         gFront.set(ControlMode.PercentOutput, output + 0.5*front_yaxis);
       }
-
+     
     }
     else {
       /* manual control
@@ -338,12 +352,74 @@ public class Gurny_josh  {
       gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * (-1) * frontGurneyEntry.getDouble(0.6));
       gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpBack) * (-1)* backGurneyEntry.getDouble(0.4));
     }
-    
+  }
+
+  public void driveWhileRaised() {
+    /* Return codes:
+     * 0: Success
+     * 1: Fatal Error
+     */
+    double axis = m_joy.getRawAxis(Constants.gDriveForward);
+    if (Math.abs(axis) >= .1) {
+      gDrive.set(ControlMode.PercentOutput, axis);
+    } else {
+      gDrive.set(ControlMode.PercentOutput, 0);
+    }
+  }
+
+  public void driveFrontGurney() {
+    if (m_joy.getRawButton(Constants.gFrontUp)) {
+      gFront.set(ControlMode.PercentOutput, Constants.gDriveUp);
+    } else {
+      gFront.set(ControlMode.PercentOutput, 0);
+    }
+  }
+
+  public void climbUp() {
+    /* Gurney UP climing routine
+       * 
+       * call motion magic with a set point of ~36000
+       *
+       * Robot tilts forward ==> positive pitch ==> add to front output
+       * #TODO: set max height on encoder for top of gurney
+       */
+      setUpPID();
+      gBack.set(ControlMode.MotionMagic, 36000);
+
+      // accelerometer PID for front
+      double pitch_error = m_navX.getPitch() - 2;
+      double front_kF = 0.5;
+      double front_kP = 0.13;
+      double output = front_kF + (front_kP)*pitch_error;
+      gFront.set(ControlMode.PercentOutput, output);
+
+      /* #TODO: test adding an offset to help the hold PID
+       * this would be the steady state error of the UP
+       */
+      int experimental_steady_state_error = 0;
+      current_postion = gBack.getSelectedSensorPosition() + experimental_steady_state_error;
+  }
+
+  public void letDown() {
+    //Lets robot down without crashing it
+    /* Gurney DOWN on Button 3, X
+       *
+       * call motion magic with a target position of 0
+       *
+       */
+      setDownPID();
+      gBack.set(ControlMode.Velocity, -10);
+      double front_kF = 0.25;
+      double front_kP = 0.14;
+      double output = front_kF + (front_kP)*filtered_error;
+      gFront.set(ControlMode.PercentOutput, output);
+
+      hold_position = gBack.getSelectedSensorPosition();
   }
 
   public void report() {
     gurneyPitchEntry.setDouble(m_navX.getPitch());
-}
+  }
 
   public void testInit() {
 
