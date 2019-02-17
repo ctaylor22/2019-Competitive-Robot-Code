@@ -197,7 +197,7 @@ public class Gurny_josh  {
   
   public void teleopPeriodic() {
     // reset encoder
-    if (climbing) {
+    /*if (climbing) {
       if (m_joy.getRawButton(Constants.gStopRoutine)) {
         climbing = false;
         climbingstage = 0;
@@ -242,7 +242,8 @@ public class Gurny_josh  {
           climbing = false;
         }
       }
-    } else if (m_joy.getRawButton(Constants.gContinueRoutine)) {
+    } else if (m_joy.getRawButton(Constants.gContinueRoutine)) {*/
+    if (m_joy.getRawButton(Constants.gContinueRoutine)) {
       climbing = true;
       climbingstage = 0;
     } else if (m_joy.getRawButton(Constants.gurneyEncoderReset)) {

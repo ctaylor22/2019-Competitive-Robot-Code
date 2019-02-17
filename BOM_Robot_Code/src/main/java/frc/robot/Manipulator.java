@@ -181,41 +181,25 @@ public class Manipulator  {
     //   manipUpDownLoop = false;
     // }
 
-    if (manipToggle) {
-      if (!hasBeenToggled) {
-        /*
-        motorForLoop = true;
-        motorGo = 1;
-        manipulator = true;
-        */
-        hasBeenToggled = true;
-      }
-      setDownPID();
-      if (manipUpDown.getSelectedSensorPosition() < -1310) {
-        setUpPID();
-      }
-      hasBeenToggled = false;
-      manipUpDown.set(ControlMode.MotionMagic, -1330);
-    }
-    if (!manipToggle) {
-      setUpPID();
-      manipUpDown.set(ControlMode.MotionMagic, 0);
-    }
     // if (manipToggle) {
-    //   if (isDownFirstLoop) {
-    //     isDownFirstLoop = false;
-    //     setDownPID();
-      
+    //   if (!hasBeenToggled) {
+    //     /*
+    //     motorForLoop = true;
+    //     motorGo = 1;
+    //     manipulator = true;
+    //     */
+    //     hasBeenToggled = true;
     //   }
-    //   if (manipUpDown.getSelectedSensorPosition() < -1260) {
+    //   setDownPID();
+    //   if (manipUpDown.getSelectedSensorPosition() < -1310) {
     //     setUpPID();
     //   }
+    //   hasBeenToggled = false;
     //   manipUpDown.set(ControlMode.MotionMagic, -1330);
     // }
     // if (!manipToggle) {
     //   setUpPID();
     //   manipUpDown.set(ControlMode.MotionMagic, 0);
-    //   isDownFirstLoop = true;
     // }
 
     setUpPID();
