@@ -207,24 +207,24 @@ public class DriveTrain  {
   }
 
   public void autonomousInit() {
-    double[] piece;
-    for (int ind = 0; ind < paths.length; ind++) {
-      piece = paths[ind];
-      if (piece[0] != 0) {
-        motorSpeeds[ind] = TurnRadius.calculateTurnRadius(piece[0], piece[1], piece[2], piece[3], piece[4], piece[5]);
-      } else {
-        //Default Velocity
-        motorSpeeds[ind][0] = piece[1];
-        motorSpeeds[ind][1] = piece[1];
-        //Encoder Offset
-        motorSpeeds[ind][2] = piece[2];
-        motorSpeeds[ind][3] = piece[2];
-      }
-    }
+    // double[] piece;
+    // for (int ind = 0; ind < paths.length; ind++) {
+    //   piece = paths[ind];
+    //   if (piece[0] != 0) {
+    //     motorSpeeds[ind] = TurnRadius.calculateTurnRadius(piece[0], piece[1], piece[2], piece[3], piece[4], piece[5]);
+    //   } else {
+    //     //Default Velocity
+    //     motorSpeeds[ind][0] = piece[1];
+    //     motorSpeeds[ind][1] = piece[1];
+    //     //Encoder Offset
+    //     motorSpeeds[ind][2] = piece[2];
+    //     motorSpeeds[ind][3] = piece[2];
+    //   }
+    // }
   }
   
   public void autonomousPeriodic() {
-    followTurnPath();
+    // followTurnPath();
   }
 
   public void followTurnPath() {

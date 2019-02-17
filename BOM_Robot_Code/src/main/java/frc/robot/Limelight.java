@@ -16,7 +16,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class Limelight {
     //Inits n such
-    Joystick m_Joystick;
+    //Joystick m_Joystick;
 
     NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight"); //LimelightNetworkTable
 
@@ -33,9 +33,9 @@ public class Limelight {
     double skew; 
     double pipeline;
     double lightMode;
-
-    public void robotInit(Joystick joy){
-        m_Joystick = joy;
+    //got rid of Joystick joy parameter
+    public void robotInit(){
+        //m_Joystick = joy;
     }
 
     public void autonomousInit() {
@@ -55,12 +55,12 @@ public class Limelight {
         lightMode = ledMode.getDouble(0.0);
 
         //Switching Limelight Light Modes
-        if (m_Joystick.getRawButtonPressed(8)){
-            if (lightMode<=3) {lightMode++;}
-            else {lightMode = 0;}
-            ledMode.setNumber(lightMode);
-            System.out.println("Limelight in mode: " + lightMode);
-        }
+        // if (m_Joystick.getRawButtonPressed(8)){
+        //     if (lightMode<=3) {lightMode++;}
+        //     else {lightMode = 0;}
+        //     ledMode.setNumber(lightMode);
+        //     System.out.println("Limelight in mode: " + lightMode);
+        // }
         
         //Placing Limelight Values
         SmartDashboard.putNumber("LimelightX", x);
