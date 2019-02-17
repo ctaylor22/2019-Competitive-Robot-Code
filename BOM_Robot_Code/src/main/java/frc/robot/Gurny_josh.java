@@ -120,7 +120,7 @@ public class Gurny_josh  {
   }
 
   private void setUpPID() {
-    gBack.config_kP(0, 0.5);
+    gBack.config_kP(0, 0.45);
     gBack.config_kI(0, 0);
     gBack.config_kD(0, 0);
     gBack.config_kF(0, 0.15);
@@ -178,12 +178,8 @@ public class Gurny_josh  {
 
     // drive
     double dashSpeed = driveGurneyEntry.getDouble(0.6);
-    if (m_joy.getRawAxis(Constants.gDriveBack) < 0.1) {
-      gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveForward) * dashSpeed);
-    } else if (m_joy.getRawAxis(Constants.gDriveForward) < 0.1) {
-      gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * (-1) * dashSpeed);
-    }
-
+    gDrive.set(ControlMode.PercentOutput, deadband(m_joy.getRawAxis(1) * -1));
+    
     // add low pass filtered error
     double pitch_error = m_navX.getPitch()-2;
     filtered_error = low_pass(pitch_error, filtered_error);
@@ -200,7 +196,7 @@ public class Gurny_josh  {
        * #TODO: set max height on encoder for top of gurney
        */
       setUpPID();
-      gBack.set(ControlMode.Velocity, 800);
+      gBack.set(ControlMode.Velocity, 500);
 
       // accelerometer PID for front
       double front_kF = 0.7;
@@ -241,7 +237,7 @@ public class Gurny_josh  {
        * #TODO: possible hold angle after front adjustment
        */
       setHoldPID();
-      double yaxis = (-1) *  m_joy.getRawAxis(Constants.gUpBack);
+      double yaxis = 0; //(-1) *  m_joy.getRawAxis(Constants.gUpBack);
 
       // accelerometer PID for front
       double front_kF = 0.4;
@@ -263,7 +259,12 @@ public class Gurny_josh  {
       }
 
       // front output math. includes raising front for platform climb
-      double front_yaxis = -1 * deadband(m_joy.getRawAxis(Constants.gUpFront));
+      double front_yaxis = 0;
+      if (m_joy.getRawButton(5)) {
+        front_yaxis = -0.7;
+      } else if (m_joy.getRawButton(3)) {
+        front_yaxis = 0.7;
+      }
       if (isSafeToRaiseFront.getSelected()) {
         gFront.set(ControlMode.PercentOutput, 0.5*front_yaxis);
       }
@@ -277,8 +278,8 @@ public class Gurny_josh  {
        *
        * joystick Y axis * -1 to make up direction output a positive number
        */
-      gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * (-1) * frontGurneyEntry.getDouble(0.6));
-      gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpBack) * (-1)* backGurneyEntry.getDouble(0.4));
+      gFront.set(ControlMode.PercentOutput, 0);
+      gBack.set(ControlMode.PercentOutput, 0);
     }
     
   }

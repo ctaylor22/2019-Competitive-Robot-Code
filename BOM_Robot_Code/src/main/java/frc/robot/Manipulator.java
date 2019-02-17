@@ -28,10 +28,13 @@ public class Manipulator  {
   TalonSRX manipUpDown;
   VictorSPX manipWheels;
   boolean manipulator = false;
+  boolean manipulator2 = false;
   boolean motorForLoop = false;
   boolean motorBackLoop = false;
   boolean manipUpDownLoop = false;
   boolean manipToggle = false;
+  boolean isDownFirstLoop = true;
+
   double motorGo = 0;
 
   ShuffleboardTab testMode = Shuffleboard.getTab("Test Mode");
@@ -57,13 +60,14 @@ public class Manipulator  {
     manipUpDown.configFactoryDefault();
     manipUpDown.setSensorPhase(true);
     manipUpDown.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
-    // manipUpDown.setSelectedSensorPosition(0);
+    manipUpDown.setSelectedSensorPosition(0);
     manipUpDown.setNeutralMode(NeutralMode.Brake);
 
+    manipWheels.configClosedloopRamp(0.2);
 
+    setUpPID();
 
   }
-
 
   public void robotPeriodic() {
 
@@ -99,11 +103,11 @@ public class Manipulator  {
      * kD is not always useful
      */
     manipUpDown.configMotionAcceleration(50);    
-    manipUpDown.configMotionCruiseVelocity(100);
+    manipUpDown.configMotionCruiseVelocity(50);
 
-    manipUpDown.config_kP(0, 3);
+    manipUpDown.config_kP(0, 1);
     manipUpDown.config_kI(0, 0);
-    manipUpDown.config_kD(0, 40);
+    manipUpDown.config_kD(0, 0);
     manipUpDown.config_IntegralZone(0, 100);
   }
 
@@ -118,17 +122,17 @@ public class Manipulator  {
     // see 'else' statement of the 'if(target_height_index != previous_index)' statement for potential fix
 
     // increase these if necessary 
-    manipUpDown.configMotionAcceleration(50);    
-    manipUpDown.configMotionCruiseVelocity(50);
+    manipUpDown.configMotionAcceleration(30);    
+    manipUpDown.configMotionCruiseVelocity(30);
     
     /* start with a very, very low kP since gravity helps a lot on the way down
      * kP = (percent_applied * 1023) / error
      * kP = (0.1 * 1023) / 15000     <-- .1 motor output when there is 15000 units of error
      * kP ~= 0.0068 ~= 0.006
      */
-    manipUpDown.config_kP(0, 0.1);
+    manipUpDown.config_kP(0, 0.14);
     manipUpDown.config_kI(0, 0);
-    manipUpDown.config_kD(0, 20);
+    manipUpDown.config_kD(0, 0);
     manipUpDown.config_IntegralZone(0, 0);
   }
 
@@ -167,35 +171,44 @@ public class Manipulator  {
 
 
     if (Enable_OR_Disable.getSelected()) {
-    if (m_joy.getRawButton(Constants.manipUpDownBut) && !manipUpDownLoop) {
-      manipUpDownLoop = true;
-      manipToggle = !manipToggle;
-    }
+    // if (m_joy.getRawButton(Constants.manipUpDownBut) && !manipUpDownLoop) {
+    //   manipUpDownLoop = true;
+    //   manipToggle = !manipToggle;
+    // }
 
-    if (!m_joy.getRawButton(Constants.manipUpDownBut)) {
-      manipUpDownLoop = false;
-    }
+    // if (!m_joy.getRawButton(Constants.manipUpDownBut)) {
+    //   manipUpDownLoop = false;
+    // }
 
-    if (manipToggle) {
-      setDownPID();
-      if (manipUpDown.getSelectedSensorPosition() < -1310) {
-        setUpPID();
-      }
-      manipUpDown.set(ControlMode.MotionMagic, -1330);
-    }
-    if (!manipToggle) {
-      setUpPID();
-      manipUpDown.set(ControlMode.MotionMagic, 0);
-    }
+    // if (manipToggle) {
+    //   if (isDownFirstLoop) {
+    //     isDownFirstLoop = false;
+    //     setDownPID();
+      
+    //   }
+    //   if (manipUpDown.getSelectedSensorPosition() < -1260) {
+    //     setUpPID();
+    //   }
+    //   manipUpDown.set(ControlMode.MotionMagic, -1330);
+    // }
+    // if (!manipToggle) {
+    //   setUpPID();
+    //   manipUpDown.set(ControlMode.MotionMagic, 0);
+    //   isDownFirstLoop = true;
+    // }
+
+    setUpPID();
+    manipUpDown.set(ControlMode.MotionMagic, 0 - Math.abs(m_joy.getRawAxis(3)) * 1400);
   }
 
 
-    if (!manipulator) {
+    if (!manipulator && !manipulator2) {
       motorGo = 0;
     }
     if (m_joy.getRawButton(Constants.manipWheelForToggle) && !motorForLoop) {
       motorForLoop = true;
       motorGo = 1;
+      manipulator2 = false;
       manipulator = !manipulator;
 
     }
@@ -206,7 +219,8 @@ public class Manipulator  {
     if (m_joy.getRawButton(Constants.manipWheelBackToggle) && !motorBackLoop) {
       motorBackLoop = true;
       motorGo = 2;
-      manipulator = !manipulator;
+      manipulator = false;
+      manipulator2 = !manipulator2;
     }
     if (!m_joy.getRawButton(Constants.manipWheelBackToggle)) {
       motorBackLoop = false;
