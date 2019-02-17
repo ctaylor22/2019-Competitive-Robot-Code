@@ -100,8 +100,8 @@ public class Gurny  {
   public void teleopPeriodic() {
     // Y button enable, RT drive
     if (m_joy.getRawButton(Constants.gurneyGoUp)) {
-      if (m_joy.getRawAxis(Constants.gDriveForward) < Constants.gSafteySpeed) {
-        gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -dashFrontSpeed);
+      if (m_joy.getRawAxis(Constants.gDrive) < Constants.gSafteySpeed) {
+        gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDrive) * -dashFrontSpeed);
         balanceFront(Constants.frontDriveP);
       } else if (true) { //Needs to activate only when back gurny motor is above a certain point and is not being driven
         gBack.set(ControlMode.PercentOutput, Constants.gSafteySpeed);
@@ -113,20 +113,20 @@ public class Gurny  {
         }
       } 
     }
-    else {
-      // manual driving
-      dashFrontSpeed = 0.5;
-      dashBackSpeed = 0.4;
-      dashDriveSpeed = 1;
-      gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * -dashFrontSpeed);
-      gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpBack) * -dashBackSpeed);
+    // else {
+    //   // manual driving
+    //   dashFrontSpeed = 0.5;
+    //   dashBackSpeed = 0.4;
+    //   dashDriveSpeed = 1;
+    //   gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpFront) * -dashFrontSpeed);
+    //   gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gUpBack) * -dashBackSpeed);
 
-      if (m_joy.getRawAxis(Constants.gDriveBack) < 0.1) {
-        gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveForward) * dashDriveSpeed);
-      } else if (m_joy.getRawAxis(Constants.gDriveForward) < 0.1) {
-        gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDriveBack) * -dashDriveSpeed);
-      }
-    }
+    //   if (m_joy.getRawAxis(Constants.gDrive) < 0.1) {
+    //     gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDrive) * dashDriveSpeed);
+    //   } else if (m_joy.getRawAxis(Constants.gDrive) < 0.1) {
+    //     gDrive.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.gDrive) * -dashDriveSpeed);
+    //   }
+    // }
   }
 
   public void balanceAtVelocity(double output) {
