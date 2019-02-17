@@ -44,7 +44,12 @@ public class Gurny_josh  {
 
  
   SendableChooser<Boolean> manual_or_hold_chooser = new SendableChooser<Boolean>();
+
+  // Climbing routine functions
   int current_postion;
+  boolean climbing = false;
+  int climbingstage = 0;
+
 
   // ShuffleboardTab MaxSpeedTab = Shuffleboard.getTab("Max Speed");
   // NetworkTableEntry frontGurneyEntry;
@@ -142,7 +147,53 @@ public class Gurny_josh  {
   
   public void teleopPeriodic() {
     // reset encoder
-    if (m_joy.getRawButton(Constants.gurneyEncoderReset)) {
+    if (climbing) {
+
+      if (m_joy.getRawButton(Constants.gStopRoutine)) {
+        climbing = false;
+        climbingstage = 0;
+      } if (m_joy.getRawButton(Constants.gRevertStage)) {
+        if (climbingstage == 2) {
+          climbingstage = 1;
+        } else if (climbingstage == 5) {
+          climbingstage = 4;
+        }
+      } else if (climbingstage == 0) {
+        //Robot hasn't climbed
+        raiseGurney();
+      } else if (climbingstage == 1) {
+        //Robot has climbed needs to be driven onto platform
+        driveWhileRaised();
+        if (m_joy.getRawButton(Constants.gContinue)) {
+          climbingstage += 1;
+          breakPID();
+        }
+      } else if (climbingstage == 2) {
+        //Robot has been driven onto platform and is testing if it can climb
+        if (tryRaiseFront()) {
+          climbingstage += 1;
+        }
+      } if (climbingstage == 3) {
+        //Robot is raising front gurney
+        if (!m_joy.getRawButton(Constants.gContinue)) {
+          climbingstage += 1;
+        }
+      } if (climbingstage == 4) {
+        //Robot needs to be driven foward
+        driveWhileRaised();
+        if (m_joy.getRawButton(Constants.gContinue)) {
+          climbingstage += 1;
+      } if (climbingstage == 5) {
+        //Robot is raising back gurney
+        if (gBack.getSelectedSensorPosition() <= Constants.gBackUp) {
+          climbingstage = 0;
+          climbing = false;
+        }
+      }
+    } else if (m_joy.getRawButton(Constants.gClimbButton)) {
+      climbing = true;
+      climbingstage = 0;
+    } else if (m_joy.getRawButton(Constants.gurneyEncoderReset)) {
       gBack.setSelectedSensorPosition(0);
     }
 
@@ -236,9 +287,7 @@ public class Gurny_josh  {
   }
 
   public void report() {
-
     gurneyPitchEntry.setDouble(m_navX.getPitch());
-    
 }
 
   public void testInit() {

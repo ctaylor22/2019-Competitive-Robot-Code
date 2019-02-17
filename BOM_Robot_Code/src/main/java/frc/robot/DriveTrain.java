@@ -78,6 +78,13 @@ public class DriveTrain  {
                                           .withProperties(Map.of("Min", 0, "Max", 1))
                                           .getEntry();
 
+  double[][] paths = {{2.0, 300.0, 3.0, 1.0, 90.0, 1.0}/*,
+                      {0.0, 100.0, 3.0}*/};
+
+  double[][] motorSpeeds = {{0, 0, 0, 0}};
+
+  int turnPath = 0;
+
   public void TalonConfig() {
     //Configs Talon to default
     m_rMaster.configFactoryDefault();
@@ -158,7 +165,20 @@ public class DriveTrain  {
   }
 
   public void autonomousInit() {
-
+    double[] piece;
+    for (int ind = 0; ind < paths.length; ind++) {
+      piece = paths[ind];
+      if (piece[0] != 0) {
+        motorSpeeds[ind] = TurnRadius.calculateTurnRadius(piece[0], piece[1], piece[2], piece[3], piece[4], piece[5]);
+      } else {
+        //Default Velocity
+        motorSpeeds[ind][0] = piece[1];
+        motorSpeeds[ind][1] = piece[1];
+        //Encoder Offset
+        motorSpeeds[ind][2] = piece[2];
+        motorSpeeds[ind][3] = piece[2];
+      }
+    }
   }
   
   public void autonomousPeriodic() {
@@ -166,35 +186,44 @@ public class DriveTrain  {
   }
 
   public void followTurnPath() {
-    double[][] paths = {{2.0, 300.0, 3.0, 1.0, 90.0, 1.0}/*,
-                        {0.0, 100.0, 3.0}*/};
-    double[] motor_speeds = {0, 0, 0, 0};
-    for (double[] piece: paths) {
-      if (piece[0] != 0) {
-        motor_speeds = TurnRadius.calculateTurnRadius(piece[0], piece[1], piece[2], piece[3], piece[4], piece[5]);
-      } else {
-        //Default Velocity
-        motor_speeds[0] = piece[1];
-        motor_speeds[1] = piece[1];
-        //Encoder Offset
-        motor_speeds[2] = piece[2];
-        motor_speeds[3] = piece[2];
+    if (turnPath == paths.length) {
+      turnPath = -1;
+    } else if (turnPath == -1) {
+      return;
+    } else {
+      if (followPath(turnPath)) {
+        turnPath += 1;
       }
-      double rightEncoderGoal = motor_speeds[2] + m_rMaster.getSelectedSensorPosition();
-      double leftEncoderGoal = motor_speeds[3] + m_lMaster.getSelectedSensorPosition();
-      double righterr = rightEncoderGoal - m_rMaster.getSelectedSensorPosition();
-      double lefterr = leftEncoderGoal - m_lMaster.getSelectedSensorPosition();
-      //Velocity in RPM
-      while (!(righterr <= 10) || !(lefterr <= 10)) {
-        righterr = rightEncoderGoal - m_rMaster.getSelectedSensorPosition();
-        lefterr = rightEncoderGoal - m_lMaster.getSelectedSensorPosition();
-        if (Math.abs(righterr) <= 10) {
-          m_rMaster.set(ControlMode.Velocity, motor_speeds[0]*(righterr/1000));
-        } 
-        if (Math.abs(lefterr) <= 10) {
-          m_lMaster.set(ControlMode.Velocity, motor_speeds[1]*(lefterr/1000));
-        }
-      }
+    }
+  }
+
+  
+  public boolean followPath(int pathNum) {
+    boolean rightIsComplete = false;
+    boolean leftIsComplete = false;
+    double rightEncoderGoal = motorSpeeds[pathNum][2] + m_rMaster.getSelectedSensorPosition();
+    double leftEncoderGoal = motorSpeeds[pathNum][3] + m_lMaster.getSelectedSensorPosition();
+    double righterr = rightEncoderGoal - m_rMaster.getSelectedSensorPosition();
+    double lefterr = leftEncoderGoal - m_lMaster.getSelectedSensorPosition();
+    //Velocity in RPM
+    righterr = rightEncoderGoal - m_rMaster.getSelectedSensorPosition();
+    lefterr = rightEncoderGoal - m_lMaster.getSelectedSensorPosition();
+    if (Math.abs(righterr) <= 10) {
+      m_rMaster.set(ControlMode.Velocity, motorSpeeds[pathNum][0]*(righterr/1000));
+    } else {
+      rightIsComplete = true;
+      m_rMaster.set(ControlMode.PercentOutput, 0);
+    }
+    if (Math.abs(lefterr) <= 10) {
+      m_lMaster.set(ControlMode.Velocity, motorSpeeds[pathNum][1]*(lefterr/1000));
+    } else {
+      leftIsComplete = true;
+      m_lMaster.set(ControlMode.PercentOutput, 0);
+    }
+    if (rightIsComplete && leftIsComplete) {
+      return true;
+    } else {
+      return false;
     }
   }
 
