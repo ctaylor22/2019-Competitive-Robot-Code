@@ -32,7 +32,7 @@ public class Constants {
     // toggles manipulator motor
     public static int manipWheelBackToggle = 5;
     public static int manipWheelForToggle = 6;
-
+    
     // Y button
     // elevator closed loop control
     // goes to position selected by index of heights array
@@ -75,11 +75,11 @@ public class Constants {
     
     // X
     // go down
-    public static int gurneyGoDown = 2;
+    public static int gurneyGoDown = 3;
 
     // Y button
     // enable auto up with leveling
-    public static int gurneyGoUp = 1;
+    public static int gurneyGoUp = 4;
 
     // Left bumper = 5
 
@@ -113,16 +113,4 @@ public class Constants {
     public static double camHeight = 0.0;
     public static double targetHeight = 0.0;
     public static double camAngle = 0.0;
-
-
-
-//ELEVATOR DRIVE
-
-    public static int elevatorAdd = 6;
-    public static int elevatorSub = 5;
-
-
-
-
-
 }

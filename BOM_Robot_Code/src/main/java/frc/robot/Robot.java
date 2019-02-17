@@ -43,7 +43,6 @@ public class Robot extends TimedRobot {
 
   Joystick m_driveJoy;
   Joystick m_gJoy;
-  Joystick m_eJoy;
   Compressor m_comp;
   Boolean compLoop = true;
   AnalogInput pressure;
@@ -66,12 +65,11 @@ public class Robot extends TimedRobot {
     m_driveJoy = new Joystick(RobotMap.driveJoy);
     pressure = new AnalogInput(0);
     m_gJoy = new Joystick(RobotMap.gJoy);
-    m_eJoy = new Joystick(RobotMap.eJoy);
     m_DriveTrain.robotInit(m_driveJoy);
-    m_Elevator.robotInit(m_eJoy);
-    //m_Gurny.robotInit(m_gJoy);
+    m_Elevator.robotInit(m_driveJoy);
+    m_Gurny.robotInit(m_gJoy);
     m_Manipulator.robotInit(m_driveJoy);
-   m_Limelight.robotInit(); //functions work with gurney, got rid of joystick parameter
+    m_Limelight.robotInit(m_gJoy); //functions work with gurney
     
     m_comp = new Compressor();
 
@@ -85,7 +83,7 @@ public class Robot extends TimedRobot {
     double pressureCalc = 250 * (pressure.getVoltage()/5) - 25;
     m_DriveTrain.report();
     m_Elevator.report();
-    //m_Gurny.report();
+    m_Gurny.report();
     m_Manipulator.report();
     m_Manipulator.robotPeriodic();
     pressureEntry.setDouble(pressureCalc);
@@ -98,7 +96,7 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     m_DriveTrain.autonomousInit();
     m_Elevator.autonomousInit();
-    //m_Gurny.autonomousInit();
+    m_Gurny.autonomousInit();
     m_Manipulator.autonomousInit();
 
   }
@@ -108,7 +106,7 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
     m_DriveTrain.autonomousPeriodic();
     m_Elevator.autonomousPeriodic();
-    //m_Gurny.autonomousPeriodic();
+    m_Gurny.autonomousPeriodic();
     m_Manipulator.autonomousPeriodic();
 
 
@@ -119,7 +117,7 @@ public class Robot extends TimedRobot {
     m_Elevator.teleopInit();
     m_Manipulator.teleopInit();
     m_DriveTrain.teleopInit();
-    //m_Gurny.teleopInit();
+    m_Gurny.teleopInit();
     
   }
 
@@ -128,7 +126,7 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     m_DriveTrain.teleopPeriodic();
     m_Elevator.teleopPeriodic();
-    //m_Gurny.teleopPeriodic();
+    m_Gurny.teleopPeriodic();
     m_Manipulator.teleopPeriodic();
     m_Limelight.teleopPeriodic();
     

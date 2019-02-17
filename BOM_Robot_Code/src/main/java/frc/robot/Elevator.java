@@ -31,7 +31,6 @@ public class Elevator  {
   Joystick m_joy;
   int mode = 0;
 
-
   /*
    * height array for elevator. 
    * array values can be 0 minimum and 15500 maximum.
@@ -41,7 +40,7 @@ public class Elevator  {
    * #TODO: replace heights with competition heights (for disks and balls)
    */
   // used for the elevator index
-  int heights[] = new int[]{100, 2000, 4000, 6000, 8000, 10400, 12000, 14000, 16700};
+  int heights[] = new int[]{100, 2000, 4000, 6000, 8000, 10000, 12000, 14000, 15500};
   Integer previous_index = 0;
   Integer target_height_index = 0;
 
@@ -58,9 +57,6 @@ public class Elevator  {
                                                                .withSize(2, 1)
                                                                .withPosition(3, 1)
                                                                .getEntry();
-  NetworkTableEntry targetHeightIndexEntry = maxSpeedTab.add("Target Position Index", 0)
-                                                        .withPosition(2, 2)
-                                                        .getEntry();
 
   // see robot init for added options.
   // use elevator_position_chooser.getSelected() to get selected value
@@ -92,7 +88,7 @@ public class Elevator  {
     m_elevator.configMotionAcceleration(9000);    
     m_elevator.configMotionCruiseVelocity(11000);
 
-    m_elevator.config_kP(0, 2.5);
+    m_elevator.config_kP(0, 2);
     m_elevator.config_kI(0, 0);
     m_elevator.config_kD(0, 180);
     m_elevator.config_IntegralZone(0, 600);
@@ -144,7 +140,7 @@ public class Elevator  {
     elevator_position_chooser.addOption("Height 7", 7);
     elevator_position_chooser.addOption("Height 8", 8);
 
-    maxSpeedTab.add("DO NOT TOUCH... Elevator Position - Chooser", elevator_position_chooser)
+    maxSpeedTab.add("Elevator Position - Chooser", elevator_position_chooser)
                .withWidget(BuiltInWidgets.kComboBoxChooser)
                .withPosition(3, 2)
                .withSize(2, 1);
@@ -169,25 +165,8 @@ public class Elevator  {
   }
   
   public void teleopPeriodic() {
-    
     // reset encoder with button 7, the small black button in the middle left 
     // 0 position should be with the elevator all the way down
-    if (m_joy.getRawButtonReleased(Constants.elevatorAdd)) {
-      target_height_index++;
-    }
-    if (m_joy.getRawButtonReleased(Constants.elevatorSub)) {
-      target_height_index--;
-    }
-    if (target_height_index < 0) {
-      target_height_index = 0;
-    }
-    if (target_height_index > 8) {
-
-      target_height_index = 8;
-    }
-
-
-
     if (m_joy.getRawButton(Constants.encoderReset)) {
       m_elevator.setSelectedSensorPosition(0);
     }
@@ -212,7 +191,6 @@ public class Elevator  {
 
   public void report() {
       elevatorEncoderPosition_Entry.setDouble(m_elevator.getSelectedSensorPosition(0));
-      targetHeightIndexEntry.setDouble(target_height_index);
 }
 
 
@@ -222,10 +200,9 @@ public class Elevator  {
 
   private int getPositionAndSetPID() {
     // assume elevator starting on ground with position 0
-    // target_height_index = elevator_position_chooser.getSelected().intValue();
+    target_height_index = elevator_position_chooser.getSelected().intValue();
     int encoder_position = m_elevator.getSelectedSensorPosition(0);
     int target_position = heights[target_height_index];
-
 
     // Check if the target index has changed, and update PID values. 
     // This only runs for one loop after a change in index
