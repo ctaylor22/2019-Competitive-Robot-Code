@@ -30,7 +30,6 @@ public class Elevator  {
   WPI_TalonSRX m_elevator;
   Joystick m_joy;
   int mode = 0;
-  double elevSpeed;
 
   /*
    * height array for elevator. 
@@ -179,13 +178,13 @@ public class Elevator  {
       m_elevator.set(ControlMode.MotionMagic, position);
     } 
     // if left trigger is not on, the set elevator with right trigger
-    else if (m_joy.getRawAxis(Constants.elevatorDown) == 0) {
-      m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.elevatorUp) * elevSpeed);
+    else if (m_joy.getRawAxis(Constants.elevatorDown) < 0.02) {
+      m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.elevatorUp) * elevatorSpeed_Entry.getDouble(0.5));
 
     } 
     // if right trigger is not on, set elevator with left trigger
-    else if (m_joy.getRawAxis(Constants.elevatorUp) == 0) {
-      m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.elevatorDown) * -elevSpeed);
+    else if (m_joy.getRawAxis(Constants.elevatorUp) < 0.02) {
+      m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.elevatorDown) * -1 *elevatorSpeed_Entry.getDouble(0.5));
     }
 
   }

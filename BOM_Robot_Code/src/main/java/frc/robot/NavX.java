@@ -16,11 +16,11 @@ public class NavX {
     private NetworkTable table = instance.getTable("/gurney");
     private AHRS navX = new AHRS(SPI.Port.kMXP);
     //Tilt on the X-Y axis
-    private double rioYaw = Constants.rioYaw;
+    // private double rioYaw = Constants.rioYaw;
     //Tilt on the Y-Z axis
-    private double rioPitch = Constants.rioPitch;
+    // private double rioPitch = Constants.rioPitch;
     //Tilt on the X-Z axis
-    private double rioRoll = Constants.rioRoll;
+    // private double rioRoll = Constants.rioRoll;
     public double zeroYaw = 0;
     public double zeroPitch = 0;
     public double zeroRoll = 0;
@@ -111,7 +111,7 @@ public class NavX {
         double realZ = zFactor+xFactor+yFactor;
         return realZ;
     }
-
+//h
     public double getPitch() {
         //Rotation about the x axis
         final double rawPitch = navX.getPitch()-zeroPitch;
@@ -124,7 +124,7 @@ public class NavX {
         final double yawFactor = rawYaw*Math.sin(rioRoll);
         final double pitch = (pitchFactor+rollFactor+yawFactor)/2;
         */
-        final double pitch = rawPitch - rioPitch;
+        final double pitch = rawPitch - Constants.rioPitch;
         return pitch;
     }
 

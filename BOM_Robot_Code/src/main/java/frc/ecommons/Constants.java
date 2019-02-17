@@ -24,6 +24,15 @@ public class Constants {
     // Shifts gears of the Drive Train
     public static int gearShift = 1;
 
+    public static int motorTest = 0;
+
+    public static int manipUpDownBut = 3;
+
+    // B button
+    // toggles manipulator motor
+    public static int manipWheelBackToggle = 5;
+    public static int manipWheelForToggle = 6;
+    
     // Y button
     // elevator closed loop control
     // goes to position selected by index of heights array
@@ -62,11 +71,7 @@ public class Constants {
     //Manipulator
     // A button
     // toggles manipulator pneumatics
-    public static int manipPToggle = 1;
 
-    // B button
-    // toggles manipulator motor
-    public static int manipMToggle = 2;
     
     // X
     // go down
@@ -102,4 +107,10 @@ public class Constants {
     public static double rioYaw = 0;
     public static double rioPitch = 34;
     public static double rioRoll = 0;
+
+//Distance measurements for Limelight
+    //Limelight
+    public static double camHeight = 0.0;
+    public static double targetHeight = 0.0;
+    public static double camAngle = 0.0;
 }

@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import java.sql.Time;
 import java.util.Map;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -16,13 +17,16 @@ import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.ecommons.RobotMap;
 import frc.ecommons.Constants;
-import frc.utilities.TurnRadius;
+//import frc.utilities.TurnRadius;
 
 // import edu.wpi.first.wpilibj.shuffleboard.BuiltInTypes;
 
@@ -53,12 +57,48 @@ public class DriveTrain  {
 
   //Loops
   boolean dgLoop = false;
+  boolean driveTestLoop = false;
 
   double driveSpeed = 0.5;
+
+  Timer run;
   ShuffleboardTab testMode = Shuffleboard.getTab("Test Mode");
-  
+  NetworkTableEntry testDriveEntry = testMode.add("Drive Test", false)
+                                             .withWidget(BuiltInWidgets.kToggleButton)
+                                             .getEntry();
+  NetworkTableEntry testTimerEntry = testMode.add("Timer", 0)
+                                             .withWidget(BuiltInWidgets.kTextView)
+                                             .getEntry();
   
   ShuffleboardTab tab = Shuffleboard.getTab("Beginning Game");
+
+  ShuffleboardTab motor = Shuffleboard.getTab("Motors");
+
+  NetworkTableEntry rightMasterOnOffCheck = motor.add("Right Master", true)
+                                               .withWidget(BuiltInWidgets.kToggleSwitch)
+                                               .withPosition(0, 0)
+                                               .getEntry();
+  NetworkTableEntry rightSlave1OnOffCheck = motor.add("Right Slave 1", true)
+                                               .withWidget(BuiltInWidgets.kToggleSwitch)
+                                               .withPosition(0, 1)
+                                               .getEntry();
+  NetworkTableEntry rightSlave2OnOffCheck = motor.add("Right Slave 2", true)
+                                               .withWidget(BuiltInWidgets.kToggleSwitch)
+                                               .withPosition(0, 2)
+                                               .getEntry();
+  NetworkTableEntry leftMasterOnOffCheck = motor.add("Left Master", true)
+                                               .withWidget(BuiltInWidgets.kToggleSwitch)
+                                               .withPosition(1, 0)
+                                               .getEntry();
+  NetworkTableEntry leftSlave1OnOffCheck = motor.add("Left Slave 1", true)
+                                               .withWidget(BuiltInWidgets.kToggleSwitch)
+                                               .withPosition(1, 1)
+                                               .getEntry();
+  NetworkTableEntry leftSlave2OnOffCheck = motor.add("Left Slave 2", true)
+                                               .withWidget(BuiltInWidgets.kToggleSwitch)
+                                               .withPosition(1, 2)
+                                               .getEntry();
+
   NetworkTableEntry rightEncoderEntry = tab.add("Right Encoder", 0)
                                            .withSize(1, 1)
                                            .withPosition(1, 1) 
@@ -93,10 +133,10 @@ public class DriveTrain  {
     m_rSlave2.configFactoryDefault();
     m_lSlave1.configFactoryDefault();
     m_lSlave2.configFactoryDefault();
-    m_rSlave1.follow(m_rMaster);
-    m_rSlave2.follow(m_rMaster);
-    m_lSlave1.follow(m_lMaster);
-    m_lSlave2.follow(m_lMaster);  
+    // m_rSlave1.follow(m_rMaster);
+    // m_rSlave2.follow(m_rMaster);
+    // m_lSlave1.follow(m_lMaster);
+    // m_lSlave2.follow(m_lMaster);  
     //Motors go right way
     m_rMaster.setSensorPhase(false);
     m_lMaster.setSensorPhase(false);
@@ -142,7 +182,9 @@ public class DriveTrain  {
 
   }
 
+
   public void robotInit(Joystick j) {
+    run = new Timer();
     //Joysticks
     m_joy = j;
 
@@ -274,28 +316,45 @@ public class DriveTrain  {
     rightSide = -(yAxis - xAxis);
     leftSide = yAxis + xAxis;
 
-    //Percent drive output with slave follows
-    if (m_joy.getRawButton(3)) {
-      int ticksPerRev = 4096;
-      int encoderToWheelGearRatio = 6;
-      int wheelDiameter = 6;
-      int targDistance = 60;
-      double pi = 3.1415;
-      double targPos = yAxis * ticksPerRev * encoderToWheelGearRatio * targDistance / (wheelDiameter * pi);
+    // motion magic 
+    // if (m_joy.getRawButton(Constants.motorTest)) {
+    //   int ticksPerRev = 4096;
+    //   int encoderToWheelGearRatio = 6;
+    //   int wheelDiameter = 6;
+    //   int targDistance = 60;
+    //   double pi = 3.1415;
+    //   double targPos = yAxis * ticksPerRev * encoderToWheelGearRatio * targDistance / (wheelDiameter * pi);
 
-      m_lMaster.set(ControlMode.MotionMagic, targPos);
-      m_rMaster.set(ControlMode.MotionMagic, -targPos);
-    } else {
+    //   m_lMaster.set(ControlMode.MotionMagic, targPos);
+    //   m_rMaster.set(ControlMode.MotionMagic, -targPos);
+    // } else {
 
       TalonConfig();
 
-      m_rMaster.set(ControlMode.PercentOutput, rightSide * driveSpeed);
-      m_lMaster.set(ControlMode.PercentOutput, leftSide * driveSpeed);
+      if (rightMasterOnOffCheck.getBoolean(true)) {
+        m_rMaster.set(ControlMode.PercentOutput, rightSide * driveSpeed);
+      }
+      if (leftMasterOnOffCheck.getBoolean(true)) {
+        m_lMaster.set(ControlMode.PercentOutput, leftSide * driveSpeed);
+      }
+      if (rightSlave1OnOffCheck.getBoolean(true)) {
+        m_rSlave1.set(ControlMode.PercentOutput, rightSide * driveSpeed);
+      }
+      if (rightSlave2OnOffCheck.getBoolean(true)) {
+        m_rSlave2.set(ControlMode.PercentOutput, rightSide * driveSpeed);
+      }
+      if (leftSlave1OnOffCheck.getBoolean(true)) {
+        m_lSlave1.set(ControlMode.PercentOutput, leftSide * driveSpeed);
+      }
+      if (leftSlave2OnOffCheck.getBoolean(true)) {
+        m_lSlave2.set(ControlMode.PercentOutput, leftSide * driveSpeed);
+      }
+      
      
     }
       
 
-  }
+  // }
 
   public void report() {
     driveSpeed = driveSpeedEntry.getDouble(0.5);
@@ -306,7 +365,44 @@ public class DriveTrain  {
   /**
    * This function is called periodically during test mode.
    */
-  
+  public void testInit() {
+    run.reset();
+    testDriveEntry.setBoolean(false);
+    
+  }
   public void testPeriodic() {
+    m_lSlave1.follow(m_lMaster);
+    m_lSlave2.follow(m_lMaster);
+    m_rSlave1.follow(m_rMaster);
+    m_rSlave2.follow(m_rMaster);
+
+    //Test to see if driving works
+    boolean driveTestCheck = testDriveEntry.getBoolean(false);
+    testTimerEntry.setDouble(run.get());
+    if (driveTestCheck && !driveTestLoop) {
+      driveTestLoop = true;
+      run.reset();
+      run.start();
+
+    }
+    if (run.get() < 3 && run.get() > 0.1) {
+      m_rMaster.set(ControlMode.PercentOutput, 0.7);
+      m_lMaster.set(ControlMode.PercentOutput, 0.7);
+    } else if (run.get() > 3 && run.get() < 6) {
+      m_rMaster.set(ControlMode.PercentOutput, -0.7);
+      m_lMaster.set(ControlMode.PercentOutput, -0.7);
+    } else if (run.get() >= 6) {
+      m_lMaster.set(ControlMode.PercentOutput, 0);
+      m_rMaster.set(ControlMode.PercentOutput, 0);
+      testDriveEntry.setBoolean(false);
+    }
+    if (!driveTestCheck) {
+      driveTestLoop = false;
+      m_lMaster.set(ControlMode.PercentOutput, 0);
+      m_rMaster.set(ControlMode.PercentOutput, 0);
+      run.stop();
+      run.reset();
+     }
+
   }
 }
