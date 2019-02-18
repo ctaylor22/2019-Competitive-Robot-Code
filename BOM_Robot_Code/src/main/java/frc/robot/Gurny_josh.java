@@ -76,7 +76,11 @@ public class Gurny_josh  {
                                         .withSize(2, 1)
                                         .getEntry();
 
-                
+  NetworkTableEntry gurneyEncoderEntry = gurneyTab.add("Gurney Encoder", 0)
+  .withWidget(BuiltInWidgets.kTextView)
+  .withPosition(3, 0)
+  .withSize(2, 1)
+  .getEntry();
 
 
   public void robotInit(Joystick j) {
@@ -94,6 +98,7 @@ public class Gurny_josh  {
     gFront.configFactoryDefault();
 
     gBack.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
+    gBack.setSensorPhase(true);
     gBack.setSelectedSensorPosition(0);
     hold_position = gBack.getSelectedSensorPosition();
     gBack.configNominalOutputForward(0);
@@ -132,34 +137,34 @@ public class Gurny_josh  {
   }
 
   private void setUpPID() {
-    gBack.config_kP(0, 0.45);
+    gBack.config_kP(0, 0.02);
     gBack.config_kI(0, 0);
     gBack.config_kD(0, 0);
-    gBack.config_kF(0, 0.15);
-    gBack.config_IntegralZone(0, 500);
-    gBack.configMotionAcceleration(700);
+    gBack.config_kF(0, 0.003);
+    gBack.config_IntegralZone(0, 10);
+    gBack.configMotionAcceleration(10000);
     gBack.configMotionCruiseVelocity(1000);
   }
   
   private void setDownPID() {
-    gBack.config_kP(0, 0);
+    gBack.config_kP(0, 0.01);
     gBack.config_kI(0, 0);
     gBack.config_kD(0, 0);
-    gBack.config_kF(0, 0.1);
-    gBack.config_IntegralZone(0, 500);
-    gBack.configMotionAcceleration(700);
-    gBack.configMotionCruiseVelocity(1200);
+    gBack.config_kF(0, 0);
+    gBack.config_IntegralZone(0, 10);
+    gBack.configMotionAcceleration(15000);
+    gBack.configMotionCruiseVelocity(9000);
   }
 
   // DO NOT TOUCH. ASK JOSH
   private void setHoldPID() {
-    gBack.config_kP(0, 0.8);
+    gBack.config_kP(0, 0.03);
     gBack.config_kI(0, 0);
     gBack.config_kD(0, 0);
-    gBack.config_kF(0, 0.7);
+    gBack.config_kF(0, 0.003);
     gBack.config_IntegralZone(0, 500);
-    gBack.configMotionAcceleration(700);
-    gBack.configMotionCruiseVelocity(1000);
+    gBack.configMotionAcceleration(10000);
+    gBack.configMotionCruiseVelocity(300);
   }
   
   private void breakPID() {
@@ -179,7 +184,7 @@ public class Gurny_josh  {
     /*
      * Takes an input and returns 0 if it is within the deadband
      */
-    if (Math.abs(input) < 0.05) return 0;
+    if (Math.abs(input) < 0.1) return 0;
     else return input;
   }
 
@@ -193,6 +198,7 @@ public class Gurny_josh  {
   }
 
   public void teleopInit() {
+    gBack.setSelectedSensorPosition(0);
   }
   
   public void teleopPeriodic() {
@@ -243,19 +249,20 @@ public class Gurny_josh  {
         }
       }
     } else if (m_joy.getRawButton(Constants.gContinueRoutine)) {*/
-    if (m_joy.getRawButton(Constants.gContinueRoutine)) {
-      climbing = true;
-      climbingstage = 0;
-    } else if (m_joy.getRawButton(Constants.gurneyEncoderReset)) {
+    // if (m_joy.getRawButton(Constants.gContinueRoutine)) {
+    //   climbing = true;
+    //   climbingstage = 0;
+    if (m_joy.getRawButton(Constants.gurneyEncoderReset)) {
       gBack.setSelectedSensorPosition(0);
     }
 
     // drive
     double dashSpeed = driveGurneyEntry.getDouble(0.6);
-    gDrive.set(ControlMode.PercentOutput, deadband(m_joy.getRawAxis(1) * -1));
+    gDrive.set(ControlMode.PercentOutput, deadband(m_joy.getRawAxis(1)));
     
     // add low pass filtered error
-    double pitch_error = m_navX.getPitch()-2;
+    // offset is necessary for robot to tilt forward and not tip over
+    double pitch_error = m_navX.getPitch()-3;
     filtered_error = low_pass(pitch_error, filtered_error);
     
 
@@ -270,18 +277,18 @@ public class Gurny_josh  {
        * #TODO: set max height on encoder for top of gurney
        */
       setUpPID();
-      gBack.set(ControlMode.Velocity, 500);
+      gBack.set(ControlMode.MotionMagic, 80000);
 
       // accelerometer PID for front
-      double front_kF = 0.7;
-      double front_kP = 0.15;
+      double front_kF = 0.35;
+      double front_kP = 0.1;
       double output = front_kF + (front_kP)*filtered_error;
       gFront.set(ControlMode.PercentOutput, output);
 
       /* #TODO: test adding an offset to help the hold PID
        * this would be the steady state error of the UP
        */
-      int experimental_steady_state_error = 0;
+      int experimental_steady_state_error = 400;
       hold_position = gBack.getSelectedSensorPosition() + experimental_steady_state_error;
     }
     else if (m_joy.getRawButton(Constants.gurneyGoDown)) {
@@ -291,15 +298,15 @@ public class Gurny_josh  {
        *
        */
       setDownPID();
-      gBack.set(ControlMode.Velocity, -10);
-      double front_kF = 0.25;
-      double front_kP = 0.14;
+      gBack.set(ControlMode.MotionMagic, 0);
+      double front_kF = 0.155;
+      double front_kP = 0.1;
       double output = front_kF + (front_kP)*filtered_error;
       gFront.set(ControlMode.PercentOutput, output);
 
       hold_position = gBack.getSelectedSensorPosition();
     }
-    else if (front_locked_chooser.getSelected() && gBack.getSelectedSensorPosition() > 2048) {
+    else if (front_locked_chooser.getSelected() && gBack.getSelectedSensorPosition() > 2648) {
       /* hold position when encoder reads a rotation or so above 0 position
        * 
        * #TODO: replace holdPID with upPID. inconjuction with adding the SS error to 'current_position'
@@ -310,39 +317,27 @@ public class Gurny_josh  {
        *        - in the ideal case, the drive wheels are on the platform and front gurney can just raise with JS axis
        * #TODO: possible hold angle after front adjustment
        */
-      setHoldPID();
-      double yaxis = 0; //(-1) *  m_joy.getRawAxis(Constants.gUpBack);
 
       // accelerometer PID for front
-      double front_kF = 0.4;
-      double front_kP = 0.13;
+      double front_kF = 0.2;
+      double front_kP = 0.12;
       double output = front_kF + (front_kP)*filtered_error;
-
-      // adjust height with joystick
-      if (deadband(yaxis) != 0) {
-        if ((deadband(yaxis) < 0 && gBack.getSelectedSensorPosition() < 100)) {
-          gBack.set(ControlMode.Velocity, 0);
-        }
-        else {
-          gBack.set(ControlMode.Velocity, 100+100*yaxis);
-        }
-      }
-      // holding height velocity with a kF of 0.75
-      else {
-        gBack.set(ControlMode.Velocity, 100);
-      }
+      setHoldPID();
+      gBack.set(ControlMode.Position, hold_position);
+      
       // front output math. includes raising front for platform climb
       double front_yaxis = 0;
-      if (m_joy.getRawButton(5)) {
-        front_yaxis = -0.7;
-      } else if (m_joy.getRawButton(3)) {
-        front_yaxis = 0.7;
+      if (m_joy.getRawButton(Constants.raiseBackGurney)) {
+        front_yaxis = -0.3;
+      } else if (m_joy.getRawButton(Constants.lowerBackGurney)) {
+        front_yaxis = 0.3;
       }
+
       if (isSafeToRaiseFront.getSelected()) {
         gFront.set(ControlMode.PercentOutput, 0.5*front_yaxis);
       }
       else {
-        gFront.set(ControlMode.PercentOutput, output + 0.5*front_yaxis);
+        gFront.set(ControlMode.PercentOutput, output);
       }
      
     }
@@ -351,8 +346,14 @@ public class Gurny_josh  {
        *
        * joystick Y axis * -1 to make up direction output a positive number
        */
+      double front_yaxis = 0;
+      if (m_joy.getRawButton(3)) {
+        front_yaxis = -0.2;
+      } else if (m_joy.getRawButton(5)) {
+        front_yaxis = 0.2;
+      }
       gFront.set(ControlMode.PercentOutput, 0);
-      gBack.set(ControlMode.PercentOutput, 0);
+      gBack.set(ControlMode.PercentOutput, front_yaxis);
     }
   }
 
@@ -361,7 +362,7 @@ public class Gurny_josh  {
      * 0: Success
      * 1: Fatal Error
      */
-    double axis = m_joy.getRawAxis(Constants.gDriveForward);
+    double axis = m_joy.getRawAxis(Constants.gDrive);
     if (Math.abs(axis) >= .1) {
       gDrive.set(ControlMode.PercentOutput, axis);
     } else {
@@ -421,6 +422,7 @@ public class Gurny_josh  {
 
   public void report() {
     gurneyPitchEntry.setDouble(m_navX.getPitch());
+    gurneyEncoderEntry.setDouble(gBack.getSelectedSensorPosition());
   }
 
   public void testInit() {
@@ -431,7 +433,7 @@ public class Gurny_josh  {
   }
 
   private double low_pass(double input, double output) {
-    output = output + 0.9 * (input - output);
+    output = output + 0.85 * (input - output);
     return output;
   }
 

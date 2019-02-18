@@ -8,35 +8,29 @@ public class Constants {
     // drive fwd, bkwd
     public static int yAxis = 1;
 
+    // Triggers Manipulator. Left = up. Right = Down
+    public static int manipulatorUp = 2;
+    public static int manipulatorDown = 3;
+
     // Right stick X
     // turns
     public static int xAxis = 4;
-
-    // left trigger
-    // drive elevator down
-    public static int elevatorDown = 2;
-    // right trigger
-    // drive elevator up
-    public static int elevatorUp = 3;
  
 // *** Drive Joystick Buttons ***
     // A button
     // Shifts gears of the Drive Train
     public static int gearShift = 1;
 
+    public static int percentDrive = 2;
+
     public static int motorTest = 0;
 
+    // maybe not used depending on manipulator
     public static int manipUpDownBut = 3;
 
-    // B button
     // toggles manipulator motor
     public static int manipWheelBackToggle = 5;
     public static int manipWheelForToggle = 6;
-
-    // Y button
-    // elevator closed loop control
-    // goes to position selected by index of heights array
-    public static int elevatorToPositionButton = 4;
 
     // Select button (small black button just left of the center of the controller)
     // resets the drive shaft encoders' position and the elevator encoder's position to 0
@@ -46,44 +40,56 @@ public class Constants {
     // toggles the compressor on/off
     public static int compressor = 8;
 
+
+
+// *** elevator joystick ***
+// axis
+    // left trigger
+    // drive elevator down
+    public static int elevatorDown = 2;
+    // right trigger
+    // drive elevator up
+    public static int elevatorUp = 3;
+
+
+// buttons
+    // Y button
+    // elevator closed loop control
+    // goes to position selected by index of heights array
+    public static int elevatorToPositionButton = 4;
+    
+    //ELEVATOR DRIVE
+    public static int elevatorAdd = 6;
+    public static int elevatorSub = 5;
+
+
+
 // *** gurney joystick axis ***
     // Ticks per rotation of the wheels
     public static double ticksPerRotation = 100;
 
 // *** gurney joystick axis ***
-    // Left stick Y axis
-    // Winds rear gurney motor
-    public static int gUpBack = 1;
-
-    // Left trigger axis
-    // drive gurney backward
-    public static int gDriveBack = 2;
-
-    // Right trigger axis
-    // drive gurney forward
-    public static int gDriveForward = 3;
+    // Y axis
+    public static int gDrive = 1;
 
     // Right Stick Y axis
     // winds front gurney motor
     public static int gUpFront = 5;
 
 // *** gurney joystick buttons ***
-    //Manipulator
-    // A button
-    // toggles manipulator pneumatics
-
-    
-    // X
     // go down
     public static int gurneyGoDown = 2;
 
-    // Y button
     // enable auto up with leveling
     public static int gurneyGoUp = 1;
 
-    // Left bumper = 5
+    // raise back when on the floor
+    public static int raiseBackGurney = 3;
 
-    // Right bumper
+    // lower back gurney when on floor
+    public static int lowerBackGurney = 5;
+
+    // //unused
     public static int gurneyManualDrive = 6;
 
     public static int gurneyEncoderReset = 7;
@@ -152,10 +158,7 @@ public class Constants {
 
 
 
-//ELEVATOR DRIVE
 
-    public static int elevatorAdd = 6;
-    public static int elevatorSub = 5;
 
 
 

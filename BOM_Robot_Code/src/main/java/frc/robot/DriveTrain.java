@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -118,6 +119,12 @@ public class DriveTrain  {
                                           .withProperties(Map.of("Min", 0, "Max", 1))
                                           .getEntry();
 
+    NetworkTableEntry leftEncoderVelocityEntry = tab.add("Left Velocity", 0)
+                                                    .withSize(1,1)
+                                                    .withPosition(0, 3)
+                                                    .withWidget(BuiltInWidgets.kTextView)
+                                                    .getEntry();
+
   double[][] paths = {{2.0, 300.0, 3.0, 1.0, 90.0, 1.0}/*,
                       {0.0, 100.0, 3.0}*/};
 
@@ -133,10 +140,10 @@ public class DriveTrain  {
     m_rSlave2.configFactoryDefault();
     m_lSlave1.configFactoryDefault();
     m_lSlave2.configFactoryDefault();
-    // m_rSlave1.follow(m_rMaster);
-    // m_rSlave2.follow(m_rMaster);
-    // m_lSlave1.follow(m_lMaster);
-    // m_lSlave2.follow(m_lMaster);  
+    m_rSlave1.follow(m_rMaster);
+    m_rSlave2.follow(m_rMaster);
+    m_lSlave1.follow(m_lMaster);
+    m_lSlave2.follow(m_lMaster);  
     //Motors go right way
     m_rMaster.setSensorPhase(false);
     m_lMaster.setSensorPhase(false);
@@ -158,26 +165,26 @@ public class DriveTrain  {
     
   
     //ARGS (Slot, Value)
-    m_rMaster.config_kF(0, 0);
-    m_rMaster.config_kP(0, 0.1);
+    m_rMaster.config_kF(0, 0.06);
+    m_rMaster.config_kP(0, 0);
     m_rMaster.config_kI(0, 0);
     m_rMaster.config_kD(0, 0);
-    // m_rMaster.config_IntegralZone(0, 30000);
+    m_rMaster.config_IntegralZone(0, 1000);
 
+    m_lMaster.config_kF(0, 0.06);
     m_lMaster.config_kP(0, 0);
-    m_lMaster.config_kF(0, 0.1);
     m_lMaster.config_kI(0, 0);
     m_lMaster.config_kD(0, 0);
-    // m_lMaster.config_IntegralZone(0, 30000);
+    m_lMaster.config_IntegralZone(0, 1000);
 
 
-    int sensorUnitsPer100ms = 12000;
+    int sensorUnitsPer100ms = 8000;
     m_rMaster.configMotionCruiseVelocity(sensorUnitsPer100ms);
     m_lMaster.configMotionCruiseVelocity(sensorUnitsPer100ms);
 
-    int sensorUnitsPer100msPerSec = 4000;
-    m_rMaster.configMotionAcceleration(sensorUnitsPer100msPerSec);
-    m_lMaster.configMotionAcceleration(sensorUnitsPer100msPerSec);
+    int sensorUnitsPer100ms_per_sec = 10240;
+    m_rMaster.configMotionAcceleration(sensorUnitsPer100ms_per_sec);
+    m_lMaster.configMotionAcceleration(sensorUnitsPer100ms_per_sec);
 
 
   }
@@ -275,9 +282,8 @@ public class DriveTrain  {
   
   public void teleopInit() {
     dogGearSolenoid.set(DoubleSolenoid.Value.kForward);
+  }
 
-
-  } 
   public void teleopPeriodic() {
 
     //Dog Gear Shift
@@ -307,7 +313,7 @@ public class DriveTrain  {
     
     //Equation for ARCADE DRIVE
     double xAxis, yAxis;
-    xAxis = m_joy.getRawAxis(Constants.xAxis);
+    xAxis = 0.25 * m_joy.getRawAxis(Constants.xAxis);
     // * -1 to correct axis sign
     yAxis = -1*m_joy.getRawAxis(Constants.yAxis);
     
@@ -316,50 +322,53 @@ public class DriveTrain  {
     rightSide = -(yAxis - xAxis);
     leftSide = yAxis + xAxis;
 
-    // motion magic 
-    // if (m_joy.getRawButton(Constants.motorTest)) {
+    // if button not pushed, percent drive
+    if (!m_joy.getRawButton(Constants.percentDrive)) {
+      m_lMaster.set(ControlMode.PercentOutput, leftSide);
+      m_rMaster.set(ControlMode.PercentOutput, rightSide);
+    } 
+    // else motion magic 
+    // else {
     //   int ticksPerRev = 4096;
     //   int encoderToWheelGearRatio = 6;
     //   int wheelDiameter = 6;
-    //   int targDistance = 60;
+    //   int targDistance = 60;  // 5 ft in inches
     //   double pi = 3.1415;
-    //   double targPos = yAxis * ticksPerRev * encoderToWheelGearRatio * targDistance / (wheelDiameter * pi);
-
+    //   double targPos = (yAxis * ticksPerRev * encoderToWheelGearRatio * targDistance) / (wheelDiameter * pi);
+      
     //   m_lMaster.set(ControlMode.MotionMagic, targPos);
     //   m_rMaster.set(ControlMode.MotionMagic, -targPos);
-    // } else {
+    // }
+    // else {
 
-      TalonConfig();
-
-      if (rightMasterOnOffCheck.getBoolean(true)) {
-        m_rMaster.set(ControlMode.PercentOutput, rightSide * driveSpeed);
-      }
-      if (leftMasterOnOffCheck.getBoolean(true)) {
-        m_lMaster.set(ControlMode.PercentOutput, leftSide * driveSpeed);
-      }
-      if (rightSlave1OnOffCheck.getBoolean(true)) {
-        m_rSlave1.set(ControlMode.PercentOutput, rightSide * driveSpeed);
-      }
-      if (rightSlave2OnOffCheck.getBoolean(true)) {
-        m_rSlave2.set(ControlMode.PercentOutput, rightSide * driveSpeed);
-      }
-      if (leftSlave1OnOffCheck.getBoolean(true)) {
-        m_lSlave1.set(ControlMode.PercentOutput, leftSide * driveSpeed);
-      }
-      if (leftSlave2OnOffCheck.getBoolean(true)) {
-        m_lSlave2.set(ControlMode.PercentOutput, leftSide * driveSpeed);
-      }
-      
-     
-    }
-      
-
-  // }
+    
+    // if (false) {
+    //   if (rightMasterOnOffCheck.getBoolean(true)) {
+    //     m_rMaster.set(ControlMode.PercentOutput, rightSide * driveSpeed);
+    //   }
+    //   if (leftMasterOnOffCheck.getBoolean(true)) {
+    //     m_lMaster.set(ControlMode.PercentOutput, leftSide * driveSpeed);
+    //   }
+    //   if (rightSlave1OnOffCheck.getBoolean(true)) {
+    //     m_rSlave1.set(ControlMode.PercentOutput, rightSide * driveSpeed);
+    //   }
+    //   if (rightSlave2OnOffCheck.getBoolean(true)) {
+    //     m_rSlave2.set(ControlMode.PercentOutput, rightSide * driveSpeed);
+    //   }
+    //   if (leftSlave1OnOffCheck.getBoolean(true)) {
+    //     m_lSlave1.set(ControlMode.PercentOutput, leftSide * driveSpeed);
+    //   }
+    //   if (leftSlave2OnOffCheck.getBoolean(true)) {
+    //     m_lSlave2.set(ControlMode.PercentOutput, leftSide * driveSpeed);
+    //   }
+    // }   
+  }
 
   public void report() {
     driveSpeed = driveSpeedEntry.getDouble(0.5);
     rightEncoderEntry.setDouble(m_rMaster.getSelectedSensorPosition());
     leftEncoderEntry.setDouble(m_lMaster.getSelectedSensorPosition());
+    leftEncoderVelocityEntry.setDouble(m_lMaster.getSelectedSensorVelocity(0));
   }
 
   /**
