@@ -8,7 +8,6 @@ import frc.ecommons.Constants;
 import frc.ecommons.RobotMap;
 
 import java.util.Map;
-import java.lang.Math;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -16,12 +15,10 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 //import sun.nio.ch.Net;
@@ -30,6 +27,7 @@ public class Elevator  {
   WPI_TalonSRX m_elevator;
   Joystick m_joy;
   int mode = 0;
+  boolean posTog = false;
 
 
   /*
@@ -125,6 +123,7 @@ public class Elevator  {
 
   public void robotInit(Joystick j) {
     m_elevator = new WPI_TalonSRX(RobotMap.elevator);
+    m_elevator.setSafetyEnabled(false);
     m_elevator.configFactoryDefault();
     m_elevator.setSensorPhase(true);
     m_elevator.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
@@ -166,10 +165,20 @@ public class Elevator  {
   }
 
   public void teleopInit() {
+    target_height_index = 0;
   }
   
   public void teleopPeriodic() {
-    
+    if (m_joy.getRawButtonReleased(Constants.elevatorBot)) {
+      target_height_index = 8;
+    } else if (m_joy.getRawButtonReleased(Constants.elevatorMid)) {
+      target_height_index = 5;
+    } else if (m_joy.getRawButtonReleased(Constants.elevatorCargo)) {
+      target_height_index = 3;
+    } else if (m_joy.getRawButtonReleased(Constants.elevatorTop)) {
+      target_height_index = 0;
+    }
+
     // reset encoder with button 7, the small black button in the middle left 
     // 0 position should be with the elevator all the way down
     if (m_joy.getRawButtonReleased(Constants.elevatorAdd)) {
@@ -188,25 +197,24 @@ public class Elevator  {
 
 
 
-    if (m_joy.getRawButton(Constants.encoderReset)) {
-      m_elevator.setSelectedSensorPosition(0);
-    }
+      if (m_joy.getRawButton(Constants.encoderReset)) {
+        m_elevator.setSelectedSensorPosition(0);
+      }
 
     // enter closed loop position control with Y on driving joystick
-    if (m_joy.getRawButton(Constants.elevatorToPositionButton)) {
+    
       int position = getPositionAndSetPID();
       // get index in the heights array, valid indexes are 0 thru 8!
       m_elevator.set(ControlMode.MotionMagic, position);
-    } 
     // if left trigger is not on, the set elevator with right trigger
-    else if (m_joy.getRawAxis(Constants.elevatorDown) < 0.02) {
-      m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.elevatorUp) * elevatorSpeed_Entry.getDouble(0.5));
+    // else if (m_joy.getRawAxis(Constants.elevatorDown) < 0.02) {
+    //   m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.elevatorUp) * elevatorSpeed_Entry.getDouble(0.5));
 
-    } 
-    // if right trigger is not on, set elevator with left trigger
-    else if (m_joy.getRawAxis(Constants.elevatorUp) < 0.02) {
-      m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.elevatorDown) * -1 *elevatorSpeed_Entry.getDouble(0.5));
-    }
+    // } 
+    // // if right trigger is not on, set elevator with left trigger
+    // else if (m_joy.getRawAxis(Constants.elevatorUp) < 0.02) {
+    //   m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.elevatorDown) * -1 *elevatorSpeed_Entry.getDouble(0.5));
+    // }
 
   }
 

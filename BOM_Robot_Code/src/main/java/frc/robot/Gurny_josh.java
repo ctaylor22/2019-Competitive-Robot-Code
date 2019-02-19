@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.ecommons.Constants;
 import frc.ecommons.RobotMap;
 import frc.robot.NavX;
@@ -48,7 +48,8 @@ public class Gurny_josh  {
   int current_postion;
   boolean climbing = false;
   int climbingstage = 0;
-
+  boolean isSafeFront = false;
+  boolean disableFront = false;
 
   // ShuffleboardTab MaxSpeedTab = Shuffleboard.getTab("Max Speed");
   // NetworkTableEntry frontGurneyEntry;
@@ -81,6 +82,15 @@ public class Gurny_josh  {
   .withPosition(3, 0)
   .withSize(2, 1)
   .getEntry();
+
+  NetworkTableEntry isSafetoRaiseFrontEntry = gurneyTab.add("Is Safe To Raise Front", isSafeFront)
+                                                       .withWidget(BuiltInWidgets.kBooleanBox)
+                                                       .withSize(3, 1)
+                                                       .getEntry();
+  NetworkTableEntry disableFrontEntry = gurneyTab.add("Disable Front... Raise Back", disableFront)
+                                                 .withWidget(BuiltInWidgets.kBooleanBox)
+                                                 .withSize(3, 1)
+                                                 .getEntry();
 
 
   public void robotInit(Joystick j) {
@@ -120,20 +130,8 @@ public class Gurny_josh  {
     gFront.config_kI(0, 0);
     gFront.config_kD(0, 0);
     gFront.config_IntegralZone(0, 1);
-
-    front_locked_chooser.setDefaultOption("Lock", true);
-    front_locked_chooser.addOption("Unlock", false);
-    gurneyTab.add("Front Gurney Level", front_locked_chooser)
-             .withSize(2, 1)
-             .withPosition(0, 0)
-             .withWidget(BuiltInWidgets.kSplitButtonChooser);
-
-    isSafeToRaiseFront.setDefaultOption("Not Safe", false);
-    isSafeToRaiseFront.addOption("Safe over Platfrom", true);
-    gurneyTab.add("Safe to Raise Front", isSafeToRaiseFront)
-            .withSize(2, 1)
-            .withPosition(0, 1)
-            .withWidget(BuiltInWidgets.kSplitButtonChooser);
+    
+    
   }
 
   private void setUpPID() {
@@ -199,9 +197,20 @@ public class Gurny_josh  {
 
   public void teleopInit() {
     gBack.setSelectedSensorPosition(0);
+    isSafeFront = false;
+    disableFront = false;
   }
   
   public void teleopPeriodic() {
+    if (m_joy.getRawButtonReleased(11)) {
+      isSafeFront = !isSafeFront;
+    }
+    if (m_joy.getRawButtonReleased(12)) {
+      disableFront = !disableFront;
+    }
+
+
+
     // reset encoder
     /*if (climbing) {
       if (m_joy.getRawButton(Constants.gStopRoutine)) {
@@ -258,7 +267,11 @@ public class Gurny_josh  {
 
     // drive
     double dashSpeed = driveGurneyEntry.getDouble(0.6);
-    gDrive.set(ControlMode.PercentOutput, deadband(m_joy.getRawAxis(1)));
+    if (m_joy.getRawButton(6)) {
+      gDrive.set(ControlMode.PercentOutput, 0.2);
+    }
+    
+    gDrive.set(ControlMode.PercentOutput, deadband(m_joy.getRawAxis(1)) * 0.5);
     
     // add low pass filtered error
     // offset is necessary for robot to tilt forward and not tip over
@@ -269,7 +282,7 @@ public class Gurny_josh  {
     // #TODO: add switch button on shuffleboard to have 'fast' / 'slow' mode
     if (m_joy.getRawButton(Constants.gurneyGoUp)) {
       Shuffleboard.selectTab("End Game");
-      /* Gurney UP on Button 4, Y
+      /* Gurney UP on Button 1, Trigger
        * 
        * call motion magic with a set point of ~36000
        *
@@ -292,7 +305,7 @@ public class Gurny_josh  {
       hold_position = gBack.getSelectedSensorPosition() + experimental_steady_state_error;
     }
     else if (m_joy.getRawButton(Constants.gurneyGoDown)) {
-      /* Gurney DOWN on Button 3, X
+      /* Gurney DOWN on Button 2, Thumb Button
        *
        * call motion magic with a target position of 0
        *
@@ -306,7 +319,7 @@ public class Gurny_josh  {
 
       hold_position = gBack.getSelectedSensorPosition();
     }
-    else if (front_locked_chooser.getSelected() && gBack.getSelectedSensorPosition() > 2648) {
+    else if (!disableFront && gBack.getSelectedSensorPosition() > 2648) {
       /* hold position when encoder reads a rotation or so above 0 position
        * 
        * #TODO: replace holdPID with upPID. inconjuction with adding the SS error to 'current_position'
@@ -333,8 +346,8 @@ public class Gurny_josh  {
         front_yaxis = 0.3;
       }
 
-      if (isSafeToRaiseFront.getSelected()) {
-        gFront.set(ControlMode.PercentOutput, 0.5*front_yaxis);
+      if (isSafeFront) {
+        gFront.set(ControlMode.PercentOutput, front_yaxis);
       }
       else {
         gFront.set(ControlMode.PercentOutput, output);
@@ -370,13 +383,13 @@ public class Gurny_josh  {
     }
   }
 
-  public void driveFrontGurney() {
-    if (m_joy.getRawButton(Constants.gFrontUp)) {
-      gFront.set(ControlMode.PercentOutput, Constants.gDriveUp);
-    } else {
-      gFront.set(ControlMode.PercentOutput, 0);
-    }
-  }
+  // public void driveFrontGurney() {
+  //   if (m_joy.getRawButton(Constants.gFrontUp)) {
+  //     gFront.set(ControlMode.PercentOutput, Constants.gDriveUp);
+  //   } else {
+  //     gFront.set(ControlMode.PercentOutput, 0);
+  //   }
+  // }
 
   public void climbUp() {
     /* Gurney UP climing routine
@@ -408,10 +421,11 @@ public class Gurny_josh  {
     /* Gurney DOWN on Button 3, X
        *
        * call motion magic with a target position of 0
-       *
+       *  xx
        */
       setDownPID();
       gBack.set(ControlMode.Velocity, -10);
+      double fummy = 0.1;
       double front_kF = 0.25;
       double front_kP = 0.14;
       double output = front_kF + (front_kP)*filtered_error;
@@ -423,10 +437,11 @@ public class Gurny_josh  {
   public void report() {
     gurneyPitchEntry.setDouble(m_navX.getPitch());
     gurneyEncoderEntry.setDouble(gBack.getSelectedSensorPosition());
+    isSafetoRaiseFrontEntry.setBoolean(isSafeFront);
+    disableFrontEntry.setBoolean(disableFront);
   }
 
   public void testInit() {
-
   }
   
   public void testPeriodic() {

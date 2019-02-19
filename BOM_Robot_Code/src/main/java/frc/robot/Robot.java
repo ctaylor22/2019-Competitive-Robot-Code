@@ -15,8 +15,10 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Watchdog;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -27,10 +29,6 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 
 
 public class Robot extends TimedRobot {
-
-  /**Classes
-   * Subsystems of Robots Import
-   */
   private DriveTrain m_DriveTrain = new DriveTrain();
   private Elevator m_Elevator = new Elevator();
   
@@ -40,12 +38,20 @@ public class Robot extends TimedRobot {
   private Manipulator m_Manipulator = new Manipulator();
   private NavX m_NavX = new NavX();
   private Limelight m_Limelight = new Limelight();
-
   Joystick m_driveJoy;
   Joystick m_gJoy;
   Joystick m_eJoy;
   Compressor m_comp;
-  Boolean compLoop = true;
+  Boolean compLoop = false;
+  
+
+  //LEDS
+  int ledMode = 0;
+  DigitalOutput dioSlot0;
+  DigitalOutput dioSlot1;
+  DigitalOutput dioSlot2;
+  // Watchdog watch;
+
   AnalogInput pressure;
   double pressureDouble;
   ShuffleboardTab tab = Shuffleboard.getTab("Beginning Game");
@@ -67,12 +73,12 @@ public class Robot extends TimedRobot {
     pressure = new AnalogInput(0);
     m_gJoy = new Joystick(RobotMap.gJoy);
     m_eJoy = new Joystick(RobotMap.eJoy);
-    m_DriveTrain.robotInit(m_driveJoy);
+    m_DriveTrain.robotInit(m_driveJoy, m_gJoy);
     m_Elevator.robotInit(m_eJoy);
     m_Gurny.robotInit(m_gJoy);
     m_Manipulator.robotInit(m_driveJoy);
-   m_Limelight.robotInit(m_driveJoy); //functions work with gurney, got rid of joystick parameter
-    
+  //  m_Limelight.robotInit(m_driveJoy); //functions work with gurney, got rid of joystick parameter
+
     m_comp = new Compressor();
 
     m_comp.setClosedLoopControl(false);
@@ -130,9 +136,9 @@ public class Robot extends TimedRobot {
     m_Elevator.teleopPeriodic();
     m_Gurny.teleopPeriodic();
     m_Manipulator.teleopPeriodic();
-    m_Limelight.teleopPeriodic();
     
-    
+
+
 
     if (m_driveJoy.getRawButton(Constants.compressor) && compLoop) {
       compLoop = false;
@@ -155,5 +161,42 @@ public class Robot extends TimedRobot {
     m_Gurny.testPeriodic();
     m_Manipulator.testPeriodic();
     m_NavX.testPeriodic();
+  }
+  public void ledCom(int i) {
+    ledMode = i;
+    if (ledMode == 0) {
+      dioSlot0.set(false);
+      dioSlot1.set(false);
+      dioSlot2.set(false);
+    } else if (ledMode == 1) {
+      dioSlot0.set(false);
+      dioSlot1.set(false);
+      dioSlot2.set(true);
+    } else if (ledMode == 2) {
+      dioSlot0.set(false);
+      dioSlot1.set(true);
+      dioSlot2.set(false);
+    } else if (ledMode == 3) {
+      dioSlot0.set(false);
+      dioSlot1.set(true);
+      dioSlot2.set(true);
+    } else if (ledMode == 4) {
+      dioSlot0.set(true);
+      dioSlot1.set(false);
+      dioSlot2.set(false);
+    } else if (ledMode == 5) {
+      dioSlot0.set(true);
+      dioSlot1.set(false);
+      dioSlot2.set(true);
+    } else if (ledMode == 6) {
+      dioSlot0.set(true);
+      dioSlot1.set(true);
+      dioSlot2.set(false);
+    } else if (ledMode == 7) {
+      dioSlot0.set(true);
+      dioSlot1.set(true);
+      dioSlot2.set(true);
+    }
+
   }
 }

@@ -42,7 +42,7 @@ public class DriveTrain  {
 
   // Joysticks/Controllers
   Joystick m_joy;
-
+  Joystick m_gJoy;
   //Talons
   WPI_TalonSRX m_rMaster;
   WPI_TalonSRX m_lMaster;
@@ -162,16 +162,20 @@ public class DriveTrain  {
 
     m_rMaster.setNeutralMode(NeutralMode.Brake);
     m_lMaster.setNeutralMode(NeutralMode.Brake);
+    m_lSlave1.setNeutralMode(NeutralMode.Brake);
+    m_lSlave2.setNeutralMode(NeutralMode.Brake);
+    m_rSlave1.setNeutralMode(NeutralMode.Brake);
+    m_rSlave2.setNeutralMode(NeutralMode.Brake);
     
   
     //ARGS (Slot, Value)
-    m_rMaster.config_kF(0, 0.06);
+    m_rMaster.config_kF(0, 0.0);
     m_rMaster.config_kP(0, 0);
     m_rMaster.config_kI(0, 0);
     m_rMaster.config_kD(0, 0);
     m_rMaster.config_IntegralZone(0, 1000);
 
-    m_lMaster.config_kF(0, 0.06);
+    m_lMaster.config_kF(0, 0.00);
     m_lMaster.config_kP(0, 0);
     m_lMaster.config_kI(0, 0);
     m_lMaster.config_kD(0, 0);
@@ -190,10 +194,11 @@ public class DriveTrain  {
   }
 
 
-  public void robotInit(Joystick j) {
+  public void robotInit(Joystick j, Joystick gJ) {
     run = new Timer();
     //Joysticks
     m_joy = j;
+    m_gJoy = gJ;
 
     //Talons - IDS found in ecommons.RobotMap
     m_rMaster = new WPI_TalonSRX(RobotMap.rMaster);
@@ -286,6 +291,8 @@ public class DriveTrain  {
 
   public void teleopPeriodic() {
 
+    
+
     //Dog Gear Shift
     if (m_joy.getRawButton(Constants.gearShift) && !dgLoop) {
 
@@ -323,10 +330,8 @@ public class DriveTrain  {
     leftSide = yAxis + xAxis;
 
     // if button not pushed, percent drive
-    if (!m_joy.getRawButton(Constants.percentDrive)) {
       m_lMaster.set(ControlMode.PercentOutput, leftSide);
       m_rMaster.set(ControlMode.PercentOutput, rightSide);
-    } 
     // else motion magic 
     // else {
     //   int ticksPerRev = 4096;
@@ -369,6 +374,8 @@ public class DriveTrain  {
     rightEncoderEntry.setDouble(m_rMaster.getSelectedSensorPosition());
     leftEncoderEntry.setDouble(m_lMaster.getSelectedSensorPosition());
     leftEncoderVelocityEntry.setDouble(m_lMaster.getSelectedSensorVelocity(0));
+
+    SmartDashboard.putNumber("Sensor Velocity", m_rMaster.getSelectedSensorVelocity());
   }
 
   /**

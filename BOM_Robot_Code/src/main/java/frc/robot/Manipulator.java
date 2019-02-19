@@ -94,8 +94,9 @@ public class Manipulator  {
   }
 
   private void setUpPID() {
-    manipUpDown.configMotionAcceleration(50);    
-    manipUpDown.configMotionCruiseVelocity(50);
+    //Originally 50, 50
+    manipUpDown.configMotionAcceleration(75);    
+    manipUpDown.configMotionCruiseVelocity(75);
 
     manipUpDown.config_kP(0, 0.7);
     manipUpDown.config_kI(0, 0);
@@ -117,9 +118,10 @@ public class Manipulator  {
       grabEncoderResetEntry.setBoolean(false);
     }
 
-    if (Enable_OR_Disable.getSelected()) {
-      setUpPID();
-      
+    
+    setUpPID();
+    
+    
       if (m_joy.getRawAxis(Constants.manipulatorUp) < 0.1 && m_joy.getRawAxis(Constants.manipulatorDown) < 0.1) {
         manipUpDown.set(ControlMode.Position, hold_position);
       }
@@ -161,12 +163,10 @@ public class Manipulator  {
       if (motorGo == 0) {
         manipWheels.set(ControlMode.PercentOutput, 0);
       }else if (motorGo == 1) {
-        manipWheels.set(ControlMode.PercentOutput, 0.35);    
+        manipWheels.set(ControlMode.PercentOutput, 1);    
       } else if (motorGo == 2) {
         manipWheels.set(ControlMode.PercentOutput, -0.5);
       }
-    } 
-
 
 
   }
