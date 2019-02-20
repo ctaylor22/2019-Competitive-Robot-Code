@@ -62,6 +62,12 @@ public class Constants {
     public static int elevatorAdd = 6;
     public static int elevatorSub = 5;
 
+    //Preset Encoder Pos
+    public static int elevatorBot = 1;
+    public static int elevatorMid = 2;
+    public static int elevatorTop = 3;
+    public static int elevatorCargo = 4;
+
 
 
 // *** gurney joystick axis ***
@@ -126,19 +132,19 @@ public class Constants {
  
      //Continues the subroutine when the driver is set up
      //TODO: Get the real button indice
-     public static int gContinueRoutine = 0;
+     //public static int gContinueRoutine = 0;
  
      //Stops the climbing routine with a safe lower
      //TODO: Get the real button indice
-     public static int gStopRoutine = 0;
+     //public static int gStopRoutine = 0;
  
      //Reverts robot to drive-while-raised mode
      //TODO: Get the real button indice
-     public static int gRevertStage = 0;
+    // public static int gRevertStage = 0;
 
      //Drives up the front gurney when climing
      //TODO: Get the real button indice
-     public static int gFrontUp = 0;
+     //public static int gFrontUp = 0;
 
 // *** other ***
     //Percent Output
