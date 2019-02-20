@@ -20,11 +20,16 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Watchdog;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
+import edu.wpi.first.wpilibj.shuffleboard.SendableCameraWrapper;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardContainer;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.ecommons.Constants;
 import frc.ecommons.RobotMap;
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTableEntry;
 
 
@@ -43,6 +48,7 @@ public class Robot extends TimedRobot {
   Joystick m_eJoy;
   Compressor m_comp;
   Boolean compLoop = false;
+  UsbCamera camera;
   
 
   //LEDS
@@ -57,17 +63,23 @@ public class Robot extends TimedRobot {
   ShuffleboardTab tab = Shuffleboard.getTab("Beginning Game");
   NetworkTableEntry pressureEntry = tab.add("Pressure", 0)
                                        .withWidget(BuiltInWidgets.kDial)
-                                       .withPosition(7, 0)
+                                       .withPosition(9, 0)
                                        .withSize(1, 1)
                                        .getEntry();
   NetworkTableEntry compressorEntry = tab.add("Compressor", false)
-                                         .withPosition(6, 0)
+                                         .withPosition(8, 0)
                                          .withSize(1, 1)
                                          .withWidget(BuiltInWidgets.kBooleanBox)
                                          .getEntry();
 
+  NetworkTableEntry cameraEntry;
+  ComplexWidget cameraWidget;
+
   @Override
   public void robotInit() {
+    camera = CameraServer.getInstance().startAutomaticCapture();
+    // ShuffleboardContainer cameraConstainer = tab.add(SendableCameraWrapper.wrap());
+    cameraWidget = tab.add(camera).withPosition(5, 1).withSize(4, 3);
     Shuffleboard.selectTab("Beginning Game");
     m_driveJoy = new Joystick(RobotMap.driveJoy);
     pressure = new AnalogInput(0);
@@ -82,7 +94,9 @@ public class Robot extends TimedRobot {
     m_comp = new Compressor();
 
     m_comp.setClosedLoopControl(false);
-    
+
+    CameraServer.getInstance().startAutomaticCapture();
+
   }
 
  
@@ -96,7 +110,6 @@ public class Robot extends TimedRobot {
     m_Manipulator.robotPeriodic();
     pressureEntry.setDouble(pressureCalc);
     compressorEntry.setBoolean(m_comp.getClosedLoopControl());
-
   }
 
 
@@ -198,5 +211,19 @@ public class Robot extends TimedRobot {
       dioSlot2.set(true);
     }
 
+  }
+  public void setControllers(Joystick j, Joystick eJ, int m) {
+    Joystick joy;
+    Joystick eJoystick;
+    int mode = m;
+    joy = j;
+    eJoystick = eJ;
+    if (mode == 0) {
+      joy = new Joystick(0);
+      eJoystick = new Joystick(1);
+    } else if (mode == 1) {
+      joy = new Joystick(1);
+      eJoystick = new Joystick(0);
+    }
   }
 }

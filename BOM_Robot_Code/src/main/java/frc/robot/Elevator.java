@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 //import sun.nio.ch.Net;
@@ -32,14 +33,14 @@ public class Elevator  {
 
   /*
    * height array for elevator. 
-   * array values can be 0 minimum and 15500 maximum.
+   * array values can be 0 minimum and 17500 maximum.
    * Array MUST be sorted from lowest height to tallest height
    *
    * Valid array indexes are 0 thru (length of array - 1)
    * #TODO: replace heights with competition heights (for disks and balls)
    */
   // used for the elevator index
-  int heights[] = new int[]{100, 2000, 4000, 6000, 8000, 10400, 12000, 14000, 16700};
+  int heights[] = new int[]{0, 100, 4000, 6000, 8000, 9500, 11000, 15000, 17500};
   Integer previous_index = 0;
   Integer target_height_index = 0;
 
@@ -170,13 +171,13 @@ public class Elevator  {
   
   public void teleopPeriodic() {
     if (m_joy.getRawButtonReleased(Constants.elevatorBot)) {
-      target_height_index = 8;
+      target_height_index = 0;
     } else if (m_joy.getRawButtonReleased(Constants.elevatorMid)) {
       target_height_index = 5;
     } else if (m_joy.getRawButtonReleased(Constants.elevatorCargo)) {
       target_height_index = 3;
     } else if (m_joy.getRawButtonReleased(Constants.elevatorTop)) {
-      target_height_index = 0;
+      target_height_index = 8;
     }
 
     // reset encoder with button 7, the small black button in the middle left 
@@ -221,6 +222,7 @@ public class Elevator  {
   public void report() {
       elevatorEncoderPosition_Entry.setDouble(m_elevator.getSelectedSensorPosition(0));
       targetHeightIndexEntry.setDouble(target_height_index);
+      SmartDashboard.putNumber("Elev Encoder", m_elevator.getSelectedSensorPosition());
 }
 
 

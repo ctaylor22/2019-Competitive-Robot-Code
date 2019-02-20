@@ -24,26 +24,23 @@ public class RobotMap {
 
 
 /* Drive Train */
-    //Dog Gear
+    //Dog Gear Pneumatics
     public static int dogGearSolenoid1 = 4;
     public static int dogGearSolenoid2 = 5;
 
-    /* Talons: 13(R), 14(L)      Victors: 15(R), 16(R), 17(L), 18(L) 
+    /* Talons: 13(R), 14(L)      Victors: 16(R), 17(R), 18(L), 19(L)
     R = Rightside Motor
     L = Leftside Motor */
-
-    //Switched Drive Gurney and right slave
-    //Switched right slave and left slave
 
     //Left Side
     public static int lMaster = 14;
     public static int lSlave1 = 19;
-    public static int lSlave2 = 18;
+    public static int lSlave2 = 18; //18 Is top reverse(wiring) motor... NOT USED
 
         //Right Side
         public static int rMaster = 13;
         public static int rSlave1 = 17;
-        public static int rSlave2 = 16;
+        public static int rSlave2 = 16; //18 Is top reverse(wiring) motor... NOT USED
 
     public static int ahrsAddress = 1;
 
