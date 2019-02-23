@@ -8,6 +8,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.shuffleboard.*;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -33,6 +34,8 @@ public class Limelight {
     double skew; 
     double pipeline;
     double lightMode;
+
+    ShuffleboardTab tab = Shuffleboard.getTab("Limelight");
     //got rid of Joystick joy parameter
     public void robotInit(Joystick joy){
         m_Joystick = joy;
@@ -73,10 +76,4 @@ public class Limelight {
     
     public void testPeriodic() {   
     }
-
-    //Guacamole 
-
-    //Skrrt Skrrt
-    
-
 }
