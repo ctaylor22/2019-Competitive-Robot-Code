@@ -47,6 +47,7 @@ public class Gurny_josh  {
   // Climbing routine functions
   int current_postion;
   boolean climbing = false;
+  boolean killSwitch = false;
   int climbingstage = 0;
   boolean isSafeFront = false;
   boolean disableFront = false;
@@ -199,6 +200,7 @@ public class Gurny_josh  {
     gBack.setSelectedSensorPosition(0);
     isSafeFront = false;
     disableFront = false;
+    killSwitch = false;
   }
   
   public void teleopPeriodic() {
@@ -267,10 +269,6 @@ public class Gurny_josh  {
 
     // drive
     double dashSpeed = driveGurneyEntry.getDouble(0.6);
-    if (m_joy.getRawButton(6)) {
-      gDrive.set(ControlMode.PercentOutput, 0.2);
-    }
-    
     gDrive.set(ControlMode.PercentOutput, deadband(m_joy.getRawAxis(1)) * 0.5);
     
     // add low pass filtered error
@@ -278,7 +276,13 @@ public class Gurny_josh  {
     double pitch_error = m_navX.getPitch()-3;
     filtered_error = low_pass(pitch_error, filtered_error);
     
-
+    if (m_joy.getRawButtonReleased(10)) {
+      killSwitch = !killSwitch;
+    }
+    if (killSwitch) {
+      gBack.set(ControlMode.PercentOutput, 0);
+      gFront.set(ControlMode.PercentOutput, 0);
+    }
     // #TODO: add switch button on shuffleboard to have 'fast' / 'slow' mode
     if (m_joy.getRawButton(Constants.gurneyGoUp)) {
       Shuffleboard.selectTab("End Game");
@@ -290,13 +294,17 @@ public class Gurny_josh  {
        * #TODO: set max height on encoder for top of gurney
        */
       setUpPID();
-      gBack.set(ControlMode.MotionMagic, 80000);
+      //Originally 80000
+      gBack.set(ControlMode.MotionMagic, 70000);
 
       // accelerometer PID for front
       double front_kF = 0.35;
       double front_kP = 0.1;
       double output = front_kF + (front_kP)*filtered_error;
-      gFront.set(ControlMode.PercentOutput, output);
+      if (!isSafeFront && !disableFront) {
+        gFront.set(ControlMode.PercentOutput, output);
+      }
+      
 
       /* #TODO: test adding an offset to help the hold PID
        * this would be the steady state error of the UP
@@ -315,7 +323,11 @@ public class Gurny_josh  {
       double front_kF = 0.155;
       double front_kP = 0.1;
       double output = front_kF + (front_kP)*filtered_error;
-      gFront.set(ControlMode.PercentOutput, output);
+
+      if (!disableFront && !isSafeFront) {
+        gFront.set(ControlMode.PercentOutput, output);
+      }
+      
 
       hold_position = gBack.getSelectedSensorPosition();
     }
@@ -341,15 +353,14 @@ public class Gurny_josh  {
       // front output math. includes raising front for platform climb
       double front_yaxis = 0;
       if (m_joy.getRawButton(Constants.raiseBackGurney)) {
-        front_yaxis = -0.3;
+        front_yaxis = -0.6;
       } else if (m_joy.getRawButton(Constants.lowerBackGurney)) {
-        front_yaxis = 0.3;
+        front_yaxis = 0.6;
       }
 
       if (isSafeFront) {
         gFront.set(ControlMode.PercentOutput, front_yaxis);
-      }
-      else {
+      } else if (!isSafeFront) {
         gFront.set(ControlMode.PercentOutput, output);
       }
      
@@ -361,14 +372,30 @@ public class Gurny_josh  {
        */
       double front_yaxis = 0;
       if (m_joy.getRawButton(3)) {
-        front_yaxis = -0.2;
+        front_yaxis = -0.3;
       } else if (m_joy.getRawButton(5)) {
-        front_yaxis = 0.2;
+        front_yaxis = 0.3;
       }
       gFront.set(ControlMode.PercentOutput, 0);
       gBack.set(ControlMode.PercentOutput, front_yaxis);
     }
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   public void driveWhileRaised() {
     /* Return codes:

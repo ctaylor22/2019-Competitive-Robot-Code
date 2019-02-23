@@ -61,9 +61,14 @@ public class Manipulator  {
     manipWheels = new VictorSPX(RobotMap.manipWheels);
     manipUpDown = new TalonSRX(RobotMap.manipUpDown);
 
+    talonConfig();
+    manipUpDown.setSelectedSensorPosition(0);
+    setUpPID();
+  }
+
+  public void talonConfig() {
     manipUpDown.configFactoryDefault();
     manipWheels.configClosedloopRamp(0.1);
-    manipUpDown.setSelectedSensorPosition(0);
     manipUpDown.setSensorPhase(false);
     manipUpDown.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
     manipUpDown.setNeutralMode(NeutralMode.Coast);
@@ -71,11 +76,10 @@ public class Manipulator  {
     manipUpDown.configForwardSoftLimitEnable(true);
     manipUpDown.configReverseSoftLimitThreshold(0);
     manipUpDown.configReverseSoftLimitEnable(true);
-    manipUpDown.configPeakOutputForward(0.08);
+    manipUpDown.configPeakOutputForward(0.17);
     manipUpDown.configPeakOutputReverse(-0.3);
     manipUpDown.configNominalOutputForward(0);
     manipUpDown.configNominalOutputReverse(0);
-    setUpPID();
   }
 
   public void robotPeriodic() {
@@ -93,11 +97,26 @@ public class Manipulator  {
 
   }
 
+  private void resetPID() {
+    //Originally 50, 50
+    manipUpDown.configFactoryDefault();
+    manipUpDown.configMotionAcceleration(0);    
+    manipUpDown.configMotionCruiseVelocity(0);
+
+    //Originally 0.7
+    manipUpDown.config_kP(0, 0);
+    manipUpDown.config_kI(0, 0);
+    manipUpDown.config_kD(0, 0);
+    manipUpDown.config_kF(0, 0);
+    manipUpDown.config_IntegralZone(0, 100);
+  }
+
   private void setUpPID() {
     //Originally 50, 50
-    manipUpDown.configMotionAcceleration(75);    
-    manipUpDown.configMotionCruiseVelocity(75);
+    manipUpDown.configMotionAcceleration(50);    
+    manipUpDown.configMotionCruiseVelocity(50);
 
+    //Originally 0.7
     manipUpDown.config_kP(0, 0.7);
     manipUpDown.config_kI(0, 0);
     manipUpDown.config_kD(0, 0);
@@ -109,6 +128,7 @@ public class Manipulator  {
     manipulator = false;
     motorForLoop = false;
     motorBackLoop = false;
+    talonConfig();
 
   }
   
@@ -180,6 +200,17 @@ public class Manipulator  {
 
   
   public void testPeriodic() {
+    resetPID();
+    if (m_joy.getRawButton(2)) {
+      manipUpDown.set(ControlMode.PercentOutput, 0.2);
+    } else if (m_joy.getRawButton(4)) {
+      manipUpDown.set(ControlMode.PercentOutput, -0.2);
+    } else {
+      manipUpDown.set(ControlMode.PercentOutput, 0);
+    }
+    if (m_joy.getRawButtonReleased(1)) {
+      manipUpDown.setSelectedSensorPosition(0);
+    }
 
   }
 }

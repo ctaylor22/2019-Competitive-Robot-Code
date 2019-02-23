@@ -313,14 +313,11 @@ public class DriveTrain  {
       dgLoop = false;
     }
 
-    if (m_joy.getRawButton(Constants.encoderReset)) {
-      m_rMaster.setSelectedSensorPosition(0, 0, 0);
-      m_lMaster.setSelectedSensorPosition(0, 0, 0);
-    }
+
     
     //Equation for ARCADE DRIVE
     double xAxis, yAxis;
-    xAxis = 0.25 * m_joy.getRawAxis(Constants.xAxis);
+    xAxis = 0.35 * m_joy.getRawAxis(Constants.xAxis);
     // * -1 to correct axis sign
     yAxis = -1*m_joy.getRawAxis(Constants.yAxis);
     
