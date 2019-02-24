@@ -22,6 +22,10 @@ public class Constants {
     public static int gearShift = 1;
 
     public static int percentDrive = 2;
+    
+    //B button
+    //Toggle the disc grabber
+    public static int discGrabber = 2;
 
     public static int motorTest = 0;
 

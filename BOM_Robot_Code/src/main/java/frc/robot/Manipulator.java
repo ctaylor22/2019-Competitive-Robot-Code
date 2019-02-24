@@ -35,6 +35,7 @@ public class Manipulator  {
   boolean manipToggle = false;
   boolean hasBeenToggled = false;
   boolean isDownFirstLoop = true;
+  //boolean grabLoop = false;
   int hold_position = 0;
 
   double motorGo = 0;
@@ -44,6 +45,8 @@ public class Manipulator  {
   NetworkTableEntry grabEncoderResetEntry = testMode.add("Manip Encoder Reset", false)
                                                     .withWidget(BuiltInWidgets.kToggleButton)
                                                     .getEntry();
+
+                                               
 
 
   SendableChooser<Boolean> Enable_OR_Disable = new SendableChooser<Boolean>();
@@ -64,6 +67,7 @@ public class Manipulator  {
     talonConfig();
     manipUpDown.setSelectedSensorPosition(0);
     setUpPID();
+    grabber.set(DoubleSolenoid.Value.kForward);
   }
 
   public void talonConfig() {
@@ -76,8 +80,8 @@ public class Manipulator  {
     manipUpDown.configForwardSoftLimitEnable(true);
     manipUpDown.configReverseSoftLimitThreshold(0);
     manipUpDown.configReverseSoftLimitEnable(true);
-    manipUpDown.configPeakOutputForward(0.17);
-    manipUpDown.configPeakOutputReverse(-0.3);
+    manipUpDown.configPeakOutputForward(0.22);
+    manipUpDown.configPeakOutputReverse(-0.40);
     manipUpDown.configNominalOutputForward(0);
     manipUpDown.configNominalOutputReverse(0);
   }
@@ -129,7 +133,7 @@ public class Manipulator  {
     motorForLoop = false;
     motorBackLoop = false;
     talonConfig();
-
+    grabber.set(DoubleSolenoid.Value.kForward);
   }
   
   public void teleopPeriodic() {
@@ -138,56 +142,64 @@ public class Manipulator  {
       grabEncoderResetEntry.setBoolean(false);
     }
 
-    
+    if (m_joy.getRawButtonPressed(Constants.discGrabber)) {
+      if (grabber.get() == (Value.kForward)) {
+        grabber.set(DoubleSolenoid.Value.kReverse);
+        //currentDiscGrabberState.setString(out);
+      } else if (grabber.get() == (Value.kReverse)) {
+        grabber.set(DoubleSolenoid.Value.kForward);
+        //currentDiscGrabberState.setString(in);
+      }
+    }
+
     setUpPID();
-    
-    
-      if (m_joy.getRawAxis(Constants.manipulatorUp) < 0.1 && m_joy.getRawAxis(Constants.manipulatorDown) < 0.1) {
-        manipUpDown.set(ControlMode.Position, hold_position);
-      }
-      else if (m_joy.getRawAxis(Constants.manipulatorUp) < 0.1) {
-        manipUpDown.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.manipulatorDown));
-        hold_position = manipUpDown.getSelectedSensorPosition();
-        if (hold_position < 0) hold_position = 0;
-      }
-      else if (m_joy.getRawAxis(Constants.manipulatorDown) < 0.1) {
-        manipUpDown.set(ControlMode.PercentOutput, -1 * m_joy.getRawAxis(Constants.manipulatorUp));
-        hold_position = manipUpDown.getSelectedSensorPosition();
-      }
+    if (m_joy.getRawAxis(Constants.manipulatorUp) < 0.1 && m_joy.getRawAxis(Constants.manipulatorDown) < 0.1) {
+      manipUpDown.set(ControlMode.Position, hold_position);
+    }
+    else if (m_joy.getRawAxis(Constants.manipulatorUp) < 0.1) {
+      manipUpDown.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.manipulatorDown));
+      hold_position = manipUpDown.getSelectedSensorPosition();
+      if (hold_position < 0) hold_position = 0;
+    }
+    else if (m_joy.getRawAxis(Constants.manipulatorDown) < 0.1) {
+      manipUpDown.set(ControlMode.PercentOutput, -1 * m_joy.getRawAxis(Constants.manipulatorUp));
+      hold_position = manipUpDown.getSelectedSensorPosition();
+    }
 
       
-      if (!manipulator && !manipulator2) {
-        motorGo = 0;
-      }
-      if (m_joy.getRawButton(Constants.manipWheelForToggle) && !motorForLoop) {
-        motorForLoop = true;
-        motorGo = 1;
-        manipulator2 = false;
-        manipulator = !manipulator;
-      }
-      if (!m_joy.getRawButton(Constants.manipWheelForToggle)) {
-        motorForLoop = false;
-      }
+    if (!manipulator && !manipulator2) {
+      motorGo = 0;
+    }
+    if (m_joy.getRawButton(Constants.manipWheelForToggle) && !motorForLoop) {
+      motorForLoop = true;
+      motorGo = 1;
+      manipulator2 = false;
+      manipulator = !manipulator;
+    }
+    if (!m_joy.getRawButton(Constants.manipWheelForToggle)) {
+      motorForLoop = false;
+    }
 
-      if (m_joy.getRawButton(Constants.manipWheelBackToggle) && !motorBackLoop) {
-        motorBackLoop = true;
-        motorGo = 2;
-        manipulator = false;
-        manipulator2 = !manipulator2;
-      }
-      if (!m_joy.getRawButton(Constants.manipWheelBackToggle)) {
-        motorBackLoop = false;
-      }
+    if (m_joy.getRawButton(Constants.manipWheelBackToggle) && !motorBackLoop) {
+      motorBackLoop = true;
+      motorGo = 2;
+      manipulator = false;
+      manipulator2 = !manipulator2;
+    }
+    if (!m_joy.getRawButton(Constants.manipWheelBackToggle)) {
+      motorBackLoop = false;
+    }
+
+    
+    if (motorGo == 0) {
+      manipWheels.set(ControlMode.PercentOutput, 0);
+    }else if (motorGo == 1) {
+      manipWheels.set(ControlMode.PercentOutput, 1);    
+    } else if (motorGo == 2) {
+      manipWheels.set(ControlMode.PercentOutput, -0.5);
+    }
 
       
-      if (motorGo == 0) {
-        manipWheels.set(ControlMode.PercentOutput, 0);
-      }else if (motorGo == 1) {
-        manipWheels.set(ControlMode.PercentOutput, 1);    
-      } else if (motorGo == 2) {
-        manipWheels.set(ControlMode.PercentOutput, -0.5);
-      }
-
 
   }
 

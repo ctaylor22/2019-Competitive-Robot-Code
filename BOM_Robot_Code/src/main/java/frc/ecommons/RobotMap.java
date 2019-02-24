@@ -28,6 +28,8 @@ public class RobotMap {
     public static int dogGearSolenoid1 = 4;
     public static int dogGearSolenoid2 = 5;
 
+
+
     /* Talons: 13(R), 14(L)      Victors: 16(R), 17(R), 18(L), 19(L)
     R = Rightside Motor
     L = Leftside Motor */
@@ -46,10 +48,13 @@ public class RobotMap {
 
 /* Manipulator */
 
+    //Disc Grabber Pneumatics
     public static int grab1 = 2;
     public static int grab2 = 3;
 
+    // motors
     public static int manipUpDown = 12;
     public static int manipWheels = 21;
+
 
 }
