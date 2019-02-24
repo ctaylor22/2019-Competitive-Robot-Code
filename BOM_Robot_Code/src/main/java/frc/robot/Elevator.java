@@ -40,7 +40,7 @@ public class Elevator  {
    * #TODO: replace heights with competition heights (for disks and balls)
    */
   // used for the elevator index
-  int heights[] = new int[]{0, 100, 4000, 6000, 8000, 9500, 11000, 15000, 17500};
+  int heights[] = new int[]{0, 100, 4000, 6000, 8000, 9500, 11000, 15000, 17000};
   Integer previous_index = 0;
   Integer target_height_index = 0;
 
@@ -91,9 +91,9 @@ public class Elevator  {
     m_elevator.configMotionAcceleration(9000);    
     m_elevator.configMotionCruiseVelocity(11000);
 
-    m_elevator.config_kP(0, 2.5);
+    m_elevator.config_kP(0, 2.4); //2.5 Comp bot last run
     m_elevator.config_kI(0, 0);
-    m_elevator.config_kD(0, 180);
+    m_elevator.config_kD(0, 200); //180 Comp bot last run
     m_elevator.config_IntegralZone(0, 600);
   }
 
@@ -202,7 +202,6 @@ public class Elevator  {
         m_elevator.setSelectedSensorPosition(0);
       }
 
-    // enter closed loop position control with Y on driving joystick
     
       int position = getPositionAndSetPID();
       // get index in the heights array, valid indexes are 0 thru 8!
