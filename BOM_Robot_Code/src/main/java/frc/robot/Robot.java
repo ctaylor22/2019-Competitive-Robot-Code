@@ -93,10 +93,10 @@ public class Robot extends TimedRobot {
 
     m_comp = new Compressor();
 
-    m_comp.setClosedLoopControl(false);
+    // m_comp.setClosedLoopControl(false);
 
     CameraServer.getInstance().startAutomaticCapture();
-
+    ledCom(0);
   }
 
  
@@ -119,7 +119,7 @@ public class Robot extends TimedRobot {
     m_Elevator.autonomousInit();
     m_Gurny.autonomousInit();
     m_Manipulator.autonomousInit();
-
+    ledCom(1);
   }
 
 
@@ -149,18 +149,19 @@ public class Robot extends TimedRobot {
     m_Elevator.teleopPeriodic();
     m_Gurny.teleopPeriodic();
     m_Manipulator.teleopPeriodic();
+  }
     
 
 
 
-    if (m_driveJoy.getRawButton(Constants.compressor) && compLoop) {
-      compLoop = false;
-      m_comp.setClosedLoopControl(!m_comp.getClosedLoopControl());
-    }
-    if (!m_driveJoy.getRawButton(Constants.compressor)) {
-      compLoop = true;
-    }
-   }
+  //   if (m_driveJoy.getRawButton(Constants.compressor) && compLoop) {
+  //     compLoop = false;
+  //     m_comp.setClosedLoopControl(!m_comp.getClosedLoopControl());
+  //   }
+  //   if (!m_driveJoy.getRawButton(Constants.compressor)) {
+  //     compLoop = true;
+  //   }
+  //  }
 
   @Override
   public void testInit() {
@@ -211,19 +212,5 @@ public class Robot extends TimedRobot {
       dioSlot2.set(true);
     }
 
-  }
-  public void setControllers(Joystick j, Joystick eJ, int m) {
-    Joystick joy;
-    Joystick eJoystick;
-    int mode = m;
-    joy = j;
-    eJoystick = eJ;
-    if (mode == 0) {
-      joy = new Joystick(0);
-      eJoystick = new Joystick(1);
-    } else if (mode == 1) {
-      joy = new Joystick(1);
-      eJoystick = new Joystick(0);
-    }
   }
 }

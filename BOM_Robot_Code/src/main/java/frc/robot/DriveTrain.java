@@ -233,10 +233,12 @@ public class DriveTrain  {
     //     motorSpeeds[ind][3] = piece[2];
     //   }
     // }
+    teleopInit();
   }
   
   public void autonomousPeriodic() {
     // followTurnPath();
+    teleopPeriodic();
   }
 
   public void followTurnPath() {
@@ -294,24 +296,24 @@ public class DriveTrain  {
     
 
     //Dog Gear Shift
-    if (m_joy.getRawButton(Constants.gearShift) && !dgLoop) {
+    // if (m_joy.getRawButton(Constants.gearShift) && !dgLoop) {
 
-      dgLoop = true;
-      Shuffleboard.selectTab("Beginning Game");
-      if (dogGearSolenoid.get() == (Value.kForward)) {
-        dogGearSolenoid.set(DoubleSolenoid.Value.kReverse);
+    //   dgLoop = true;
+    //   Shuffleboard.selectTab("Beginning Game");
+    //   if (dogGearSolenoid.get() == (Value.kForward)) {
+    //     dogGearSolenoid.set(DoubleSolenoid.Value.kReverse);
         
-        currentGearEntry.setString(lowGear);
-      } else if (dogGearSolenoid.get() == (Value.kReverse)) {
-        dogGearSolenoid.set(DoubleSolenoid.Value.kForward);
+    //     currentGearEntry.setString(lowGear);
+    //   } else if (dogGearSolenoid.get() == (Value.kReverse)) {
+    //     dogGearSolenoid.set(DoubleSolenoid.Value.kForward);
       
-        currentGearEntry.setString(highGear);
-      }
+    //     currentGearEntry.setString(highGear);
+    //   }
 
-    }
-    if (!m_joy.getRawButton(Constants.gearShift)) {
-      dgLoop = false;
-    }
+    // }
+    // if (!m_joy.getRawButton(Constants.gearShift)) {
+    //   dgLoop = false;
+    // }
 
 
     

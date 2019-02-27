@@ -30,6 +30,8 @@ public class Elevator  {
   int mode = 0;
   boolean posTog = false;
 
+  private Robot m_Robot = new Robot();
+
 
   /*
    * height array for elevator. 
@@ -43,6 +45,12 @@ public class Elevator  {
   int heights[] = new int[]{0, 100, 4000, 6000, 8000, 9500, 11000, 15000, 17000};
   Integer previous_index = 0;
   Integer target_height_index = 0;
+
+  ShuffleboardTab testMode = Shuffleboard.getTab("Test Mode");
+
+  NetworkTableEntry resetEncoderEntry = testMode.add("Reset Elevator Encoder", false)
+                                                .withWidget(BuiltInWidgets.kToggleButton)
+                                                .getEntry();
 
   ShuffleboardTab maxSpeedTab = Shuffleboard.getTab("Beginning Game");
   NetworkTableEntry elevatorSpeed_Entry = maxSpeedTab.add("Elevator Manual Speed", 0.5)
@@ -157,11 +165,12 @@ public class Elevator  {
 
   public void autonomousInit() {
     m_elevator.setSelectedSensorPosition(0);
+    teleopInit();
 
   }
   
   public void autonomousPeriodic() {
-
+    teleopPeriodic();
 
   }
 
@@ -178,6 +187,12 @@ public class Elevator  {
       target_height_index = 3;
     } else if (m_joy.getRawButtonReleased(Constants.elevatorTop)) {
       target_height_index = 8;
+    }
+
+    if (target_height_index != 0) {
+      m_Robot.ledCom(3);
+    } else {
+      m_Robot.ledCom(0);
     }
 
     // reset encoder with button 7, the small black button in the middle left 
@@ -198,9 +213,7 @@ public class Elevator  {
 
 
 
-      if (m_joy.getRawButton(Constants.encoderReset)) {
-        m_elevator.setSelectedSensorPosition(0);
-      }
+
 
     
       int position = getPositionAndSetPID();
@@ -227,6 +240,7 @@ public class Elevator  {
 
   
   public void testPeriodic() {
+
   }
 
   private int getPositionAndSetPID() {

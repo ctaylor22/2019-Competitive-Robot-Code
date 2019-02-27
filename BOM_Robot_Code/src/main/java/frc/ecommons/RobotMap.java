@@ -28,8 +28,6 @@ public class RobotMap {
     public static int dogGearSolenoid1 = 4;
     public static int dogGearSolenoid2 = 5;
 
-
-
     /* Talons: 13(R), 14(L)      Victors: 16(R), 17(R), 18(L), 19(L)
     R = Rightside Motor
     L = Leftside Motor */
@@ -42,19 +40,19 @@ public class RobotMap {
         //Right Side
         public static int rMaster = 13;
         public static int rSlave1 = 17;
-        public static int rSlave2 = 16; //18 Is top reverse(wiring) motor... NOT USED
+        public static int rSlave2 = 16; //16 Is top reverse(wiring) motor...
 
     public static int ahrsAddress = 1;
 
 /* Manipulator */
 
-    //Disc Grabber Pneumatics
     public static int grab1 = 2;
     public static int grab2 = 3;
 
-    // motors
-    public static int manipUpDown = 12;
-    public static int manipWheels = 21;
+    public static int dual1 = 0;
+    public static int dual2 = 1;
 
+    public static int manipUpDown = 12;
+    public static int manipWheels = 21; 
 
 }
