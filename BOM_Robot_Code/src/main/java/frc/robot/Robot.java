@@ -50,12 +50,11 @@ public class Robot extends TimedRobot {
   Boolean compLoop = false;
   UsbCamera camera;
   
-
-  //LEDS
   int ledMode = 0;
-  DigitalOutput dioSlot0;
-  DigitalOutput dioSlot1;
-  DigitalOutput dioSlot2;
+  DigitalOutput dioSlot0 = new DigitalOutput(0);
+  DigitalOutput dioSlot1 = new DigitalOutput(1);
+  DigitalOutput dioSlot2 = new DigitalOutput(2);
+
   // Watchdog watch;
 
   AnalogInput pressure;
@@ -77,9 +76,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    camera = CameraServer.getInstance().startAutomaticCapture();
+    // camera = CameraServer.getInstance().startAutomaticCapture();
     // ShuffleboardContainer cameraConstainer = tab.add(SendableCameraWrapper.wrap());
-    cameraWidget = tab.add(camera).withPosition(5, 1).withSize(4, 3);
+    // cameraWidget = tab.add(camera).withPosition(5, 1).withSize(4, 3);
     Shuffleboard.selectTab("Beginning Game");
     m_driveJoy = new Joystick(RobotMap.driveJoy);
     pressure = new AnalogInput(0);
@@ -93,9 +92,14 @@ public class Robot extends TimedRobot {
 
     m_comp = new Compressor();
 
-    // m_comp.setClosedLoopControl(false);
+    m_comp.setClosedLoopControl(false);
 
-    CameraServer.getInstance().startAutomaticCapture();
+    // CameraServer.getInstance().startAutomaticCapture();
+
+    // DIO config
+    dioSlot0.disablePWM();
+    dioSlot1.disablePWM();
+    dioSlot2.disablePWM();
     ledCom(0);
   }
 
@@ -149,19 +153,15 @@ public class Robot extends TimedRobot {
     m_Elevator.teleopPeriodic();
     m_Gurny.teleopPeriodic();
     m_Manipulator.teleopPeriodic();
+
+    if (m_driveJoy.getRawButton(Constants.compressor) && compLoop) {
+      compLoop = false;
+      m_comp.setClosedLoopControl(!m_comp.getClosedLoopControl());
+    }
+    if (!m_driveJoy.getRawButton(Constants.compressor)) {
+      compLoop = true;
+    }
   }
-    
-
-
-
-  //   if (m_driveJoy.getRawButton(Constants.compressor) && compLoop) {
-  //     compLoop = false;
-  //     m_comp.setClosedLoopControl(!m_comp.getClosedLoopControl());
-  //   }
-  //   if (!m_driveJoy.getRawButton(Constants.compressor)) {
-  //     compLoop = true;
-  //   }
-  //  }
 
   @Override
   public void testInit() {
@@ -176,41 +176,41 @@ public class Robot extends TimedRobot {
     m_Manipulator.testPeriodic();
     m_NavX.testPeriodic();
   }
-  public void ledCom(int i) {
+
+  void ledCom(int i) {
     ledMode = i;
     if (ledMode == 0) {
-      dioSlot0.set(false);
-      dioSlot1.set(false);
-      dioSlot2.set(false);
+    dioSlot0.set(false);
+    dioSlot1.set(false);
+    dioSlot2.set(false);
     } else if (ledMode == 1) {
-      dioSlot0.set(false);
-      dioSlot1.set(false);
-      dioSlot2.set(true);
+    dioSlot0.set(false);
+    dioSlot1.set(false);
+    dioSlot2.set(true);
     } else if (ledMode == 2) {
-      dioSlot0.set(false);
-      dioSlot1.set(true);
-      dioSlot2.set(false);
+    dioSlot0.set(false);
+    dioSlot1.set(true);
+    dioSlot2.set(false);
     } else if (ledMode == 3) {
-      dioSlot0.set(false);
-      dioSlot1.set(true);
-      dioSlot2.set(true);
+    dioSlot0.set(false);
+    dioSlot1.set(true);
+    dioSlot2.set(true);
     } else if (ledMode == 4) {
-      dioSlot0.set(true);
-      dioSlot1.set(false);
-      dioSlot2.set(false);
+    dioSlot0.set(true);
+    dioSlot1.set(false);
+    dioSlot2.set(false);
     } else if (ledMode == 5) {
-      dioSlot0.set(true);
-      dioSlot1.set(false);
-      dioSlot2.set(true);
+    dioSlot0.set(true);
+    dioSlot1.set(false);
+    dioSlot2.set(true);
     } else if (ledMode == 6) {
-      dioSlot0.set(true);
-      dioSlot1.set(true);
-      dioSlot2.set(false);
+    dioSlot0.set(true);
+    dioSlot1.set(true);
+    dioSlot2.set(false);
     } else if (ledMode == 7) {
-      dioSlot0.set(true);
-      dioSlot1.set(true);
-      dioSlot2.set(true);
+    dioSlot0.set(true);
+    dioSlot1.set(true);
+    dioSlot2.set(true);
     }
-
   }
 }

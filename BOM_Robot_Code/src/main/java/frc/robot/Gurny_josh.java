@@ -58,7 +58,7 @@ public class Gurny_josh  {
   // NetworkTableEntry driveGurneyEntry;
   SendableChooser<Boolean> front_locked_chooser = new SendableChooser<Boolean>();
   SendableChooser<Boolean> isSafeToRaiseFront = new SendableChooser<Boolean>();
-  private Robot m_Robot = new Robot();
+  // private Robot m_Robot = new Robot();
   
   int hold_position;
   double filtered_error = m_navX.getPitch();
@@ -333,7 +333,7 @@ public class Gurny_josh  {
       hold_position = gBack.getSelectedSensorPosition();
     }
     else if (!disableFront && gBack.getSelectedSensorPosition() > 2648) {
-      m_Robot.ledCom(6);
+      // m_Robot.ledCom(6);
       /* hold position when encoder reads a rotation or so above 0 position
        * 
        * #TODO: replace holdPID with upPID. inconjuction with adding the SS error to 'current_position'
@@ -360,12 +360,12 @@ public class Gurny_josh  {
         front_yaxis = 0.6;
       }
 
-      if (isSafeFront) {
-        m_Robot.ledCom(5);
-        gFront.set(ControlMode.PercentOutput, front_yaxis);
-      } else if (!isSafeFront) {
-        gFront.set(ControlMode.PercentOutput, output);
-      }
+      // if (isSafeFront) {
+      //   m_Robot.ledCom(5);
+      //   gFront.set(ControlMode.PercentOutput, front_yaxis);
+      // } else if (!isSafeFront) {
+      //   gFront.set(ControlMode.PercentOutput, output);
+      // }
      
     }
     else {

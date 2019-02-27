@@ -53,10 +53,10 @@ public class Manipulator  {
                                                     .withWidget(BuiltInWidgets.kToggleButton)
                                                     .getEntry();
   NetworkTableEntry grabberStateEntry = tab.add("Disc Up/Down State", grabState)
-                                           .getEntry();
+                                            .withPosition(1, 3).getEntry();
 
   NetworkTableEntry dualActionGrabberEntry = tab.add("Disc In/Out State", inOutState)
-                                                .getEntry();
+                                                .withPosition(2, 3).getEntry();
                                                
 
 
@@ -68,7 +68,6 @@ public class Manipulator  {
     testMode.add("Manip Closed Loop Enable", Enable_OR_Disable)
             .withWidget(BuiltInWidgets.kSplitButtonChooser)
             .withSize(2,1);
-
 
     m_joy = j;
 
@@ -87,46 +86,36 @@ public class Manipulator  {
     dualActionGrabber.set(DoubleSolenoid.Value.kReverse);
     inOutState = "Out";
     
+    manipulator = false;
+    motorForLoop = false;
+    motorBackLoop = false;
   }
 
   public void talonConfig() {
     manipUpDown.configFactoryDefault();
     manipWheels.configClosedloopRamp(0.1);
-    manipUpDown.setSensorPhase(false);
+    manipUpDown.setSensorPhase(true);
     manipUpDown.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
     manipUpDown.setNeutralMode(NeutralMode.Coast);
-    manipUpDown.configForwardSoftLimitThreshold(1000);
+    manipUpDown.configForwardSoftLimitThreshold(-50);
     manipUpDown.configForwardSoftLimitEnable(true);
-    manipUpDown.configReverseSoftLimitThreshold(0);
+    // this reverse limit is working, gravity takes over and lets it fall when 
+    // the trigger is pushed, causing the closed loop to deactivate
+    manipUpDown.configReverseSoftLimitThreshold(-1400);
     manipUpDown.configReverseSoftLimitEnable(true);
-    manipUpDown.configPeakOutputForward(0.22);
-    manipUpDown.configPeakOutputReverse(-0.40);
+    manipUpDown.configPeakOutputForward(0.3);
+    manipUpDown.configPeakOutputReverse(-0.17);
     manipUpDown.configNominalOutputForward(0);
     manipUpDown.configNominalOutputReverse(0);
-  }
-
-  public void robotPeriodic() {
-
-  }
-  
-  public void autonomousInit() {
-    teleopInit();
-  }
-
-
-  
-  public void autonomousPeriodic() {
-    teleopPeriodic();
-
+    manipUpDown.configMotionAcceleration(0);    
+    manipUpDown.configMotionCruiseVelocity(0);
   }
 
   private void resetPID() {
     //Originally 50, 50
-    manipUpDown.configFactoryDefault();
-    manipUpDown.configMotionAcceleration(0);    
-    manipUpDown.configMotionCruiseVelocity(0);
+    // manipUpDown.configFactoryDefault();
 
-    //Originally 0.7
+    //Originally 0
     manipUpDown.config_kP(0, 0);
     manipUpDown.config_kI(0, 0);
     manipUpDown.config_kD(0, 0);
@@ -135,23 +124,32 @@ public class Manipulator  {
   }
 
   private void setUpPID() {
-    //Originally 50, 50
-    manipUpDown.configMotionAcceleration(50);    
-    manipUpDown.configMotionCruiseVelocity(50);
 
     //Originally 0.7
-    manipUpDown.config_kP(0, 0.7);
+    manipUpDown.config_kP(0, 0.65);
     manipUpDown.config_kI(0, 0);
     manipUpDown.config_kD(0, 0);
     manipUpDown.config_kF(0, 0);
     manipUpDown.config_IntegralZone(0, 100);
   }
 
-  public void teleopInit() {
+  public void robotPeriodic() {
+
+  }
+  
+  public void autonomousInit() {
     manipulator = false;
     motorForLoop = false;
     motorBackLoop = false;
     talonConfig();
+  }
+
+  public void autonomousPeriodic() {
+    teleopPeriodic();
+
+  }
+
+  public void teleopInit() {
 
   }
   
@@ -161,43 +159,46 @@ public class Manipulator  {
       grabEncoderResetEntry.setBoolean(false);
     }
 
+    // disk grabber flippy thing
     if (m_joy.getRawButtonReleased(Constants.discGrabber)) {
-      if (grabber.get() == (Value.kForward)) {
+      if (grabber.get() == (Value.kForward) && inOutState == "In") {
         grabber.set(DoubleSolenoid.Value.kReverse);
-        grabState = "Down";
-        //currentDiscGrabberState.setString(out);
-      } else if (grabber.get() == (Value.kReverse)) {
-        grabber.set(DoubleSolenoid.Value.kForward);
         grabState = "Up";
-        //currentDiscGrabberState.setString(in);
+        // currentDiscGrabberState.setString("out");
+      } else if (grabber.get() == (Value.kReverse) && manipUpDown.getSelectedSensorPosition() > -400) {
+        grabber.set(DoubleSolenoid.Value.kForward);
+        grabState = "Down";
+        // .setString(grabState);
       }
     }
 
+    // disk pusher
     if (m_joy.getRawButtonReleased(Constants.dualActionGrabber)) {
       if (dualActionGrabber.get() == (Value.kForward)) {
         dualActionGrabber.set(DoubleSolenoid.Value.kReverse);
         inOutState = "In";
-      } else if (dualActionGrabber.get() == (Value.kReverse)) {
+      } else if (dualActionGrabber.get() == (Value.kReverse) && grabState == "Down" && manipUpDown.getSelectedSensorPosition() > -400) {
         dualActionGrabber.set(DoubleSolenoid.Value.kForward);
         inOutState = "Out";
       }
     }
 
-    // setUpPID();
-    // if (m_joy.getRawAxis(Constants.manipulatorUp) < 0.1 && m_joy.getRawAxis(Constants.manipulatorDown) < 0.1) {
-    //   manipUpDown.set(ControlMode.Position, hold_position);
-    // }
-    // else if (m_joy.getRawAxis(Constants.manipulatorUp) < 0.1) {
-    //   manipUpDown.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.manipulatorDown));
-    //   hold_position = manipUpDown.getSelectedSensorPosition();
-    //   if (hold_position < 0) hold_position = 0;
-    // }
-    // else if (m_joy.getRawAxis(Constants.manipulatorDown) < 0.1) {
-    //   manipUpDown.set(ControlMode.PercentOutput, -1 * m_joy.getRawAxis(Constants.manipulatorUp));
-    //   hold_position = manipUpDown.getSelectedSensorPosition();
-    // }
-
-      
+    // manipulator arms
+    if (m_joy.getRawAxis(Constants.manipulatorUp) < 0.1 && m_joy.getRawAxis(Constants.manipulatorDown) < 0.1) {
+      manipUpDown.set(ControlMode.Position, hold_position);
+      // manipUpDown.set(ControlMode.PercentOutput, 0);
+    }
+    else if (m_joy.getRawAxis(Constants.manipulatorUp) < 0.1 && inOutState == "In" && grabState == "Up") {
+      manipUpDown.set(ControlMode.PercentOutput, -1 * m_joy.getRawAxis(Constants.manipulatorDown));
+      hold_position = manipUpDown.getSelectedSensorPosition();
+    }
+    else if (m_joy.getRawAxis(Constants.manipulatorDown) < 0.1) {
+      manipUpDown.set(ControlMode.PercentOutput, 1 * m_joy.getRawAxis(Constants.manipulatorUp));
+      hold_position = manipUpDown.getSelectedSensorPosition();
+      if (hold_position > -50) hold_position = -60;
+    }
+ 
+    // ball grabber wheels
     if (!manipulator && !manipulator2) {
       motorGo = 0;
     }
@@ -221,7 +222,6 @@ public class Manipulator  {
       motorBackLoop = false;
     }
 
-    
     if (motorGo == 0) {
       manipWheels.set(ControlMode.PercentOutput, 0);
     }else if (motorGo == 1) {
@@ -229,13 +229,9 @@ public class Manipulator  {
     } else if (motorGo == 2) {
       manipWheels.set(ControlMode.PercentOutput, -0.5);
     }
-
-      
-
   }
 
   public void report() {
-    
     SmartDashboard.putNumber("Grab Encoder", manipUpDown.getSelectedSensorPosition());
 
     grabberStateEntry.setString(grabState);
