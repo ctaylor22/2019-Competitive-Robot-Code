@@ -53,6 +53,8 @@ public class Constants {
     // drive elevator up
     public static int elevatorUp = 3;
 
+    public static int elevMode = 6;
+
 
 // buttons
     // Y button

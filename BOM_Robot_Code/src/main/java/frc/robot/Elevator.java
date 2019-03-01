@@ -30,6 +30,9 @@ public class Elevator  {
   Joystick m_joy;
   int mode = 0;
   boolean posTog = false;
+  String elevModeString = "Error";
+  boolean elevMode = false;
+  
 
   // private Robot m_Robot = new Robot();
 
@@ -43,7 +46,8 @@ public class Elevator  {
    * #TODO: replace heights with competition heights (for disks and balls)
    */
   // used for the elevator index
-  int heights[] = new int[]{10, 2000, 4000, 6000, 8000, 9500, 11000, 15000, 17000};
+  // 0, 1, 2, 3, 4, 5, 6, 7, 8                        Hatch Mode = 0, 2, 4, 8       Ball Mode = 0, 3, 5, 8
+  int heights[] = new int[]{10, 4300, 5000, 6000, 8000, 9500, 11000, 15000, 17000};
   Integer previous_index = 0;
   Integer target_height_index = 0;
 
@@ -54,12 +58,6 @@ public class Elevator  {
                                                 .getEntry();
 
   ShuffleboardTab maxSpeedTab = Shuffleboard.getTab("Beginning Game");
-  NetworkTableEntry elevatorSpeed_Entry = maxSpeedTab.add("Elevator Manual Speed", 0.5)
-                                                    .withWidget(BuiltInWidgets.kNumberSlider)
-                                                    .withProperties(Map.of("Min", 0, "minimum", 0.3, "Block increment", 0.1))
-                                                    .withPosition(3, 0)
-                                                    .withSize(2, 1)
-                                                    .getEntry();
 
   // encoder position in sensor units                                                  
   NetworkTableEntry elevatorEncoderPosition_Entry = maxSpeedTab.add("Elev Encoder Position", 0)
@@ -100,12 +98,12 @@ public class Elevator  {
      * start with x10 kP and increase
      * kD is not always useful
      */
-    m_elevator.configMotionAcceleration(5000);    
-    m_elevator.configMotionCruiseVelocity(600);
+    m_elevator.configMotionAcceleration(9000);    
+    m_elevator.configMotionCruiseVelocity(11000);
 
-    m_elevator.config_kP(0, 0.45); // new motor..... Comp bot last run
+    m_elevator.config_kP(0, 2.5);
     m_elevator.config_kI(0, 0);
-    m_elevator.config_kD(0, 140); //180 Comp bot last run
+    m_elevator.config_kD(0, 180);
     m_elevator.config_IntegralZone(0, 600);
   }
 
@@ -120,30 +118,26 @@ public class Elevator  {
     // see 'else' statement of the 'if(target_height_index != previous_index)' statement for potential fix
 
     // increase these if necessary 
-    m_elevator.configMotionAcceleration(5000);    
-    m_elevator.configMotionCruiseVelocity(600);
+    m_elevator.configMotionAcceleration(9000);    
+    m_elevator.configMotionCruiseVelocity(10000);
     
     /* start with a very, very low kP since gravity helps a lot on the way down
      * kP = (percent_applied * 1023) / error
      * kP = (0.1 * 1023) / 15000     <-- .1 motor output when there is 15000 units of error
      * kP ~= 0.0068 ~= 0.006
      */
-    m_elevator.config_kP(0, 0.05);
+    m_elevator.config_kP(0, 0.15);
     m_elevator.config_kI(0, 0);
-    m_elevator.config_kD(0, 100);
+    m_elevator.config_kD(0, 20);
     m_elevator.config_IntegralZone(0, 0);
   }
 
   public void robotInit(Joystick j) {
     m_elevator = new WPI_TalonSRX(RobotMap.elevator);
+    m_elevator.setSafetyEnabled(false);
     m_elevator.configFactoryDefault();
-    m_elevator.setSafetyEnabled(true);
-    m_elevator.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 20);
-    m_elevator.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 20);
-
     m_elevator.setSensorPhase(true);
     m_elevator.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
-    m_elevator.setSelectedSensorPosition(0);
     m_elevator.configClosedloopRamp(0);
     m_elevator.configAllowableClosedloopError(0, 0, 0);
 
@@ -154,12 +148,10 @@ public class Elevator  {
 
     m_elevator.configNominalOutputForward(0);
     m_elevator.configNominalOutputReverse(0);
-    m_elevator.configPeakOutputForward(0.6);
-    m_elevator.configPeakOutputReverse(-0.3);
-    m_elevator.configContinuousCurrentLimit(10);
-    m_elevator.configPeakCurrentLimit(14);
+    // m_elevator.configContinuousCurrentLimit(10);
+    // m_elevator.configPeakCurrentLimit(14);
     m_elevator.configPeakCurrentDuration(2000);
-    m_elevator.enableCurrentLimit(true);
+    m_elevator.enableCurrentLimit(false);
 
 
     // add position options to chooser
@@ -186,7 +178,6 @@ public class Elevator  {
   }
 
   public void autonomousInit() {
-    m_elevator.setSelectedSensorPosition(0);
     teleopInit();
 
   }
@@ -202,6 +193,9 @@ public class Elevator  {
   }
   
   public void teleopPeriodic() {
+    if (m_joy.getRawButtonReleased(Constants.elevMode)) {
+      elevMode = !elevMode;
+    }
     if (m_joy.getRawButtonReleased(Constants.elevatorBot)) {
       target_height_index = 0;
     } else if (m_joy.getRawButtonReleased(Constants.elevatorMid)) {
@@ -211,6 +205,7 @@ public class Elevator  {
     } else if (m_joy.getRawButtonReleased(Constants.elevatorTop)) {
       target_height_index = 8;
     }
+
 
     // if (target_height_index != 0) {
     //   m_Robot.ledCom(3);
@@ -256,12 +251,25 @@ public class Elevator  {
     elevatorEncoderPosition_Entry.setDouble(m_elevator.getSelectedSensorPosition(0));
     targetHeightIndexEntry.setDouble(target_height_index);
     elevatorVoltageEntry.setDouble(m_elevator.getMotorOutputVoltage());
-    elevatorCurrentEntry.setDouble(m_elevator.getOutputCurrent());        
+    elevatorCurrentEntry.setDouble(m_elevator.getOutputCurrent());
+    SmartDashboard.putNumber("Elevator Encoder", m_elevator.getSelectedSensorPosition());
   }
 
 
   
   public void testPeriodic() {
+        // if left trigger is not on, the set elevator with right trigger
+    if (m_joy.getRawAxis(Constants.elevatorDown) < 0.02) {
+      m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.elevatorUp) * 0.3);
+    } 
+    // // if right trigger is not on, set elevator with left trigger
+    else if (m_joy.getRawAxis(Constants.elevatorUp) < 0.02) {
+      m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.elevatorDown) * -1 * 0.3);
+    }
+
+    if (m_joy.getRawButtonReleased(1)) {
+      m_elevator.setSelectedSensorPosition(0);
+    }
 
   }
 

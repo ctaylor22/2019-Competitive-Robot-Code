@@ -63,21 +63,7 @@ public class Gurny_josh  {
   int hold_position;
   double filtered_error = m_navX.getPitch();
 
-  NetworkTableEntry frontGurneyEntry = gurneyTab.add("Front Speed", 0.5)
-                                        .withWidget(BuiltInWidgets.kNumberSlider)
-                                        .withPosition(0, 2)
-                                        .withSize(2, 1)
-                                        .getEntry();
-  NetworkTableEntry backGurneyEntry = gurneyTab.add("Back Speed", 0.5)
-                                        .withWidget(BuiltInWidgets.kNumberSlider)
-                                        .withPosition(2, 2)
-                                        .withSize(2, 1)
-                                        .getEntry();
-  NetworkTableEntry driveGurneyEntry = gurneyTab.add("Drive Speed", 0.5)
-                                        .withWidget(BuiltInWidgets.kNumberSlider)
-                                        .withPosition(4, 2)
-                                        .withSize(2, 1)
-                                        .getEntry();
+
 
   NetworkTableEntry gurneyEncoderEntry = gurneyTab.add("Gurney Encoder", 0)
   .withWidget(BuiltInWidgets.kTextView)
@@ -111,7 +97,6 @@ public class Gurny_josh  {
 
     gBack.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
     gBack.setSensorPhase(true);
-    gBack.setSelectedSensorPosition(0);
     hold_position = gBack.getSelectedSensorPosition();
     gBack.configNominalOutputForward(0);
     gBack.configNominalOutputReverse(0);
@@ -264,12 +249,9 @@ public class Gurny_josh  {
     // if (m_joy.getRawButton(Constants.gContinueRoutine)) {
     //   climbing = true;
     //   climbingstage = 0;
-    if (m_joy.getRawButton(Constants.gurneyEncoderReset)) {
-      gBack.setSelectedSensorPosition(0);
-    }
 
     // drive
-    double dashSpeed = driveGurneyEntry.getDouble(0.6);
+
     gDrive.set(ControlMode.PercentOutput, deadband(m_joy.getRawAxis(1)) * 0.5);
     
     // add low pass filtered error
@@ -383,6 +365,30 @@ public class Gurny_josh  {
       gBack.set(ControlMode.PercentOutput, front_yaxis);
     }
   }
+  public void report() {
+    gurneyPitchEntry.setDouble(m_navX.getPitch());
+    gurneyEncoderEntry.setDouble(gBack.getSelectedSensorPosition());
+    isSafetoRaiseFrontEntry.setBoolean(isSafeFront);
+    disableFrontEntry.setBoolean(disableFront);
+    SmartDashboard.putNumber("Back Gurney Encoder", gBack.getSelectedSensorPosition());
+  }
+
+  public void testInit() {
+  }
+  
+  public void testPeriodic() {
+    gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(1) * -1 * 0.2);
+    gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(2) * 0.2);
+    if (m_joy.getRawButtonReleased(5)) {
+      gBack.setSelectedSensorPosition(0);
+    }
+
+    if (m_joy.getRawButton(7)) {
+      gDrive.set(ControlMode.PercentOutput, 0.2);
+    } else if (!m_joy.getRawButton(7)){
+      gDrive.set(ControlMode.PercentOutput, 0);
+    }
+  }
 
 
 
@@ -395,7 +401,7 @@ public class Gurny_josh  {
 
 
 
-
+//NOT USED FUNCTIONS
 
 
 
@@ -464,18 +470,7 @@ public class Gurny_josh  {
       hold_position = gBack.getSelectedSensorPosition();
   }
 
-  public void report() {
-    gurneyPitchEntry.setDouble(m_navX.getPitch());
-    gurneyEncoderEntry.setDouble(gBack.getSelectedSensorPosition());
-    isSafetoRaiseFrontEntry.setBoolean(isSafeFront);
-    disableFrontEntry.setBoolean(disableFront);
-  }
-
-  public void testInit() {
-  }
   
-  public void testPeriodic() {
-  }
 
   private double low_pass(double input, double output) {
     output = output + 0.85 * (input - output);

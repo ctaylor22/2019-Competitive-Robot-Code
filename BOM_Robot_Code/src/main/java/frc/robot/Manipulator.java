@@ -78,7 +78,6 @@ public class Manipulator  {
     manipUpDown = new TalonSRX(RobotMap.manipUpDown);
 
     talonConfig();
-    manipUpDown.setSelectedSensorPosition(0);
     setUpPID();
     
     grabber.set(DoubleSolenoid.Value.kReverse);
@@ -150,24 +149,21 @@ public class Manipulator  {
   }
 
   public void teleopInit() {
+    manipUpDown.setSelectedSensorPosition(0);
 
   }
   
   public void teleopPeriodic() {
-    if (grabEncoderResetEntry.getBoolean(true)) {
-      manipUpDown.setSelectedSensorPosition(0);
-      grabEncoderResetEntry.setBoolean(false);
-    }
 
     // disk grabber flippy thing
     if (m_joy.getRawButtonReleased(Constants.discGrabber)) {
-      if (grabber.get() == (Value.kForward) && inOutState == "In") {
-        grabber.set(DoubleSolenoid.Value.kReverse);
-        grabState = "Up";
-        // currentDiscGrabberState.setString("out");
-      } else if (grabber.get() == (Value.kReverse) && manipUpDown.getSelectedSensorPosition() > -400) {
+      if (grabber.get() == (Value.kReverse) && dualActionGrabber.get() == (Value.kReverse)) {
         grabber.set(DoubleSolenoid.Value.kForward);
         grabState = "Down";
+        // currentDiscGrabberState.setString("out");
+      } else if (grabber.get() == (Value.kForward)) {
+        grabber.set(DoubleSolenoid.Value.kReverse);
+        grabState = "Up";
         // .setString(grabState);
       }
     }
@@ -176,10 +172,10 @@ public class Manipulator  {
     if (m_joy.getRawButtonReleased(Constants.dualActionGrabber)) {
       if (dualActionGrabber.get() == (Value.kForward)) {
         dualActionGrabber.set(DoubleSolenoid.Value.kReverse);
-        inOutState = "In";
-      } else if (dualActionGrabber.get() == (Value.kReverse) && grabState == "Down" && manipUpDown.getSelectedSensorPosition() > -400) {
-        dualActionGrabber.set(DoubleSolenoid.Value.kForward);
         inOutState = "Out";
+      } else if (dualActionGrabber.get() == (Value.kReverse) && grabber.get() == (Value.kReverse)) {
+        dualActionGrabber.set(DoubleSolenoid.Value.kForward);
+        inOutState = "In";
       }
     }
 
@@ -188,9 +184,10 @@ public class Manipulator  {
       manipUpDown.set(ControlMode.Position, hold_position);
       // manipUpDown.set(ControlMode.PercentOutput, 0);
     }
-    else if (m_joy.getRawAxis(Constants.manipulatorUp) < 0.1 && inOutState == "In" && grabState == "Up") {
+    else if (m_joy.getRawAxis(Constants.manipulatorUp) < 0.1) {
       manipUpDown.set(ControlMode.PercentOutput, -1 * m_joy.getRawAxis(Constants.manipulatorDown));
       hold_position = manipUpDown.getSelectedSensorPosition();
+      
     }
     else if (m_joy.getRawAxis(Constants.manipulatorDown) < 0.1) {
       manipUpDown.set(ControlMode.PercentOutput, 1 * m_joy.getRawAxis(Constants.manipulatorUp));
@@ -242,16 +239,14 @@ public class Manipulator  {
   
   public void testPeriodic() {
     resetPID();
-    if (m_joy.getRawButton(2)) {
-      manipUpDown.set(ControlMode.PercentOutput, 0.2);
-    } else if (m_joy.getRawButton(4)) {
-      manipUpDown.set(ControlMode.PercentOutput, -0.2);
-    } else {
-      manipUpDown.set(ControlMode.PercentOutput, 0);
+    if (m_joy.getRawAxis(Constants.elevatorUp) < 0.2) {
+      manipUpDown.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.elevatorDown) * 0.3);
+    } else if (m_joy.getRawAxis(Constants.elevatorDown) < 0.2) {
+      manipUpDown.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.elevatorUp) * -1 * 0.3);
     }
     if (m_joy.getRawButtonReleased(1)) {
       manipUpDown.setSelectedSensorPosition(0);
-    }
+    } 
 
   }
 }

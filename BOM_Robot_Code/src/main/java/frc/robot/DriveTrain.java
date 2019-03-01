@@ -74,56 +74,18 @@ public class DriveTrain  {
   ShuffleboardTab tab = Shuffleboard.getTab("Beginning Game");
 
   ShuffleboardTab motor = Shuffleboard.getTab("Motors");
-
-  NetworkTableEntry rightMasterOnOffCheck = motor.add("Right Master", true)
-                                               .withWidget(BuiltInWidgets.kToggleSwitch)
-                                               .withPosition(0, 0)
-                                               .getEntry();
-  NetworkTableEntry rightSlave1OnOffCheck = motor.add("Right Slave 1", true)
-                                               .withWidget(BuiltInWidgets.kToggleSwitch)
-                                               .withPosition(0, 1)
-                                               .getEntry();
-  NetworkTableEntry rightSlave2OnOffCheck = motor.add("Right Slave 2", true)
-                                               .withWidget(BuiltInWidgets.kToggleSwitch)
-                                               .withPosition(0, 2)
-                                               .getEntry();
-  NetworkTableEntry leftMasterOnOffCheck = motor.add("Left Master", true)
-                                               .withWidget(BuiltInWidgets.kToggleSwitch)
-                                               .withPosition(1, 0)
-                                               .getEntry();
-  NetworkTableEntry leftSlave1OnOffCheck = motor.add("Left Slave 1", true)
-                                               .withWidget(BuiltInWidgets.kToggleSwitch)
-                                               .withPosition(1, 1)
-                                               .getEntry();
-  NetworkTableEntry leftSlave2OnOffCheck = motor.add("Left Slave 2", true)
-                                               .withWidget(BuiltInWidgets.kToggleSwitch)
-                                               .withPosition(1, 2)
-                                               .getEntry();
+  
 
   NetworkTableEntry rightEncoderEntry = tab.add("Right Encoder", 0)
                                            .withSize(1, 1)
                                            .withPosition(1, 1) 
                                            .getEntry();
-  NetworkTableEntry currentGearEntry = tab.add("Current Gear", lowGear)
-                                          .withSize(2, 1)
-                                          .withPosition(0, 2)
-                                          .getEntry();
+
   NetworkTableEntry leftEncoderEntry = tab.add("Left Encoder", 0)
                                           .withSize(1, 1)
                                           .withPosition(0, 1)
                                           .getEntry();
-  NetworkTableEntry driveSpeedEntry = tab.add("Drive Speed", 0.5)
-                                          .withSize(2, 1)
-                                          .withPosition(0, 0)
-                                          .withWidget(BuiltInWidgets.kNumberSlider)
-                                          .withProperties(Map.of("Min", 0, "Max", 1))
-                                          .getEntry();
 
-    NetworkTableEntry leftEncoderVelocityEntry = tab.add("Left Velocity", 0)
-                                                    .withSize(1,1)
-                                                    .withPosition(0, 3)
-                                                    .withWidget(BuiltInWidgets.kTextView)
-                                                    .getEntry();
 
   double[][] paths = {{2.0, 300.0, 3.0, 1.0, 90.0, 1.0}/*,
                       {0.0, 100.0, 3.0}*/};
@@ -369,10 +331,9 @@ public class DriveTrain  {
   }
 
   public void report() {
-    driveSpeed = driveSpeedEntry.getDouble(0.5);
+    
     rightEncoderEntry.setDouble(m_rMaster.getSelectedSensorPosition());
     leftEncoderEntry.setDouble(m_lMaster.getSelectedSensorPosition());
-    leftEncoderVelocityEntry.setDouble(m_lMaster.getSelectedSensorVelocity(0));
 
     SmartDashboard.putNumber("Sensor Velocity", m_rMaster.getSelectedSensorVelocity());
   }
