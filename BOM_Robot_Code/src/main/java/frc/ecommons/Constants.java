@@ -68,9 +68,9 @@ public class Constants {
 
     //Preset Encoder Pos
     public static int elevatorBot = 1;
-    public static int elevatorMid = 2;
+    public static int elevatorMid = 3;
     public static int elevatorTop = 4;
-    public static int elevatorCargo = 3;
+    public static int elevatorCargo = 2;
 
 
 

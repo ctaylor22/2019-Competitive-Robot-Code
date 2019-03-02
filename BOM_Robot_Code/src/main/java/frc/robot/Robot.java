@@ -47,7 +47,7 @@ public class Robot extends TimedRobot {
   Joystick m_gJoy;
   Joystick m_eJoy;
   Compressor m_comp;
-  Boolean compLoop = false;
+  //Boolean compLoop = false;
   UsbCamera camera;
   
   int ledMode = 0;
@@ -76,9 +76,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    // camera = CameraServer.getInstance().startAutomaticCapture();
-    // ShuffleboardContainer cameraConstainer = tab.add(SendableCameraWrapper.wrap());
-    // cameraWidget = tab.add(camera).withPosition(5, 1).withSize(4, 3);
+    camera = CameraServer.getInstance().startAutomaticCapture();
+
+    cameraWidget = tab.add(camera).withPosition(5, 1).withSize(4, 3);
     Shuffleboard.selectTab("Beginning Game");
     m_driveJoy = new Joystick(RobotMap.driveJoy);
     pressure = new AnalogInput(0);
@@ -92,9 +92,9 @@ public class Robot extends TimedRobot {
 
     m_comp = new Compressor();
 
-    m_comp.setClosedLoopControl(false);
+    m_comp.setClosedLoopControl(true);
 
-    // CameraServer.getInstance().startAutomaticCapture();
+    //CameraServer.getInstance().startAutomaticCapture();
 
     // DIO config
     dioSlot0.disablePWM();
@@ -154,13 +154,13 @@ public class Robot extends TimedRobot {
     m_Gurny.teleopPeriodic();
     m_Manipulator.teleopPeriodic();
 
-    if (m_driveJoy.getRawButton(Constants.compressor) && compLoop) {
-      compLoop = false;
-      m_comp.setClosedLoopControl(!m_comp.getClosedLoopControl());
-    }
-    if (!m_driveJoy.getRawButton(Constants.compressor)) {
-      compLoop = true;
-    }
+    // if (m_driveJoy.getRawButton(Constants.compressor) && compLoop) {
+    //   compLoop = false;
+    //   m_comp.setClosedLoopControl(!m_comp.getClosedLoopControl());
+    // }
+    // if (!m_driveJoy.getRawButton(Constants.compressor)) {
+    //   compLoop = true;
+    // }
   }
 
   @Override

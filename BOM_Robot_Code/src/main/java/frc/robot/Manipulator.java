@@ -80,14 +80,15 @@ public class Manipulator  {
     talonConfig();
     setUpPID();
     
-    grabber.set(DoubleSolenoid.Value.kReverse);
+    grabber.set(DoubleSolenoid.Value.kForward);
     grabState = "Up";
     dualActionGrabber.set(DoubleSolenoid.Value.kReverse);
     inOutState = "Out";
     
     manipulator = false;
+
     motorForLoop = false;
-    motorBackLoop = false;
+    motorBackLoop = false; 
   }
 
   public void talonConfig() {
@@ -140,7 +141,6 @@ public class Manipulator  {
     manipulator = false;
     motorForLoop = false;
     motorBackLoop = false;
-    talonConfig();
   }
 
   public void autonomousPeriodic() {
@@ -149,7 +149,7 @@ public class Manipulator  {
   }
 
   public void teleopInit() {
-    manipUpDown.setSelectedSensorPosition(0);
+    setUpPID();
 
   }
   
@@ -159,11 +159,11 @@ public class Manipulator  {
     if (m_joy.getRawButtonReleased(Constants.discGrabber)) {
       if (grabber.get() == (Value.kReverse) && dualActionGrabber.get() == (Value.kReverse)) {
         grabber.set(DoubleSolenoid.Value.kForward);
-        grabState = "Down";
+        grabState = "Up";
         // currentDiscGrabberState.setString("out");
       } else if (grabber.get() == (Value.kForward)) {
         grabber.set(DoubleSolenoid.Value.kReverse);
-        grabState = "Up";
+        grabState = "Down";
         // .setString(grabState);
       }
     }
@@ -172,10 +172,10 @@ public class Manipulator  {
     if (m_joy.getRawButtonReleased(Constants.dualActionGrabber)) {
       if (dualActionGrabber.get() == (Value.kForward)) {
         dualActionGrabber.set(DoubleSolenoid.Value.kReverse);
-        inOutState = "Out";
+        inOutState = "In";
       } else if (dualActionGrabber.get() == (Value.kReverse) && grabber.get() == (Value.kReverse)) {
         dualActionGrabber.set(DoubleSolenoid.Value.kForward);
-        inOutState = "In";
+        inOutState = "Out";
       }
     }
 

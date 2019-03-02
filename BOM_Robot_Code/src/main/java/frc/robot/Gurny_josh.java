@@ -285,7 +285,7 @@ public class Gurny_josh  {
       double front_kP = 0.1;
       double output = front_kF + (front_kP)*filtered_error;
       if (!isSafeFront && !disableFront) {
-        gFront.set(ControlMode.PercentOutput, output);
+        gFront.set(ControlMode.PercentOutput, -output);
       }
       
 
@@ -308,7 +308,7 @@ public class Gurny_josh  {
       double output = front_kF + (front_kP)*filtered_error;
 
       if (!disableFront && !isSafeFront) {
-        gFront.set(ControlMode.PercentOutput, output);
+        gFront.set(ControlMode.PercentOutput, -output);
       }
       
 
@@ -342,12 +342,12 @@ public class Gurny_josh  {
         front_yaxis = 0.6;
       }
 
-      // if (isSafeFront) {
-      //   m_Robot.ledCom(5);
-      //   gFront.set(ControlMode.PercentOutput, front_yaxis);
-      // } else if (!isSafeFront) {
-      //   gFront.set(ControlMode.PercentOutput, output);
-      // }
+      if (isSafeFront) {
+        // m_Robot.ledCom(5);
+        gFront.set(ControlMode.PercentOutput, -front_yaxis);
+      } else if (!isSafeFront) {
+        gFront.set(ControlMode.PercentOutput, -output);
+      }
      
     }
     else {
@@ -378,7 +378,7 @@ public class Gurny_josh  {
   
   public void testPeriodic() {
     gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(1) * -1 * 0.2);
-    gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(2) * 0.2);
+    gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(5) * 0.2);
     if (m_joy.getRawButtonReleased(5)) {
       gBack.setSelectedSensorPosition(0);
     }

@@ -51,7 +51,6 @@ public class DriveTrain  {
   WPI_VictorSPX m_rSlave1;
   WPI_VictorSPX m_rSlave2;
   WPI_VictorSPX m_lSlave1;
-  WPI_VictorSPX m_lSlave2;
 
   //Solenoids
   DoubleSolenoid dogGearSolenoid;
@@ -101,11 +100,9 @@ public class DriveTrain  {
     m_rSlave1.configFactoryDefault();
     m_rSlave2.configFactoryDefault();
     m_lSlave1.configFactoryDefault();
-    m_lSlave2.configFactoryDefault();
     m_rSlave1.follow(m_rMaster);
     m_rSlave2.follow(m_rMaster);
     m_lSlave1.follow(m_lMaster);
-    m_lSlave2.follow(m_lMaster);  
     //Motors go right way
     m_rMaster.setSensorPhase(false);
     m_lMaster.setSensorPhase(false);
@@ -120,12 +117,10 @@ public class DriveTrain  {
 
     m_lMaster.setInverted(false);
     m_lSlave1.setInverted(InvertType.FollowMaster);
-    m_lSlave2.setInverted(InvertType.FollowMaster);
 
     m_rMaster.setNeutralMode(NeutralMode.Brake);
     m_lMaster.setNeutralMode(NeutralMode.Brake);
     m_lSlave1.setNeutralMode(NeutralMode.Brake);
-    m_lSlave2.setNeutralMode(NeutralMode.Brake);
     m_rSlave1.setNeutralMode(NeutralMode.Brake);
     m_rSlave2.setNeutralMode(NeutralMode.Brake);
     
@@ -170,7 +165,6 @@ public class DriveTrain  {
     m_rSlave1 = new WPI_VictorSPX(RobotMap.rSlave1);
     m_rSlave2 = new WPI_VictorSPX(RobotMap.rSlave2);
     m_lSlave1 = new WPI_VictorSPX(RobotMap.lSlave1);
-    m_lSlave2 = new WPI_VictorSPX(RobotMap.lSlave2);
 
     //DoubleSolenoid
     dogGearSolenoid = new DoubleSolenoid(RobotMap.dogGearSolenoid1, RobotMap.dogGearSolenoid2);
@@ -348,7 +342,6 @@ public class DriveTrain  {
   }
   public void testPeriodic() {
     m_lSlave1.follow(m_lMaster);
-    m_lSlave2.follow(m_lMaster);
     m_rSlave1.follow(m_rMaster);
     m_rSlave2.follow(m_rMaster);
 

@@ -12,6 +12,7 @@ import java.util.Map;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.StatusFrame;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -27,6 +28,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Elevator  {
   WPI_TalonSRX m_elevator;
+  VictorSPX m_elevatorFollow;
   Joystick m_joy;
   int mode = 0;
   boolean posTog = false;
@@ -46,8 +48,9 @@ public class Elevator  {
    * #TODO: replace heights with competition heights (for disks and balls)
    */
   // used for the elevator index
+  // ground, low hatch, mid ball, cargo ball, mid hatch, top ball, top hatch
   // 0, 1, 2, 3, 4, 5, 6, 7, 8                        Hatch Mode = 0, 2, 4, 8       Ball Mode = 0, 3, 5, 8
-  int heights[] = new int[]{10, 4300, 5000, 6000, 8000, 9500, 11000, 15000, 17000};
+  int heights[] = new int[]{10, 3500, 4900, 9500, 12400, 14500, 16300};
   Integer previous_index = 0;
   Integer target_height_index = 0;
 
@@ -101,7 +104,7 @@ public class Elevator  {
     m_elevator.configMotionAcceleration(9000);    
     m_elevator.configMotionCruiseVelocity(11000);
 
-    m_elevator.config_kP(0, 2.5);
+    m_elevator.config_kP(0, 2.5); //0.028 Dual 775 Pro
     m_elevator.config_kI(0, 0);
     m_elevator.config_kD(0, 180);
     m_elevator.config_IntegralZone(0, 600);
@@ -133,18 +136,24 @@ public class Elevator  {
   }
 
   public void robotInit(Joystick j) {
+    // m_elevatorFollow = new VictorSPX(RobotMap.elevFollow);
     m_elevator = new WPI_TalonSRX(RobotMap.elevator);
-    m_elevator.setSafetyEnabled(false);
+
+    // m_elevatorFollow.configFactoryDefault();
+    // m_elevatorFollow.follow(m_elevator);
+    m_elevator.setSafetyEnabled(true);
     m_elevator.configFactoryDefault();
     m_elevator.setSensorPhase(true);
     m_elevator.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
-    m_elevator.configClosedloopRamp(0);
+    m_elevator.setSelectedSensorPosition(0);
+    m_elevator.configClosedloopRamp(0.25);
     m_elevator.configAllowableClosedloopError(0, 0, 0);
 
     m_elevator.configForwardSoftLimitEnable(true);
     m_elevator.configReverseSoftLimitEnable(true);
-    m_elevator.configForwardSoftLimitThreshold(17500);
-    m_elevator.configReverseSoftLimitThreshold(500);
+    m_elevator.configForwardSoftLimitThreshold(16400);
+    m_elevator.configReverseSoftLimitThreshold(50);
+    
 
     m_elevator.configNominalOutputForward(0);
     m_elevator.configNominalOutputReverse(0);
@@ -152,6 +161,8 @@ public class Elevator  {
     // m_elevator.configPeakCurrentLimit(14);
     m_elevator.configPeakCurrentDuration(2000);
     m_elevator.enableCurrentLimit(false);
+    // m_elevator.configPeakOutputForward(0.4);
+    // m_elevator.configPeakOutputReverse(-0.05);
 
 
     // add position options to chooser
@@ -199,11 +210,11 @@ public class Elevator  {
     if (m_joy.getRawButtonReleased(Constants.elevatorBot)) {
       target_height_index = 0;
     } else if (m_joy.getRawButtonReleased(Constants.elevatorMid)) {
-      target_height_index = 5;
+      target_height_index = 2;
     } else if (m_joy.getRawButtonReleased(Constants.elevatorCargo)) {
       target_height_index = 3;
     } else if (m_joy.getRawButtonReleased(Constants.elevatorTop)) {
-      target_height_index = 8;
+      target_height_index = 6;
     }
 
 
@@ -215,18 +226,18 @@ public class Elevator  {
 
     // reset encoder with button 7, the small black button in the middle left 
     // 0 position should be with the elevator all the way down
-    if (m_joy.getRawButtonReleased(Constants.elevatorAdd)) {
+    if (m_joy.getRawButtonPressed(6)) {
       target_height_index++;
     }
-    if (m_joy.getRawButtonReleased(Constants.elevatorSub)) {
+    else if (m_joy.getRawButtonReleased(5)) {
       target_height_index--;
     }
     if (target_height_index < 0) {
       target_height_index = 0;
     }
-    if (target_height_index > 8) {
+    if (target_height_index > 6) {
 
-      target_height_index = 8;
+      target_height_index = 6;
     }
 
     int position = getPositionAndSetPID();
@@ -260,7 +271,7 @@ public class Elevator  {
   public void testPeriodic() {
         // if left trigger is not on, the set elevator with right trigger
     if (m_joy.getRawAxis(Constants.elevatorDown) < 0.02) {
-      m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.elevatorUp) * 0.3);
+      m_elevator.set(ControlMode.PercentOutput, m_joy.getRawAxis(Constants.elevatorUp) * 0.5);
     } 
     // // if right trigger is not on, set elevator with left trigger
     else if (m_joy.getRawAxis(Constants.elevatorUp) < 0.02) {
