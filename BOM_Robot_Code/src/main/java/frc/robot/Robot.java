@@ -89,7 +89,7 @@ public class Robot extends TimedRobot {
     m_Elevator.robotInit(m_eJoy);
     m_Gurny.robotInit(m_gJoy);
     m_Manipulator.robotInit(m_driveJoy);
-  //  m_Limelight.robotInit(m_driveJoy); //functions work with gurney, got rid of joystick parameter
+   m_Limelight.robotInit(m_driveJoy); //functions work with gurney, got rid of joystick parameter
 
     m_comp = new Compressor();
 
@@ -108,6 +108,7 @@ public class Robot extends TimedRobot {
     m_Gurny.report();
     m_Manipulator.report();
     m_Manipulator.robotPeriodic();
+    m_Limelight.report();
     pressureEntry.setDouble(pressureCalc);
     compressorEntry.setBoolean(m_comp.getClosedLoopControl());
   }
