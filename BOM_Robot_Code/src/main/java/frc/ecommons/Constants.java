@@ -19,18 +19,19 @@ public class Constants {
     public static int xAxis = 4;
  
 // *** Drive Joystick Buttons ***
+    public static int motorTest = 0;
 
     //B button
     //Toggle the disc grabber
     public static int discGrabber = 2;
+    
     //A Button
     //Dual Action Pneumatic
     public static int dualActionGrabber = 1;
 
-    public static int motorTest = 0;
-
-    // maybe not used depending on manipulator
-    public static int manipUpDownBut = 3;
+    // X
+    // limelight turn
+    public static int limelightAutoTurn = 3;
 
     // toggles manipulator motor
     public static int manipWheelBackToggle = 5;

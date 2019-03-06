@@ -38,7 +38,8 @@ public class DriveTrain  {
   String lowGear = "Low Gear";
   String highGear = "High Gear";
 
-  
+  NetworkTable limelight_table = NetworkTableInstance.getDefault().getTable("limelight"); //LimelightNetworkTable
+
 
   // Joysticks/Controllers
   Joystick m_joy;
@@ -249,30 +250,6 @@ public class DriveTrain  {
 
   public void teleopPeriodic() {
 
-    
-
-    //Dog Gear Shift
-    // if (m_joy.getRawButton(Constants.gearShift) && !dgLoop) {
-
-    //   dgLoop = true;
-    //   Shuffleboard.selectTab("Beginning Game");
-    //   if (dogGearSolenoid.get() == (Value.kForward)) {
-    //     dogGearSolenoid.set(DoubleSolenoid.Value.kReverse);
-        
-    //     currentGearEntry.setString(lowGear);
-    //   } else if (dogGearSolenoid.get() == (Value.kReverse)) {
-    //     dogGearSolenoid.set(DoubleSolenoid.Value.kForward);
-      
-    //     currentGearEntry.setString(highGear);
-    //   }
-
-    // }
-    // if (!m_joy.getRawButton(Constants.gearShift)) {
-    //   dgLoop = false;
-    // }
-
-
-    
     //Equation for ARCADE DRIVE
     double xAxis, yAxis;
     xAxis = 0.35 * m_joy.getRawAxis(Constants.xAxis);
@@ -283,45 +260,36 @@ public class DriveTrain  {
     double leftSide, rightSide;
     rightSide = -(yAxis - xAxis);
     leftSide = yAxis + xAxis;
-
-    // if button not pushed, percent drive
-      m_lMaster.set(ControlMode.PercentOutput, leftSide);
-      m_rMaster.set(ControlMode.PercentOutput, rightSide);
-    // else motion magic 
-    // else {
-    //   int ticksPerRev = 4096;
-    //   int encoderToWheelGearRatio = 6;
-    //   int wheelDiameter = 6;
-    //   int targDistance = 60;  // 5 ft in inches
-    //   double pi = 3.1415;
-    //   double targPos = (yAxis * ticksPerRev * encoderToWheelGearRatio * targDistance) / (wheelDiameter * pi);
-      
-    //   m_lMaster.set(ControlMode.MotionMagic, targPos);
-    //   m_rMaster.set(ControlMode.MotionMagic, -targPos);
-    // }
-    // else {
-
     
-    // if (false) {
-    //   if (rightMasterOnOffCheck.getBoolean(true)) {
-    //     m_rMaster.set(ControlMode.PercentOutput, rightSide * driveSpeed);
-    //   }
-    //   if (leftMasterOnOffCheck.getBoolean(true)) {
-    //     m_lMaster.set(ControlMode.PercentOutput, leftSide * driveSpeed);
-    //   }
-    //   if (rightSlave1OnOffCheck.getBoolean(true)) {
-    //     m_rSlave1.set(ControlMode.PercentOutput, rightSide * driveSpeed);
-    //   }
-    //   if (rightSlave2OnOffCheck.getBoolean(true)) {
-    //     m_rSlave2.set(ControlMode.PercentOutput, rightSide * driveSpeed);
-    //   }
-    //   if (leftSlave1OnOffCheck.getBoolean(true)) {
-    //     m_lSlave1.set(ControlMode.PercentOutput, leftSide * driveSpeed);
-    //   }
-    //   if (leftSlave2OnOffCheck.getBoolean(true)) {
-    //     m_lSlave2.set(ControlMode.PercentOutput, leftSide * driveSpeed);
-    //   }
-    // }   
+    // if button, limelight turn
+    if (m_joy.getRawButton(Constants.limelightAutoTurn) && limelight_table.getEntry("tv").getDouble(0)) {
+      rightSide;
+      leftSide;
+      double limelight_kP = 0.05;
+      double limelight_kF = 0.05;
+      double heading_error = limelight_table.getEntry("tx").getDouble(0.0);
+      double steering_adjust = 0.0;
+      if (Math.abs(heading_error) > 0.05)
+      {
+        steering_adjust = limelight_kP*heading_error + limelight_kF;
+      }
+      // #TODO: check these signs
+      leftSide -= steering_adjust;
+      rightSide -= steering_adjust;
+
+      // clamp the output to +/- 0.7 
+      double min = -.7;
+      double max = 0.7;
+      leftSide = Math.max(min, Math.min(max, leftSide));
+      rightSide = Math.max(min, Math.min(max, rightSide));
+    }
+    // else percent out
+    else {
+      
+    }   
+
+    m_lMaster.set(ControlMode.PercentOutput, leftSide);
+    m_rMaster.set(ControlMode.PercentOutput, rightSide);
   }
 
   public void report() {
