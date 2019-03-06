@@ -252,7 +252,7 @@ public class Gurny_josh  {
 
     // drive
 
-    gDrive.set(ControlMode.PercentOutput, deadband(m_joy.getRawAxis(1)) * 0.5);
+    gDrive.set(ControlMode.PercentOutput, deadband(m_joy.getRawAxis(1)) * 0.6 );
     
     // add low pass filtered error
     // offset is necessary for robot to tilt forward and not tip over
@@ -278,7 +278,7 @@ public class Gurny_josh  {
        */
       setUpPID();
       //Originally 80000
-      gBack.set(ControlMode.MotionMagic, 70000);
+      gBack.set(ControlMode.MotionMagic, 74000);
 
       // accelerometer PID for front
       double front_kF = 0.35;
@@ -378,7 +378,7 @@ public class Gurny_josh  {
   
   public void testPeriodic() {
     gBack.set(ControlMode.PercentOutput, m_joy.getRawAxis(1) * -1 * 0.2);
-    gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(5) * 0.2);
+    gFront.set(ControlMode.PercentOutput, m_joy.getRawAxis(5) * -1 * 0.2);
     if (m_joy.getRawButtonReleased(5)) {
       gBack.setSelectedSensorPosition(0);
     }

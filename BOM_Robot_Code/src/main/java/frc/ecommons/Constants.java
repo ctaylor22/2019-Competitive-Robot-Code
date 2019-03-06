@@ -12,6 +12,8 @@ public class Constants {
     public static int manipulatorUp = 2;
     public static int manipulatorDown = 3;
 
+    public static int manipCargoPreset = 3;
+
     // Right stick X
     // turns
     public static int xAxis = 4;

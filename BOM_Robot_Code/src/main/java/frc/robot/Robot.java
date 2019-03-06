@@ -48,7 +48,8 @@ public class Robot extends TimedRobot {
   Joystick m_eJoy;
   Compressor m_comp;
   //Boolean compLoop = false;
-  UsbCamera camera;
+  UsbCamera camera1;
+  UsbCamera camera2;
   
   int ledMode = 0;
   DigitalOutput dioSlot0 = new DigitalOutput(0);
@@ -66,19 +67,22 @@ public class Robot extends TimedRobot {
                                        .withSize(1, 1)
                                        .getEntry();
   NetworkTableEntry compressorEntry = tab.add("Compressor", false)
-                                         .withPosition(8, 0)
+                                         .withPosition(10, 0)
                                          .withSize(1, 1)
                                          .withWidget(BuiltInWidgets.kBooleanBox)
                                          .getEntry();
 
   NetworkTableEntry cameraEntry;
   ComplexWidget cameraWidget;
+  ComplexWidget cameraWidget2;
 
   @Override
   public void robotInit() {
-    camera = CameraServer.getInstance().startAutomaticCapture();
+    camera1 = CameraServer.getInstance().startAutomaticCapture(0);
+    camera2 = CameraServer.getInstance().startAutomaticCapture(1);
 
-    cameraWidget = tab.add(camera).withPosition(5, 1).withSize(4, 3);
+    cameraWidget = tab.add("Side", camera1).withPosition(5, 3).withSize(4, 3);
+    cameraWidget2 = tab.add("Center", camera2).withPosition(5, 0).withSize(4, 3);
     Shuffleboard.selectTab("Beginning Game");
     m_driveJoy = new Joystick(RobotMap.driveJoy);
     pressure = new AnalogInput(0);

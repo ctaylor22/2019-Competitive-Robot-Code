@@ -50,7 +50,7 @@ public class Elevator  {
   // used for the elevator index
   // ground, low hatch, mid ball, cargo ball, mid hatch, top ball, top hatch
   // 0, 1, 2, 3, 4, 5, 6, 7, 8                        Hatch Mode = 0, 2, 4, 8       Ball Mode = 0, 3, 5, 8
-  int heights[] = new int[]{10, 3500, 4900, 9500, 12400, 14500, 16300};
+  int heights[] = new int[]{10, 3500, 4900, 8700, 12400, 14500, 16300};
   Integer previous_index = 0;
   Integer target_height_index = 0;
 
@@ -136,9 +136,10 @@ public class Elevator  {
   }
 
   public void robotInit(Joystick j) {
-    // m_elevatorFollow = new VictorSPX(RobotMap.elevFollow);
+    m_elevatorFollow = new VictorSPX(RobotMap.elevFollow);
     m_elevator = new WPI_TalonSRX(RobotMap.elevator);
 
+    m_elevatorFollow.follow(m_elevator);
     // m_elevatorFollow.configFactoryDefault();
     // m_elevatorFollow.follow(m_elevator);
     m_elevator.setSafetyEnabled(true);
@@ -189,6 +190,7 @@ public class Elevator  {
   }
 
   public void autonomousInit() {
+    target_height_index = 0;
     teleopInit();
 
   }
@@ -199,7 +201,7 @@ public class Elevator  {
   }
 
   public void teleopInit() {
-    target_height_index = 0;
+    
     m_elevator.set(ControlMode.PercentOutput, 0);
   }
   

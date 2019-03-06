@@ -180,10 +180,13 @@ public class Manipulator  {
     }
 
     // manipulator arms
-    if (m_joy.getRawAxis(Constants.manipulatorUp) < 0.1 && m_joy.getRawAxis(Constants.manipulatorDown) < 0.1) {
+    if (m_joy.getRawButtonReleased(Constants.manipCargoPreset)){
+      hold_position = -740;
+    }
+    else if (m_joy.getRawAxis(Constants.manipulatorUp) < 0.1 && m_joy.getRawAxis(Constants.manipulatorDown) < 0.1) {
       manipUpDown.set(ControlMode.Position, hold_position);
       // manipUpDown.set(ControlMode.PercentOutput, 0);
-    }
+    } 
     else if (m_joy.getRawAxis(Constants.manipulatorUp) < 0.1) {
       manipUpDown.set(ControlMode.PercentOutput, -1 * m_joy.getRawAxis(Constants.manipulatorDown));
       hold_position = manipUpDown.getSelectedSensorPosition();
@@ -193,8 +196,8 @@ public class Manipulator  {
       manipUpDown.set(ControlMode.PercentOutput, 1 * m_joy.getRawAxis(Constants.manipulatorUp));
       hold_position = manipUpDown.getSelectedSensorPosition();
       if (hold_position > -50) hold_position = -60;
+
     }
- 
     // ball grabber wheels
     if (!manipulator && !manipulator2) {
       motorGo = 0;
