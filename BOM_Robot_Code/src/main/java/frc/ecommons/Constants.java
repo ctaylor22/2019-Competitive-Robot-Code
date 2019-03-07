@@ -33,6 +33,10 @@ public class Constants {
     // limelight turn
     public static int limelightAutoTurn = 3;
 
+    // Y
+    // limelight led on
+    public static int limelightLEDon = 4;
+
     // toggles manipulator motor
     public static int manipWheelBackToggle = 5;
     public static int manipWheelForToggle = 6;

@@ -47,7 +47,7 @@ public class Robot extends TimedRobot {
   Joystick m_gJoy;
   Joystick m_eJoy;
   Compressor m_comp;
-  //Boolean compLoop = false;
+  Boolean compLoop = false;
   UsbCamera camera1;
   UsbCamera camera2;
   
@@ -96,7 +96,7 @@ public class Robot extends TimedRobot {
 
     m_comp = new Compressor();
 
-    m_comp.setClosedLoopControl(true);
+    m_comp.setClosedLoopControl(false);
 
     //CameraServer.getInstance().startAutomaticCapture();
 
@@ -158,13 +158,13 @@ public class Robot extends TimedRobot {
     m_Gurny.teleopPeriodic();
     m_Manipulator.teleopPeriodic();
 
-    // if (m_driveJoy.getRawButton(Constants.compressor) && compLoop) {
-    //   compLoop = false;
-    //   m_comp.setClosedLoopControl(!m_comp.getClosedLoopControl());
-    // }
-    // if (!m_driveJoy.getRawButton(Constants.compressor)) {
-    //   compLoop = true;
-    // }
+    if (m_driveJoy.getRawButton(Constants.compressor) && compLoop) {
+      compLoop = false;
+      m_comp.setClosedLoopControl(!m_comp.getClosedLoopControl());
+    }
+    if (!m_driveJoy.getRawButton(Constants.compressor)) {
+      compLoop = true;
+    }
   }
 
   @Override

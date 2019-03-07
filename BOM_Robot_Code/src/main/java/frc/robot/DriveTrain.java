@@ -14,7 +14,9 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
@@ -29,6 +31,8 @@ import frc.ecommons.RobotMap;
 import frc.ecommons.Constants;
 import frc.utilities.TurnRadius;
 
+
+
 // import edu.wpi.first.wpilibj.shuffleboard.BuiltInTypes;
 
 // import edu.wpi.first.wpilibj.shuffleboard;
@@ -39,8 +43,11 @@ public class DriveTrain  {
   String highGear = "High Gear";
 
   NetworkTable limelight_table = NetworkTableInstance.getDefault().getTable("limelight"); //LimelightNetworkTable
-
-
+  double steering_adjust = 0.0;
+  double last_error = 0.0;
+  double heading_error = 0;
+  int limelight_warm_up_counter = 0;
+  
   // Joysticks/Controllers
   Joystick m_joy;
   Joystick m_gJoy;
@@ -75,6 +82,16 @@ public class DriveTrain  {
 
   ShuffleboardTab motor = Shuffleboard.getTab("Motors");
   
+  NetworkTableEntry txEntry = testMode.add("Limelight tx", 0)
+                                  .withPosition(0, 3)
+                                  .withWidget(BuiltInWidgets.kTextView)
+                                  .getEntry();
+
+  NetworkTableEntry steeringEntry = testMode.add("Steering Adjust Output", 0)
+                                  .withPosition(1, 3)
+                                  .withSize(2,1)
+                                  .withWidget(BuiltInWidgets.kTextView)
+                                  .getEntry();
 
   NetworkTableEntry rightEncoderEntry = tab.add("Right Encoder", 0)
                                            .withSize(1, 1)
@@ -261,32 +278,42 @@ public class DriveTrain  {
     rightSide = -(yAxis - xAxis);
     leftSide = yAxis + xAxis;
     
-    // if button, limelight turn
-    if (m_joy.getRawButton(Constants.limelightAutoTurn) && limelight_table.getEntry("tv").getDouble(0)) {
-      rightSide;
-      leftSide;
-      double limelight_kP = 0.05;
-      double limelight_kF = 0.05;
-      double heading_error = limelight_table.getEntry("tx").getDouble(0.0);
-      double steering_adjust = 0.0;
-      if (Math.abs(heading_error) > 0.05)
-      {
-        steering_adjust = limelight_kP*heading_error + limelight_kF;
-      }
-      // #TODO: check these signs
-      leftSide -= steering_adjust;
-      rightSide -= steering_adjust;
-
-      // clamp the output to +/- 0.7 
-      double min = -.7;
-      double max = 0.7;
-      leftSide = Math.max(min, Math.min(max, leftSide));
-      rightSide = Math.max(min, Math.min(max, rightSide));
+    // turn limelight led on
+    if (m_joy.getRawButtonPressed(Constants.limelightLEDon)) {
+      limelight_table.getEntry("ledMode").setNumber(3);
+    } 
+    // auto turn off led if reading a good value and it's within tolerance
+    else if (limelight_table.getEntry("tv").getDouble(0) == 1 && Math.abs(limelight_table.getEntry("tx").getDouble(0)) < 0.05){
+      limelight_table.getEntry("ledMode").setNumber(1);
     }
-    // else percent out
+
+    // if button, limelight turn
+    if (m_joy.getRawButton(Constants.limelightAutoTurn) && limelight_table.getEntry("tv").getDouble(0) == 1) {
+        double limelight_kP = 0.02;
+        double limelight_kF = 0.1;
+        heading_error = limelight_table.getEntry("tx").getDouble(0.0);
+        steering_adjust = 0.0;
+        if (heading_error > 0.5)
+        {
+          steering_adjust = limelight_kP*heading_error + limelight_kF;
+        }
+        else if (heading_error < -0.5) {
+          steering_adjust = limelight_kP*heading_error - limelight_kF;
+        }
+        leftSide += steering_adjust;
+        rightSide += steering_adjust;
+
+        // clamp the output to +/- 0.7 
+        double min = -.5;
+        double max = 0.5;
+        leftSide = Math.max(min, Math.min(max, leftSide));
+        rightSide = Math.max(min, Math.min(max, rightSide));
+    }
+    // else
     else {
-      
+     
     }   
+
 
     m_lMaster.set(ControlMode.PercentOutput, leftSide);
     m_rMaster.set(ControlMode.PercentOutput, rightSide);
@@ -298,6 +325,9 @@ public class DriveTrain  {
     leftEncoderEntry.setDouble(m_lMaster.getSelectedSensorPosition());
 
     SmartDashboard.putNumber("Sensor Velocity", m_rMaster.getSelectedSensorVelocity());
+    
+    txEntry.setDouble(limelight_table.getEntry("tx").getDouble(0.0));
+    steeringEntry.setDouble(steering_adjust);
   }
 
   /**

@@ -265,7 +265,7 @@ public class Elevator  {
     targetHeightIndexEntry.setDouble(target_height_index);
     elevatorVoltageEntry.setDouble(m_elevator.getMotorOutputVoltage());
     elevatorCurrentEntry.setDouble(m_elevator.getOutputCurrent());
-    SmartDashboard.putNumber("Elevator Encoder", m_elevator.getSelectedSensorPosition());
+    // SmartDashboard.putNumber("Elevator Encoder", m_elevator.getSelectedSensorPosition());
   }
 
 
