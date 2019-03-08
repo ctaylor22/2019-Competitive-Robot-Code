@@ -79,12 +79,6 @@ public class Constants {
     public static int elevatorTop = 4;
     public static int elevatorCargo = 2;
 
-
-
-// *** gurney joystick axis ***
-    // Ticks per rotation of the wheels
-    public static double ticksPerRotation = 100;
-
 // *** gurney joystick axis ***
     // Y axis
     public static int gDrive = 1;
@@ -139,6 +133,20 @@ public class Constants {
      //Encoder value to pull the back gurney up to
      public static int gBackUp = 100;
  
+ // *** automatic turning constants ***
+     
+     //Distance from robot wheels to robot center
+     //TODO: Get the real offset in feet
+    public static double wheelOffset = 0;
+
+    //Radius of robot wheels
+    //TODO: Get the real wheel radiuses
+    public static double wheelRadius = 0;
+
+    // Ticks per rotation of the wheels
+    //TODO: Get real value for this
+    public static double ticksPerRotation = 0;
+
  // *** gurney subroutine buttons ***
  
      //Continues the subroutine when the driver is set up

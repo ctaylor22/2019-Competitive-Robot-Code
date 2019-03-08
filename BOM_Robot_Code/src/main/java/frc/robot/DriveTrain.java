@@ -100,16 +100,59 @@ public class DriveTrain  {
 
   NetworkTableEntry leftEncoderEntry = tab.add("Left Encoder", 0)
                                           .withSize(1, 1)
-                                          .withPosition(0, 1)
+                                          .withPosition(0, 4)
+                                          .getEntry();
+
+  NetworkTableEntry rightVelocity = tab.add("Right Speed", 0)
+                                          .withSize(1, 1)
+                                          .withPosition(0, 5)
                                           .getEntry();
 
 
-  double[][] paths = {{2.0, 300.0, 3.0, 1.0, 90.0, 1.0}/*,
-                      {0.0, 100.0, 3.0}*/};
+  NetworkTableEntry leftVelocity = tab.add("Left Speed", 0)
+                                          .withSize(1, 1)
+                                          .withPosition(0, 6)
+                                          .getEntry();
 
-  double[][] motorSpeeds = {{0, 0, 0, 0}};
+  NetworkTableEntry rightPathGoal = tab.add("Right Path Goal", 0)
+                                          .withSize(1, 1)
+                                          .withPosition(0, 7)
+                                          .getEntry();
+
+
+  NetworkTableEntry leftPathGoal = tab.add("Left Path Goal", 0)
+                                          .withSize(1, 1)
+                                          .withPosition(0, 8)
+                                          .getEntry();
+
+
+  //Whether automatic turn radius calculation is active
+  boolean m_isTurning = false;
+
+  //Hard coded paths for sandstorm
+  double[][] paths = {{1, 1, 1}};
+                    //{turnradius, degress, direction}
+
+  //Ratios between the right and left wheels for each piece in the hard coded paths
+  double[] ratios = {0.0};
+
+  //Path which the limelight or another pather can write to
+  double[] path = {0, 0, 0};
+                  //{turnradius, degress, direction}
+
+  //Ratio between right and left wheel spins on current path
+  double ratio = 0;
+
+  //The encoder values at which the robot *thinks* it will reach its target for left and right wheels respectively
+  double[] encoderGoals = {0, 0};
+
+  //The P value at which the robot will try to achive it's encoder goals on its paths
+  //TODO: Tune this!
+  double pPath = 100;
 
   int turnPath = 0;
+
+  final double pi = 3.1415926535897932384626433832;
 
   public void TalonConfig() {
     //Configs Talon to default
@@ -193,20 +236,10 @@ public class DriveTrain  {
   }
 
   public void autonomousInit() {
-    // double[] piece;
-    // for (int ind = 0; ind < paths.length; ind++) {
-    //   piece = paths[ind];
-    //   if (piece[0] != 0) {
-    //     motorSpeeds[ind] = TurnRadius.calculateTurnRadius(piece[0], piece[1], piece[2], piece[3], piece[4], piece[5]);
-    //   } else {
-    //     //Default Velocity
-    //     motorSpeeds[ind][0] = piece[1];
-    //     motorSpeeds[ind][1] = piece[1];
-    //     //Encoder Offset
-    //     motorSpeeds[ind][2] = piece[2];
-    //     motorSpeeds[ind][3] = piece[2];
-    //   }
-    // }
+    //Finds ratios for hard coded paths
+    for (int ind = 0; ind < paths.length; ind++) {
+        ratios[ind] = TurnRadius.turnRadiusRatio(paths[ind][0], Constants.wheelOffset, paths[ind][2]);
+      }
     teleopInit();
   }
   
@@ -215,46 +248,90 @@ public class DriveTrain  {
     teleopPeriodic();
   }
 
-  public void followTurnPath() {
+  public void followHardPaths(int pathnum) {
     if (turnPath == paths.length) {
       turnPath = -1;
-    } else if (turnPath == -1) {
       return;
     } else {
-      if (followPath(turnPath)) {
+      if (followPath()) {
         turnPath += 1;
+        processHardVariables(paths[pathnum]);
       }
     }
   }
 
-  
-  public boolean followPath(int pathNum) {
-    boolean rightIsComplete = false;
-    boolean leftIsComplete = false;
-    double rightEncoderGoal = motorSpeeds[pathNum][2] + m_rMaster.getSelectedSensorPosition();
-    double leftEncoderGoal = motorSpeeds[pathNum][3] + m_lMaster.getSelectedSensorPosition();
-    double righterr = rightEncoderGoal - m_rMaster.getSelectedSensorPosition();
-    double lefterr = leftEncoderGoal - m_lMaster.getSelectedSensorPosition();
-    //Velocity in RPM
-    righterr = rightEncoderGoal - m_rMaster.getSelectedSensorPosition();
-    lefterr = rightEncoderGoal - m_lMaster.getSelectedSensorPosition();
-    if (Math.abs(righterr) <= 10) {
-      m_rMaster.set(ControlMode.Velocity, motorSpeeds[pathNum][0]*(righterr/1000));
-    } else {
-      rightIsComplete = true;
-      m_rMaster.set(ControlMode.PercentOutput, 0);
-    }
-    if (Math.abs(lefterr) <= 10) {
-      m_lMaster.set(ControlMode.Velocity, motorSpeeds[pathNum][1]*(lefterr/1000));
-    } else {
-      leftIsComplete = true;
+  public void getLimelightPath() {
+    /* Writes needed variables to the path array
+     * The array is formatted as {turnradius, degresstoturn, direction}
+     * direction is 1 if right and -1 if left
+     */
+    //TODO: Write code for the limelight to pick up nedded turn path and format it
+
+    //Call this after path list has been written to
+    processPathVariables();
+  }
+
+  public void processPathVariables() {
+    double[] radiuses = {0, 0};
+    double[] distances = {0, 0};
+    //Rotations of the robot's wheels
+    double[] rotations = {0, 0};
+    double radians = path[1]*(pi/180);
+    //Finds ratio between right and left wheels
+    ratio = TurnRadius.turnRadiusRatio(path[0], Constants.wheelOffset, path[2]);
+    //Finds the radius each side will rotate about depending on turn direction
+    radiuses[0] = path[1]+Constants.wheelOffset*path[2];
+    radiuses[1] = path[1]+Constants.wheelOffset*-path[2];
+    //Finds the distance each side will travel
+    distances[0] = radiuses[0]*(2*pi)*radians;
+    distances[1] = radiuses[1]*(2*pi)*radians;
+    //Finds how many rotations will be needed for wheels on each side
+    rotations[0] = distances[0]/(2*pi*Constants.wheelRadius);
+    rotations[1] = distances[1]/(2*pi*Constants.wheelRadius);
+    //Calculates the encoder goals
+    encoderGoals[0] = (int) m_lMaster.getSelectedSensorPosition()+Constants.ticksPerRotation*rotations[0];
+    encoderGoals[1] = (int) m_rMaster.getSelectedSensorPosition()+Constants.ticksPerRotation*rotations[1];
+  }
+
+  public void processHardVariables(double[] pathlist) {
+    double[] radiuses = {0, 0};
+    double[] distances = {0, 0};
+    //Rotations of the robot's wheels
+    double[] rotations = {0, 0};
+    double radians = pathlist[1]*(pi/180);
+    ratio = TurnRadius.turnRadiusRatio(pathlist[0], Constants.wheelOffset, pathlist[2]);
+    radiuses[0] = pathlist[1]+Constants.wheelOffset*pathlist[2];
+    radiuses[1] = pathlist[1]+Constants.wheelOffset*-pathlist[2];
+    distances[0] = radiuses[0]*(2*pi)*radians;
+    distances[1] = radiuses[1]*(2*pi)*radians;
+    rotations[0] = distances[0]/(2*pi*Constants.wheelRadius);
+    rotations[1] = distances[1]/(2*pi*Constants.wheelRadius);
+    encoderGoals[0] = (int) m_lMaster.getSelectedSensorPosition()+Constants.ticksPerRotation*rotations[0];
+    encoderGoals[1] = (int) m_rMaster.getSelectedSensorPosition()+Constants.ticksPerRotation*rotations[1];
+  }
+
+  public boolean followPath() {
+    double leftVelocity;
+    double rightVelocity;
+    double lefterr = encoderGoals[0] - m_lMaster.getSelectedSensorPosition();
+    double righterr = encoderGoals[1] - m_rMaster.getSelectedSensorPosition();
+    rightVelocity = ratio*righterr*pPath;
+    leftVelocity = 1*lefterr*pPath;
+    if (righterr > 1 && lefterr > 1) {
+      m_rMaster.set(ControlMode.PercentOutput, rightVelocity);
+      m_lMaster.set(ControlMode.PercentOutput, leftVelocity);
+    } else if (righterr > 1) {
+      m_rMaster.set(ControlMode.PercentOutput, rightVelocity);
       m_lMaster.set(ControlMode.PercentOutput, 0);
-    }
-    if (rightIsComplete && leftIsComplete) {
-      return true;
+    } else if (lefterr > 1) {
+      m_rMaster.set(ControlMode.PercentOutput, 0);
+      m_lMaster.set(ControlMode.PercentOutput, leftVelocity);
     } else {
-      return false;
+      m_rMaster.set(ControlMode.PercentOutput, 0);
+      m_lMaster.set(ControlMode.PercentOutput, 0);
+      return true;
     }
+    return false;
   }
 
   /**
@@ -308,7 +385,12 @@ public class DriveTrain  {
         double max = 0.5;
         leftSide = Math.max(min, Math.min(max, leftSide));
         rightSide = Math.max(min, Math.min(max, rightSide));
-    }
+    } /* if (m_joy.getRawButton(Constants.makeTurnRadius)) {
+      //TODO: See if limelight is picking up on a new path
+      if (followPath() && m_isTurning) {
+        m_isTurning = false;
+      }
+    }*/
     // else
     else {
      
