@@ -38,8 +38,7 @@ public class Robot extends TimedRobot {
   private Elevator m_Elevator = new Elevator();
   
   // private Gurny m_Gurny = new Gurny();
-  //private Gurny_josh m_Gurny = new Gurny_josh();
-  private Gurny_LA m_Gurny = new Gurny_LA();
+  private Gurny_josh m_Gurny = new Gurny_josh();
 
   private Manipulator m_Manipulator = new Manipulator();
   private NavX m_NavX = new NavX();
@@ -91,7 +90,7 @@ public class Robot extends TimedRobot {
     m_eJoy = new Joystick(RobotMap.eJoy);
     m_DriveTrain.robotInit(m_driveJoy, m_gJoy);
     m_Elevator.robotInit(m_eJoy);
-    m_Gurny.robotInit(m_gJoy, m_DriveTrain);
+    m_Gurny.robotInit(m_gJoy);
     m_Manipulator.robotInit(m_driveJoy);
   //  m_Limelight.robotInit(m_driveJoy); //functions work with gurney, got rid of joystick parameter
 

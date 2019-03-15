@@ -47,9 +47,6 @@ public class DriveTrain  {
   double last_error = 0.0;
   double heading_error = 0;
   int limelight_warm_up_counter = 0;
-  boolean m_GurneyInControl = false;
-  double m_Gurney_Left = 0.0;
-  double m_Gurney_Right = 0.0;
   
   // Joysticks/Controllers
   Joystick m_joy;
@@ -191,7 +188,6 @@ public class DriveTrain  {
     dogGearSolenoid = new DoubleSolenoid(RobotMap.dogGearSolenoid1, RobotMap.dogGearSolenoid2);
 
     TalonConfig();
-    m_GurneyInControl = false;
 
  
   }
@@ -212,7 +208,6 @@ public class DriveTrain  {
     //   }
     // }
     teleopInit();
-    m_GurneyInControl = false;
   }
   
   public void autonomousPeriodic() {
@@ -262,31 +257,15 @@ public class DriveTrain  {
     }
   }
 
-  public void gurneyTakeControl() {
-    m_Gurney_Left = 0.0;
-    m_Gurney_Right = 0.0;
-    m_GurneyInControl = true;
-  }
-
-  public void gurneyReleaseControl() {
-    m_GurneyInControl = false;
-  }
-
-  public void gurneyControl(double left, double right) {
-    m_Gurney_Left = left;
-    m_Gurney_Right = right;
-  }
-
   /**
    * This function is called periodically during operator control.
    */
   
   public void teleopInit() {
     dogGearSolenoid.set(DoubleSolenoid.Value.kForward);
-    m_GurneyInControl = false;
   }
 
-    public void teleopPeriodic() {
+  public void teleopPeriodic() {
 
     //Equation for ARCADE DRIVE
     double xAxis, yAxis;
@@ -335,13 +314,9 @@ public class DriveTrain  {
      
     }   
 
-    if (!m_GurneyInControl) {
-      m_lMaster.set(ControlMode.PercentOutput, leftSide);
-      m_rMaster.set(ControlMode.PercentOutput, rightSide);
-    } else {
-      m_lMaster.set(ControlMode.PercentOutput, m_Gurney_Left);
-      m_rMaster.set(ControlMode.PercentOutput, m_Gurney_Right);
-    }
+
+    m_lMaster.set(ControlMode.PercentOutput, leftSide);
+    m_rMaster.set(ControlMode.PercentOutput, rightSide);
   }
 
   public void report() {
