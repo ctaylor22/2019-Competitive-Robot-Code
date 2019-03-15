@@ -208,7 +208,7 @@ public class Elevator  {
   public void teleopPeriodic() {
     if (m_joy.getRawButtonReleased(Constants.elevMode)) {
       elevMode = !elevMode;
-    } 
+    }
     if (m_joy.getRawButtonReleased(Constants.elevatorBot)) {
       target_height_index = 0;
     } else if (m_joy.getRawButtonReleased(Constants.elevatorMid)) {

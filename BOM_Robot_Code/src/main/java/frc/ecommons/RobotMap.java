@@ -46,14 +46,13 @@ public class RobotMap {
     public static int ahrsAddress = 1;
 
 /* Manipulator */
-    //Pneumatics
+
     public static int grab1 = 2;
     public static int grab2 = 3;
 
     public static int dual1 = 5;
     public static int dual2 = 4;
 
-    //Motors
     public static int manipUpDown = 12;
     public static int manipWheels = 21; 
 
