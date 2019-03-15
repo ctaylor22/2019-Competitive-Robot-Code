@@ -29,9 +29,8 @@ import frc.robot.NavX;
 // ABORT  == Aborting... Trying or have landed bot back to floor
 // RISING == Both Front and Back trying to raise the robot.
 //           Can have pauses or "holds" in this mode 
-// FRONT_SAFE    == Front legs are retracting slowly to land the bot.
-// FRONT_RETRACT == Front legs retracting as fast as possible.
-// BACK_SAFE     == Back legs can be retracted as fast as possible.
+// FRONT_RETRACT == Front legs are retracting.
+// BACK_RETRACT  == Back legs can be retracting.
 // SETUP         == Allows setting of parameters with joystick
 // CALIBRATE     == Allows running of the main gurney motors, slowly.
 
@@ -58,6 +57,8 @@ public class Gurny_LA  {
   public static final int BUTTON_SAFE_FRONT = 11;
   public static final int BUTTON_SAFE_BACK  = 12;
 
+  private static final double cBiasInc = 0.01;
+
   Joystick m_joy;
   DriveTrain m_DriveTrain;   
   WPI_TalonSRX gBack;
@@ -67,17 +68,28 @@ public class Gurny_LA  {
   int m_Hold_Front = 0;
   int m_Hold_Back = 0;
   int m_Counter = 0;
-  double m_KUp = -0.75;  // Overall Percentage to go UP.
-  double m_KHold = -0.10; // Overall Percentage to HOLD.
-  double m_KDown = -0.035; // Overall Percentage to go DOWN.
-  double m_FrontRiseBias = 0.0; // Bias in Percentage.
-  double m_BackRiseBias = 0.0;  // Bias in Percentage.
-  double m_FrontHoldBias = 0.0; // Bias in Percentage.
-  double m_BackHoldBias = 0.0;  // Bias in Percentage.
-  double m_BiasInc = 0.02;      // Percent Bias to Add or Subtract.
-  double m_FrontOut = 0.0;
-  double m_BackOut = 0.0;
-  int m_CycleOfAbort = 0; // Cycle that abort was started.
+
+  // Default Parameter Settings...
+  static final double default_KUp = -0.95;          // Overall Percentage to rise.
+  static final double default_KHold = -0.15;        // Overall Percentage to hold.
+  static final double default_KDown = -0.085;       // Overall Percentage to lower.
+  static final double default_FrontRiseBias = -0.02; // Bias in Percentage.
+  static final double default_BackRiseBias = -0.01;  // Bias in Percentage.
+  static final double default_FrontHoldBias = -0.02; // Bias in Percentage.
+  static final double default_BackHoldBias = 0.11;   // Bias in Percentage.
+
+  // ********************** Important Parameters Below -- See LoadDefaut()
+  double m_KUp;           // Overall Percentage to go UP.
+  double m_KHold;         // Overall Percentage to HOLD.
+  double m_KDown;         // Overall Percentage to go DOWN.
+  double m_FrontRiseBias; // Bias in Percentage.
+  double m_BackRiseBias;  // Bias in Percentage.
+  double m_FrontHoldBias; // Bias in Percentage.
+  double m_BackHoldBias;  // Bias in Percentage.
+  // *************************************************
+
+  double m_FrontOut = 0.0;  // Actual Percent Output to Front Gurney Motor
+  double m_BackOut = 0.0; // Actual Percent Output to Back Gurney Motor
   boolean m_AbortButtonClear = true;   // For Abort Double Click.
   
   ShuffleboardTab gurneyTab = Shuffleboard.getTab("Gurny-LA");
@@ -146,6 +158,11 @@ public class Gurny_LA  {
     .withPosition(9, 0)
     .withSize(1, 1)
     .getEntry();
+  NetworkTableEntry stab_UseingDefaults = gurneyTab.add("Using Defaults", false)
+    .withWidget(BuiltInWidgets.kToggleButton)
+    .withPosition(1, 0)
+    .withSize(1, 1)
+    .getEntry();
 
   private void Init(Joystick j, DriveTrain d) {
     m_joy = j;
@@ -195,44 +212,69 @@ public class Gurny_LA  {
   }
 
   private void LoadDefaults() {
-    m_KUp = -0.75;  // Percentage to go UP.
-    m_KHold = -0.10; // Percentage to HOLD.
-    m_KDown = -0.035; // Percentage to go DOWN.
-    m_FrontRiseBias = 0.0; // Bias in Percentage.
-    m_BackRiseBias = 0.0;  // Bias in Percentage.
-    m_FrontHoldBias = 0.0; // Bias in Percentage.
-    m_BackHoldBias = 0.0;  // Bias in Percentage.
+    m_KUp            = default_KUp;  // Percentage to go UP.
+    m_KHold          = default_KHold; // Percentage to HOLD.
+    m_KDown          = default_KDown; // Percentage to go DOWN.
+    m_FrontRiseBias  = default_FrontRiseBias; // Bias in Percentage.
+    m_BackRiseBias   = default_BackRiseBias;  // Bias in Percentage.
+    m_FrontHoldBias  = default_FrontHoldBias; // Bias in Percentage.
+    m_BackHoldBias   = default_BackHoldBias;  // Bias in Percentage.
+  }
+
+  private boolean UsingDefaults() {
+    if (m_KUp != default_KUp) {
+      return false;
+    }
+    if (m_KHold != default_KHold) {
+      return false;
+    }
+    if (m_KDown != default_KDown) {
+      return false;
+    }
+    if (m_FrontRiseBias != default_FrontRiseBias) {
+      return false;
+    }
+    if (m_BackRiseBias != default_BackRiseBias) {
+      return false;
+    }
+    if (m_FrontHoldBias != default_FrontHoldBias) {
+      return false;
+    }
+    if (m_BackHoldBias != default_BackHoldBias) {
+      return false;
+    }
+    return true;
   }
 
   private void GetSettings() {
     Preferences p = Preferences.getInstance();
     double x;
-    x = p.getDouble("Gurny-la-KUp", m_KUp);
+    x = p.getDouble("Gurny-la-KUp", default_KUp);
     if (x > -1.0 && x < -0.1) {
       m_KUp = x;
     }
-    x = p.getDouble("Gurny-la-KHold", m_KHold);
+    x = p.getDouble("Gurny-la-KHold", default_KHold);
     if (x > -0.5 && x < -0.05) {
       m_KHold = x;
     }
-    x = p.getDouble("Gurny-la-KDown", m_KDown);
+    x = p.getDouble("Gurny-la-KDown", default_KDown);
     if (x > -0.5 && x < 0.00) {
       m_KDown = x;
     }
-    x = p.getDouble("Gurny-la-FrontRiseBias", m_FrontRiseBias);
-    if (x > -0.3 && x < 0.2) {
+    x = p.getDouble("Gurny-la-FrontRiseBias", default_FrontRiseBias);
+    if (x > -0.5 && x < 0.5) {
       m_FrontRiseBias = x;
     }
-    x = p.getDouble("Gurny-la-BackRiseBias", m_BackRiseBias);
-    if (x > -0.3 && x < 0.2) {
+    x = p.getDouble("Gurny-la-BackRiseBias", default_BackRiseBias);
+    if (x > -0.5 && x < 0.5) {
       m_BackRiseBias = x;
     }
-    x = p.getDouble("Gurny-la-FrontHoldBias", m_FrontHoldBias);
-    if (x > -0.3 && x < 0.2) {
+    x = p.getDouble("Gurny-la-FrontHoldBias", default_FrontHoldBias);
+    if (x > -0.5 && x < 0.5) {
       m_FrontHoldBias = x;
     }
-    x = p.getDouble("Gurny-la-BackHoldBias", m_BackHoldBias);
-    if (x > -0.3 && x < 0.2) {
+    x = p.getDouble("Gurny-la-BackHoldBias", default_BackHoldBias);
+    if (x > -0.5 && x < 0.5) {
       m_BackHoldBias = x;
     }
   }
@@ -290,12 +332,18 @@ public class Gurny_LA  {
     // Clear for next command if all buttons are up...
     if (!m_joy.getRawButton(BUTTON_GO) && !m_joy.getRawButton(BUTTON_LEFT_UP) &&
     !m_joy.getRawButton(BUTTON_LEFT_DOWN) && !m_joy.getRawButton(BUTTON_RIGHT_UP) &&
-    !m_joy.getRawButton(BUTTON_RIGHT_DOWN) && !m_joy.getRawButton(BUTTON_SAVE)) {
+    !m_joy.getRawButton(BUTTON_RIGHT_DOWN) && !m_joy.getRawButton(BUTTON_SAVE) &&
+    !m_joy.getRawButton(BUTTON_SAFE_FRONT)) {
       m_Setup_Buttons_Clear = true; 
       return;
     }
     // Don't do anything if we are not clear.
     if (!m_Setup_Buttons_Clear) {
+      return;
+    }
+    if (m_joy.getRawButton(BUTTON_SAFE_FRONT)) {
+      LoadDefaults();
+      m_Setup_Buttons_Clear = false;
       return;
     }
     // Do the KUp value...  Joystick pushed in Y.
@@ -454,10 +502,10 @@ public class Gurny_LA  {
       double b = m_KHold + m_BackHoldBias;
       int pov = m_joy.getPOV();
       if (pov == 0) {
-        f += 0.15;
+        f += 0.2;
       }
       if (pov == 180) {
-        b += 0.1;
+        b += 0.14;
       }
       SetMotors(f, b);
     }
@@ -482,10 +530,10 @@ public class Gurny_LA  {
     } else {
       front = 0.0;
       if (m_joy.getRawButton(BUTTON_LEFT_UP)) {
-        front = -0.15;
+        front = -0.25;
       }
       if (m_joy.getRawButton(BUTTON_LEFT_DOWN)) {
-        front = 0.15;
+        front = 0.25;
       }
     }
     SetMotors(front, back);
@@ -501,17 +549,17 @@ public class Gurny_LA  {
     } else {
       back = 0.0;
       if (m_joy.getRawButton(BUTTON_RIGHT_UP)) {
-        back = -0.15;
+        back = -0.25;
       }
       if (m_joy.getRawButton(BUTTON_RIGHT_DOWN)) {
-        back = 0.15;
+        back = 0.52;
       }
     }
     if (m_joy.getRawButton(BUTTON_LEFT_UP)) {
-      front = -0.15;
+      front = -0.25;
     }
     if (m_joy.getRawButton(BUTTON_LEFT_DOWN)) {
-      front = 0.15;
+      front = 0.25;
     }
     SetMotors(front, back);
   }
@@ -534,21 +582,21 @@ public class Gurny_LA  {
     double bbias = 0.0;
     if (m_FrontBiasClear) {
       if (m_joy.getRawButton(BUTTON_LEFT_UP)) {
-        fbias += m_BiasInc;
+        fbias += cBiasInc;
         m_FrontBiasClear = false;
       }
       if (m_joy.getRawButton(BUTTON_LEFT_DOWN)) {
-        fbias -= m_BiasInc;
+        fbias -= cBiasInc;
         m_FrontBiasClear = false;
       }
     }
     if (m_BackBiasClear) {
       if (m_joy.getRawButton(BUTTON_RIGHT_UP)) {
-        bbias += m_BiasInc;
+        bbias += cBiasInc;
         m_BackBiasClear = false;
       }
       if (m_joy.getRawButton(BUTTON_RIGHT_DOWN)) {
-        bbias -= m_BiasInc;
+        bbias -= cBiasInc;
         m_BackBiasClear = false;
       }
     }
@@ -688,6 +736,7 @@ public class Gurny_LA  {
     stab_BackHoldBias.setDouble(m_BackHoldBias);
     stab_FrontOut.setDouble(m_FrontOut);
     stab_BackOut.setDouble(m_BackOut);
+    stab_UseingDefaults.setBoolean(UsingDefaults());
   }
 
   public void robotInit(Joystick j, DriveTrain d) {
