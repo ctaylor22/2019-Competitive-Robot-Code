@@ -80,7 +80,7 @@ public class Manipulator  {
     talonConfig();
     setUpPID();
     
-    grabber.set(DoubleSolenoid.Value.kForward);
+    grabber.set(DoubleSolenoid.Value.kReverse);
     grabState = "Up";
     dualActionGrabber.set(DoubleSolenoid.Value.kReverse);
     inOutState = "Out";

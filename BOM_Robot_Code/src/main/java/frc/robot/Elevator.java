@@ -50,7 +50,12 @@ public class Elevator  {
   // used for the elevator index
   // ground, low hatch, mid ball, cargo ball, mid hatch, top ball, top hatch
   // 0, 1, 2, 3, 4, 5, 6, 7, 8                        Hatch Mode = 0, 2, 4, 8       Ball Mode = 0, 3, 5, 8
-  int heights[] = new int[]{10, 3500, 4900, 8700, 12400, 14500, 16300};
+  
+  //Comp Heights
+  // int heights[] = new int[]{10, 3500, 4900, 8700, 12400, 14500, 16300};
+  
+  //Practice Heights
+  int heights[] = new int[]{10, 2600, 4900, 8700, 12400, 14500, 16300};
   Integer previous_index = 0;
   Integer target_height_index = 0;
 
@@ -101,7 +106,7 @@ public class Elevator  {
      * start with x10 kP and increase
      * kD is not always useful
      */
-    m_elevator.configMotionAcceleration(9000);    
+    m_elevator.configMotionAcceleration(9000);   
     m_elevator.configMotionCruiseVelocity(11000);
 
     m_elevator.config_kP(0, 2.5); //0.028 Dual 775 Pro
@@ -208,7 +213,7 @@ public class Elevator  {
   public void teleopPeriodic() {
     if (m_joy.getRawButtonReleased(Constants.elevMode)) {
       elevMode = !elevMode;
-    }
+    } 
     if (m_joy.getRawButtonReleased(Constants.elevatorBot)) {
       target_height_index = 0;
     } else if (m_joy.getRawButtonReleased(Constants.elevatorMid)) {
