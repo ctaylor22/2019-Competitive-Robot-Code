@@ -73,10 +73,10 @@ public class Gurny_LA  {
   static final double default_KUp = -0.95;          // Overall Percentage to rise.
   static final double default_KHold = -0.15;        // Overall Percentage to hold.
   static final double default_KDown = -0.085;       // Overall Percentage to lower.
-  static final double default_FrontRiseBias = -0.02; // Bias in Percentage.
-  static final double default_BackRiseBias = -0.01;  // Bias in Percentage.
+  static final double default_FrontRiseBias = 0.08; // Bias in Percentage.
+  static final double default_BackRiseBias = 0.00;  // Bias in Percentage.
   static final double default_FrontHoldBias = -0.02; // Bias in Percentage.
-  static final double default_BackHoldBias = 0.11;   // Bias in Percentage.
+  static final double default_BackHoldBias = 0.10;   // Bias in Percentage.
 
   // ********************** Important Parameters Below -- See LoadDefaut()
   double m_KUp;           // Overall Percentage to go UP.
