@@ -24,8 +24,11 @@ public class Limelight {
     NetworkTableEntry ty = table.getEntry("ty");
     NetworkTableEntry ta = table.getEntry("ta");
     NetworkTableEntry tv = table.getEntry("tv");
+    
+
     NetworkTableEntry getPipe = table.getEntry("getpipe");
     NetworkTableEntry ledMode = table.getEntry("ledMode");
+    //NetworkTableEntry camMode = table.getEntry("camMode");
 
     double x;
     double y;
@@ -33,9 +36,12 @@ public class Limelight {
     double skew; 
     double pipeline;
     double lightMode;
+    boolean visEnabled;
+     
     //got rid of Joystick joy parameter
     public void robotInit(Joystick joy){
         m_Joystick = joy;
+        //camMode.setNumber(0);
     }
 
     public void autonomousInit() {
@@ -55,12 +61,9 @@ public class Limelight {
         lightMode = ledMode.getDouble(0.0);
 
         //Switching Limelight Light Modes
-        if (m_Joystick.getRawButtonPressed(8)){
-            if (lightMode<=3) {lightMode++;}
-            else {lightMode = 0;}
-            ledMode.setNumber(lightMode);
-            System.out.println("Limelight in mode: " + lightMode);
-        }
+        // if (m_Joystick.getPOV() == 180){
+        //     camMode.setNumber(1);
+        // }
         
         //Placing Limelight Values
         SmartDashboard.putNumber("LimelightX", x);

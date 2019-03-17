@@ -13,6 +13,7 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -31,6 +32,8 @@ public class Manipulator  {
   String grabState = "N/A";
   String inOutState = "N/A";
 
+  String onePushState = "NotExecuting";
+
   TalonSRX manipUpDown;
   VictorSPX manipWheels;
   boolean manipulator = false;
@@ -41,6 +44,7 @@ public class Manipulator  {
   boolean manipToggle = false;
   boolean hasBeenToggled = false;
   boolean isDownFirstLoop = true;
+  public static boolean elevatorDown = false;
   //boolean grabLoop = false;
   int hold_position = 0;
 
@@ -57,6 +61,8 @@ public class Manipulator  {
 
   NetworkTableEntry dualActionGrabberEntry = tab.add("Disc In/Out State", inOutState)
                                                 .withPosition(2, 3).getEntry();
+
+  Timer oneDeliverTimer;
                                                
 
 
@@ -82,18 +88,20 @@ public class Manipulator  {
     
     grabber.set(DoubleSolenoid.Value.kReverse);
     grabState = "Up";
-    dualActionGrabber.set(DoubleSolenoid.Value.kReverse);
+    dualActionGrabber.set(DoubleSolenoid.Value.kForward);
     inOutState = "Out";
     
     manipulator = false;
 
     motorForLoop = false;
     motorBackLoop = false; 
+    oneDeliverTimer = new Timer();
   }
 
   public void talonConfig() {
     manipUpDown.configFactoryDefault();
     manipWheels.configClosedloopRamp(0.1);
+    
     manipUpDown.setSensorPhase(true);
     manipUpDown.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
     manipUpDown.setNeutralMode(NeutralMode.Coast);
@@ -157,7 +165,7 @@ public class Manipulator  {
 
     // disk grabber flippy thing
     if (m_joy.getRawButtonReleased(Constants.discGrabber)) {
-      if (grabber.get() == (Value.kReverse) && dualActionGrabber.get() == (Value.kReverse)) {
+      if (grabber.get() == (Value.kReverse)) {
         grabber.set(DoubleSolenoid.Value.kForward);
         grabState = "Up";
         // currentDiscGrabberState.setString("out");
@@ -173,12 +181,34 @@ public class Manipulator  {
       if (dualActionGrabber.get() == (Value.kForward)) {
         dualActionGrabber.set(DoubleSolenoid.Value.kReverse);
         inOutState = "In";
-      } else if (dualActionGrabber.get() == (Value.kReverse) && grabber.get() == (Value.kReverse)) {
+      } else if (dualActionGrabber.get() == (Value.kReverse)) {
         dualActionGrabber.set(DoubleSolenoid.Value.kForward);
         inOutState = "Out";
       }
     }
 
+    //One Button Delivery
+    if (onePushState == "NotExecuting") {
+      oneDeliverTimer.reset();
+      // onePushState = "Executing";
+      if (m_joy.getRawButtonReleased(Constants.onPushDelivery)) {
+        grabber.set(Value.kForward);
+        onePushState = "grabberOut";
+      } 
+    } else if (onePushState == "grabberOut") {
+      dualActionGrabber.set(Value.kReverse);
+      oneDeliverTimer.start();
+      onePushState = "pushOut";
+    } else if (onePushState == "pushOut") {
+      if (oneDeliverTimer.get() > 0.25 && oneDeliverTimer.get() < 0.75) {
+        elevatorDown = true;
+        onePushState = "NotExecuting";
+      } else if (oneDeliverTimer.get() > 0.75) {
+        
+      }
+
+    } 
+    // SmartDashboard.putNumber("Timer", oneDeliverTimer.get());
     // manipulator arms
     if (m_joy.getRawButtonReleased(Constants.manipCargoPreset)){
       hold_position = -740;

@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Watchdog;
+import edu.wpi.first.wpilibj.buttons.POVButton;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
 import edu.wpi.first.wpilibj.shuffleboard.SendableCameraWrapper;
@@ -28,7 +29,9 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.ecommons.Constants;
 import frc.ecommons.RobotMap;
+import edu.wpi.cscore.MjpegServer;
 import edu.wpi.cscore.UsbCamera;
+import edu.wpi.cscore.VideoSource.ConnectionStrategy;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTableEntry;
 
@@ -43,7 +46,7 @@ public class Robot extends TimedRobot {
 
   private Manipulator m_Manipulator = new Manipulator();
   private NavX m_NavX = new NavX();
-  private Limelight m_Limelight = new Limelight();
+  //private Limelight m_Limelight = new Limelight();
   Joystick m_driveJoy;
   Joystick m_gJoy;
   Joystick m_eJoy;
@@ -51,6 +54,7 @@ public class Robot extends TimedRobot {
   Boolean compLoop = false;
   UsbCamera camera1;
   UsbCamera camera2;
+  MjpegServer server;
   
   int ledMode = 0;
   DigitalOutput dioSlot0 = new DigitalOutput(0);
@@ -77,13 +81,18 @@ public class Robot extends TimedRobot {
   ComplexWidget cameraWidget;
   ComplexWidget cameraWidget2;
 
+
+
   @Override
   public void robotInit() {
     camera1 = CameraServer.getInstance().startAutomaticCapture(0);
-    camera2 = CameraServer.getInstance().startAutomaticCapture(1);
-
+  
+    // camera2 = CameraServer.getInstance().startAutomaticCapture(1);
+  
+    server = CameraServer.getInstance().addServer("Camera Stream", 5800);
+    server.setSource(camera1);
     cameraWidget = tab.add("Side", camera1).withPosition(5, 3).withSize(4, 3);
-    cameraWidget2 = tab.add("Center", camera2).withPosition(5, 0).withSize(4, 3);
+    // cameraWidget2 = tab.add("Center", camera2).withPosition(5, 0).withSize(4, 3);
     Shuffleboard.selectTab("Beginning Game");
     m_driveJoy = new Joystick(RobotMap.driveJoy);
     pressure = new AnalogInput(0);
@@ -93,7 +102,7 @@ public class Robot extends TimedRobot {
     m_Elevator.robotInit(m_eJoy);
     m_Gurny.robotInit(m_gJoy, m_DriveTrain);
     m_Manipulator.robotInit(m_driveJoy);
-  //  m_Limelight.robotInit(m_driveJoy); //functions work with gurney, got rid of joystick parameter
+    //m_Limelight.robotInit(m_driveJoy); //functions work with gurney, got rid of joystick parameter
 
     m_comp = new Compressor();
 
@@ -119,6 +128,11 @@ public class Robot extends TimedRobot {
     m_Manipulator.robotPeriodic();
     pressureEntry.setDouble(pressureCalc);
     compressorEntry.setBoolean(m_comp.getClosedLoopControl());
+    if (DriveTrain.camSwitch) {
+      server.setSource(camera2);
+    } else if (!DriveTrain.camSwitch) {
+      server.setSource(camera1);
+    }
   }
 
 
@@ -149,6 +163,7 @@ public class Robot extends TimedRobot {
     m_DriveTrain.teleopInit();
     m_Gurny.teleopInit();
     
+    
   }
 
 
@@ -158,6 +173,7 @@ public class Robot extends TimedRobot {
     m_Elevator.teleopPeriodic();
     m_Gurny.teleopPeriodic();
     m_Manipulator.teleopPeriodic();
+    //m_Limelight.teleopPeriodic();
 
     if (m_driveJoy.getRawButton(Constants.compressor) && compLoop) {
       compLoop = false;

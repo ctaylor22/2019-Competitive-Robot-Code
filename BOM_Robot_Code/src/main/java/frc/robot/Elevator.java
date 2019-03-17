@@ -48,16 +48,16 @@ public class Elevator  {
    * #TODO: replace heights with competition heights (for disks and balls)
    */
   // used for the elevator index
-  // ground, low hatch, mid ball, cargo ball, mid hatch, top ball, top hatch
-  // 0, 1, 2, 3, 4, 5, 6, 7, 8                        Hatch Mode = 0, 2, 4, 8       Ball Mode = 0, 3, 5, 8
+  // ground, low hatch, hatch grab, mid ball, cargo ball, mid hatch, top ball, top hatch
+  // 0, 1, 2, 3, 4, 5, 6, 7                        Hatch Mode = 0, 2, 4, 8       Ball Mode = 0, 3, 5, 8
   
   //Comp Heights
-  // int heights[] = new int[]{10, 3500, 4900, 8700, 12400, 14500, 16300};
+  // int heights[] = new int[]{10, 3500, 3800, 4900, 8700, 12400, 14500, 16300};
   
   //Practice Heights
-  int heights[] = new int[]{10, 2600, 4900, 8700, 12400, 14500, 16300};
+  int heights[] = new int[]{10, 2600, 2900, 4900, 8700, 12400, 15500, 16200};
   Integer previous_index = 0;
-  Integer target_height_index = 0;
+  public static Integer target_height_index = 0;
 
   ShuffleboardTab testMode = Shuffleboard.getTab("Test Mode");
 
@@ -215,13 +215,17 @@ public class Elevator  {
       elevMode = !elevMode;
     } 
     if (m_joy.getRawButtonReleased(Constants.elevatorBot)) {
+      Manipulator.elevatorDown = false;
       target_height_index = 0;
     } else if (m_joy.getRawButtonReleased(Constants.elevatorMid)) {
-      target_height_index = 2;
-    } else if (m_joy.getRawButtonReleased(Constants.elevatorCargo)) {
+      Manipulator.elevatorDown = false;
       target_height_index = 3;
+    } else if (m_joy.getRawButtonReleased(Constants.elevatorCargo)) {
+      Manipulator.elevatorDown = false;
+      target_height_index = 4;
     } else if (m_joy.getRawButtonReleased(Constants.elevatorTop)) {
-      target_height_index = 6;
+      Manipulator.elevatorDown = false;
+      target_height_index = 7;
     }
 
 
@@ -234,23 +238,32 @@ public class Elevator  {
     // reset encoder with button 7, the small black button in the middle left 
     // 0 position should be with the elevator all the way down
     if (m_joy.getRawButtonPressed(6)) {
+      Manipulator.elevatorDown = false;
       target_height_index++;
     }
     else if (m_joy.getRawButtonReleased(5)) {
+      Manipulator.elevatorDown = false;
       target_height_index--;
     }
     if (target_height_index < 0) {
       target_height_index = 0;
     }
-    if (target_height_index > 6) {
+    if (target_height_index > 7) {
 
-      target_height_index = 6;
+      target_height_index = 7;
     }
 
     int position = getPositionAndSetPID();
     // if (m_joy.getRawAxis(Constants.elevatorUp) < 0.02 && m_joy.getRawAxis(Constants.elevatorDown) < 0.02) {
       // get index in the heights array, valid indexes are 0 thru 8!
-      m_elevator.set(ControlMode.Position, position);
+      if (Manipulator.elevatorDown) {
+        setDownPID();
+        m_elevator.set(ControlMode.Position, position - 200);
+      } else {
+        m_elevator.set(ControlMode.Position, position);
+      }
+      
+      
   
       // m_elevator.set(ControlMode.PercentOutput, 0);
     // }
@@ -295,6 +308,8 @@ public class Elevator  {
     // assume elevator starting on ground with position 0
     // target_height_index = elevator_position_chooser.getSelected().intValue();
     int encoder_position = m_elevator.getSelectedSensorPosition(0);
+
+  
     int target_position = heights[target_height_index];
 
 

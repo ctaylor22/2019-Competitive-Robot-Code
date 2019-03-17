@@ -69,6 +69,8 @@ public class DriveTrain  {
   //Loops
   boolean dgLoop = false;
   boolean driveTestLoop = false;
+  public static boolean camSwitch = false;
+  boolean camLoop = false;
 
   double driveSpeed = 0.5;
 
@@ -288,6 +290,13 @@ public class DriveTrain  {
 
     public void teleopPeriodic() {
 
+      if (m_joy.getPOV() == 90 && !camLoop) {
+        camLoop = false;
+        camSwitch = !camSwitch;
+      } else {
+        camLoop = true;
+      }
+
     //Equation for ARCADE DRIVE
     double xAxis, yAxis;
     xAxis = 0.35 * m_joy.getRawAxis(Constants.xAxis);
@@ -310,6 +319,8 @@ public class DriveTrain  {
 
     // if button, limelight turn
     if (m_joy.getRawButton(Constants.limelightAutoTurn) && limelight_table.getEntry("tv").getDouble(0) == 1) {
+      limelight_table.getEntry("ledMode").setNumber(3);     
+
         double limelight_kP = 0.02;
         double limelight_kF = 0.1;
         heading_error = limelight_table.getEntry("tx").getDouble(0.0);
