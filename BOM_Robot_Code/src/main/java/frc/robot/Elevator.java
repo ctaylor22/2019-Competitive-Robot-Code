@@ -216,15 +216,19 @@ public class Elevator  {
     } 
     if (m_joy.getRawButtonReleased(Constants.elevatorBot)) {
       Manipulator.elevatorDown = false;
+      Manipulator.hatchIsDown = false;
       target_height_index = 0;
     } else if (m_joy.getRawButtonReleased(Constants.elevatorMid)) {
       Manipulator.elevatorDown = false;
+      Manipulator.hatchIsDown = false;
       target_height_index = 3;
     } else if (m_joy.getRawButtonReleased(Constants.elevatorCargo)) {
       Manipulator.elevatorDown = false;
+      Manipulator.hatchIsDown = false;
       target_height_index = 4;
     } else if (m_joy.getRawButtonReleased(Constants.elevatorTop)) {
       Manipulator.elevatorDown = false;
+      Manipulator.hatchIsDown = false;
       target_height_index = 7;
     }
 
@@ -259,6 +263,9 @@ public class Elevator  {
       if (Manipulator.elevatorDown) {
         setDownPID();
         m_elevator.set(ControlMode.Position, position - 200);
+      } else if (Manipulator.hatchIsDown && target_height_index == 0){
+        setUpPID();
+        m_elevator.set(ControlMode.Position, position + Manipulator.elevatorUpBecauseOfHatch);
       } else {
         m_elevator.set(ControlMode.Position, position);
       }

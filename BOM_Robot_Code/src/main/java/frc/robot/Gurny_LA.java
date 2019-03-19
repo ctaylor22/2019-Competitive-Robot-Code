@@ -198,6 +198,14 @@ public class Gurny_LA  {
 
   }
 
+  private double deadband(double input) {
+    /*
+     * Takes an input and returns 0 if it is within the deadband
+     */
+    if (Math.abs(input) < 0.1) return 0;
+    else return input;
+  }
+
   private String GetStringMode() {
     switch(m_Mode) {
       case GN_OFF: return "OFF";
@@ -311,8 +319,8 @@ public class Gurny_LA  {
   private void DriveBot() {
     if (m_Mode == GN_RISING || m_Mode == GN_CALIBRATE ||
       m_Mode == GN_FRONT_RETRACT || m_Mode == GN_BACK_RETRACT) {
-        double z = m_joy.getZ();
-        double y = m_joy.getY();
+        double z = 0;
+        double y = deadband(m_joy.getY());
         gDrive.set(ControlMode.PercentOutput, y);
         if (m_Mode == GN_RISING || m_Mode == GN_FRONT_RETRACT || m_Mode == GN_BACK_RETRACT) {
           m_DriveTrain.gurneyTakeControl();

@@ -24,10 +24,14 @@ import frc.ecommons.Constants;
 import frc.ecommons.RobotMap;
 
 public class Manipulator  {
+
+  public static double elevatorUpBecauseOfHatch = 500;
+
   Joystick m_joy;
 
   DoubleSolenoid grabber;
   DoubleSolenoid dualActionGrabber;
+  DoubleSolenoid hatchPickup;
 
   String grabState = "N/A";
   String inOutState = "N/A";
@@ -44,6 +48,10 @@ public class Manipulator  {
   boolean manipToggle = false;
   boolean hasBeenToggled = false;
   boolean isDownFirstLoop = true;
+
+  public static boolean hatchIsDown = false;
+
+  boolean hatchPickLoop = false;
   public static boolean elevatorDown = false;
   //boolean grabLoop = false;
   int hold_position = 0;
@@ -80,6 +88,10 @@ public class Manipulator  {
     grabber = new DoubleSolenoid(RobotMap.grab1, RobotMap.grab2);
     dualActionGrabber = new DoubleSolenoid(RobotMap.dual1, RobotMap.dual2);
 
+    //Reverse is up... Forward is down... change if necessary
+    hatchPickup = new DoubleSolenoid(RobotMap.hatchPneumatic1, RobotMap.hatchPneumatic2);
+    
+
     manipWheels = new VictorSPX(RobotMap.manipWheels);
     manipUpDown = new TalonSRX(RobotMap.manipUpDown);
 
@@ -90,6 +102,8 @@ public class Manipulator  {
     grabState = "Up";
     dualActionGrabber.set(DoubleSolenoid.Value.kForward);
     inOutState = "Out";
+
+    hatchPickup.set(DoubleSolenoid.Value.kReverse);
     
     manipulator = false;
 
@@ -162,6 +176,25 @@ public class Manipulator  {
   }
   
   public void teleopPeriodic() {
+
+
+
+    // Hatch Pickup
+    // If Right D-Pad pressed... then hatch pickup should go down elevator goes up
+    // Click again and hatch pickup will go up
+    // Elevator will stay in same position
+    if (m_joy.getPOV() == 90 && !hatchPickLoop) {
+      hatchPickLoop = true;
+      if (hatchPickup.get() == Value.kForward) {
+        hatchPickup.set(Value.kReverse);
+      } else if (hatchPickup.get() == Value.kReverse) {
+        hatchIsDown = true;
+        hatchPickup.set(Value.kForward);
+      }
+      
+
+      hatchPickLoop = false;
+    }
 
     // disk grabber flippy thing
     if (m_joy.getRawButtonReleased(Constants.discGrabber)) {

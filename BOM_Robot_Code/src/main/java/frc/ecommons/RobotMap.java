@@ -53,6 +53,9 @@ public class RobotMap {
     public static int dual1 = 5;
     public static int dual2 = 4;
 
+    public static int hatchPneumatic1 = 6;
+    public static int hatchPneumatic2 = 7;
+
     public static int manipUpDown = 12;
     public static int manipWheels = 21; 
 
