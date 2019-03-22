@@ -370,7 +370,7 @@ public class Gurny_josh  {
     gurneyEncoderEntry.setDouble(gBack.getSelectedSensorPosition());
     isSafetoRaiseFrontEntry.setBoolean(isSafeFront);
     disableFrontEntry.setBoolean(disableFront);
-    SmartDashboard.putNumber("Back Gurney Encoder", gBack.getSelectedSensorPosition());
+    //SmartDashboard.putNumber("Back Gurney Encoder", gBack.getSelectedSensorPosition());
   }
 
   public void testInit() {

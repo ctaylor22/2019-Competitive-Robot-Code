@@ -25,7 +25,7 @@ import frc.ecommons.RobotMap;
 
 public class Manipulator  {
 
-  public static double elevatorUpBecauseOfHatch = 500;
+  // public static double elevatorUpBecauseOfHatch = 500;
 
   Joystick m_joy;
 
@@ -48,8 +48,6 @@ public class Manipulator  {
   boolean manipToggle = false;
   boolean hasBeenToggled = false;
   boolean isDownFirstLoop = true;
-
-  public static boolean hatchIsDown = false;
 
   boolean hatchPickLoop = false;
   public static boolean elevatorDown = false;
@@ -183,18 +181,18 @@ public class Manipulator  {
     // If Right D-Pad pressed... then hatch pickup should go down elevator goes up
     // Click again and hatch pickup will go up
     // Elevator will stay in same position
-    if (m_joy.getPOV() == 90 && !hatchPickLoop) {
-      hatchPickLoop = true;
-      if (hatchPickup.get() == Value.kForward) {
-        hatchPickup.set(Value.kReverse);
-      } else if (hatchPickup.get() == Value.kReverse) {
-        hatchIsDown = true;
-        hatchPickup.set(Value.kForward);
-      }
+    // if (m_joy.getPOV() == 90 && !hatchPickLoop) {
+    //   hatchPickLoop = true;
+    //   if (hatchPickup.get() == Value.kForward) {
+    //     hatchPickup.set(Value.kReverse);
+    //   } else if (hatchPickup.get() == Value.kReverse) {
+    //     hatchIsDown = true;
+    //     hatchPickup.set(Value.kForward);
+    //   }
       
 
-      hatchPickLoop = false;
-    }
+    //   hatchPickLoop = false;
+    // }
 
     // disk grabber flippy thing
     if (m_joy.getRawButtonReleased(Constants.discGrabber)) {
@@ -241,7 +239,7 @@ public class Manipulator  {
       }
 
     } 
-    // SmartDashboard.putNumber("Timer", oneDeliverTimer.get());
+    // //SmartDashboard.putNumber("Timer", oneDeliverTimer.get());
     // manipulator arms
     if (m_joy.getRawButtonReleased(Constants.manipCargoPreset)){
       hold_position = -740;
@@ -295,7 +293,7 @@ public class Manipulator  {
   }
 
   public void report() {
-    SmartDashboard.putNumber("Grab Encoder", manipUpDown.getSelectedSensorPosition());
+    //SmartDashboard.putNumber("Grab Encoder", manipUpDown.getSelectedSensorPosition());
 
     grabberStateEntry.setString(grabState);
     dualActionGrabberEntry.setString(inOutState);      

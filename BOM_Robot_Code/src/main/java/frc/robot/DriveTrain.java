@@ -291,10 +291,10 @@ public class DriveTrain  {
     public void teleopPeriodic() {
 
       if (m_joy.getPOV() == 90 && !camLoop) {
-        camLoop = false;
-        camSwitch = !camSwitch;
-      } else {
         camLoop = true;
+        camSwitch = !camSwitch;
+      } else if (m_joy.getPOV() != 90) {
+        camLoop = false;
       }
 
     //Equation for ARCADE DRIVE
@@ -360,7 +360,7 @@ public class DriveTrain  {
     rightEncoderEntry.setDouble(m_rMaster.getSelectedSensorPosition());
     leftEncoderEntry.setDouble(m_lMaster.getSelectedSensorPosition());
 
-    SmartDashboard.putNumber("Sensor Velocity", m_rMaster.getSelectedSensorVelocity());
+    //SmartDashboard.putNumber("Sensor Velocity", m_rMaster.getSelectedSensorVelocity());
     
     txEntry.setDouble(limelight_table.getEntry("tx").getDouble(0.0));
     steeringEntry.setDouble(steering_adjust);

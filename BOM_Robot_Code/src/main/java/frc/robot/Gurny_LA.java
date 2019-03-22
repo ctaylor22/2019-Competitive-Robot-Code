@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.IMUProtocol.YPRUpdate;
@@ -73,7 +74,7 @@ public class Gurny_LA  {
   static final double default_KUp = -0.95;          // Overall Percentage to rise.
   static final double default_KHold = -0.15;        // Overall Percentage to hold.
   static final double default_KDown = -0.085;       // Overall Percentage to lower.
-  static final double default_FrontRiseBias = 0.08; // Bias in Percentage.
+  static final double default_FrontRiseBias = 0.10; // Bias in Percentage.
   static final double default_BackRiseBias = 0.00;  // Bias in Percentage.
   static final double default_FrontHoldBias = -0.02; // Bias in Percentage.
   static final double default_BackHoldBias = 0.10;   // Bias in Percentage.
@@ -173,6 +174,9 @@ public class Gurny_LA  {
     gBack = new WPI_TalonSRX(RobotMap.gBack);
     gFront = new WPI_TalonSRX(RobotMap.gFront);
     gDrive = new WPI_VictorSPX(RobotMap.gDrive);
+
+    gBack.setNeutralMode(NeutralMode.Brake);
+    gFront.setNeutralMode(NeutralMode.Brake);
 
     gDrive.configFactoryDefault();
     gFront.configFactoryDefault();

@@ -66,12 +66,12 @@ public class Limelight {
         // }
         
         //Placing Limelight Values
-        SmartDashboard.putNumber("LimelightX", x);
-        SmartDashboard.putNumber("LimelightY", y);
-        SmartDashboard.putNumber("LimelightArea", area);
-        SmartDashboard.putNumber("LimelightSkew", skew);
-        SmartDashboard.putNumber("LimelightPipeline", pipeline);
-        SmartDashboard.putNumber("LimeLightLedMode", lightMode);
+        //SmartDashboard.putNumber("LimelightX", x);
+        //SmartDashboard.putNumber("LimelightY", y);
+        //SmartDashboard.putNumber("LimelightArea", area);
+        //SmartDashboard.putNumber("LimelightSkew", skew);
+        //SmartDashboard.putNumber("LimelightPipeline", pipeline);
+        //SmartDashboard.putNumber("LimeLightLedMode", lightMode);
     }
     
     public void testPeriodic() {   

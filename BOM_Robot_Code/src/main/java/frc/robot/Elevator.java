@@ -52,10 +52,10 @@ public class Elevator  {
   // 0, 1, 2, 3, 4, 5, 6, 7                        Hatch Mode = 0, 2, 4, 8       Ball Mode = 0, 3, 5, 8
   
   //Comp Heights
-  // int heights[] = new int[]{10, 3500, 3800, 4900, 8700, 12400, 14500, 16300};
+  int heights[] = new int[]{10, 3200, 3800, 4900, 8700, 12400, 14500, 16300};
   
   //Practice Heights
-  int heights[] = new int[]{10, 2600, 2900, 4900, 8700, 12400, 15500, 16200};
+  // int heights[] = new int[]{10, 2600, 2900, 4900, 8700, 12400, 15500, 16200};
   Integer previous_index = 0;
   public static Integer target_height_index = 0;
 
@@ -216,19 +216,19 @@ public class Elevator  {
     } 
     if (m_joy.getRawButtonReleased(Constants.elevatorBot)) {
       Manipulator.elevatorDown = false;
-      Manipulator.hatchIsDown = false;
+       
       target_height_index = 0;
     } else if (m_joy.getRawButtonReleased(Constants.elevatorMid)) {
       Manipulator.elevatorDown = false;
-      Manipulator.hatchIsDown = false;
+       
       target_height_index = 3;
     } else if (m_joy.getRawButtonReleased(Constants.elevatorCargo)) {
       Manipulator.elevatorDown = false;
-      Manipulator.hatchIsDown = false;
+       
       target_height_index = 4;
     } else if (m_joy.getRawButtonReleased(Constants.elevatorTop)) {
       Manipulator.elevatorDown = false;
-      Manipulator.hatchIsDown = false;
+       
       target_height_index = 7;
     }
 
@@ -263,9 +263,6 @@ public class Elevator  {
       if (Manipulator.elevatorDown) {
         setDownPID();
         m_elevator.set(ControlMode.Position, position - 200);
-      } else if (Manipulator.hatchIsDown && target_height_index == 0){
-        setUpPID();
-        m_elevator.set(ControlMode.Position, position + Manipulator.elevatorUpBecauseOfHatch);
       } else {
         m_elevator.set(ControlMode.Position, position);
       }
@@ -290,7 +287,7 @@ public class Elevator  {
     targetHeightIndexEntry.setDouble(target_height_index);
     elevatorVoltageEntry.setDouble(m_elevator.getMotorOutputVoltage());
     elevatorCurrentEntry.setDouble(m_elevator.getOutputCurrent());
-    // SmartDashboard.putNumber("Elevator Encoder", m_elevator.getSelectedSensorPosition());
+    // //SmartDashboard.putNumber("Elevator Encoder", m_elevator.getSelectedSensorPosition());
   }
 
 

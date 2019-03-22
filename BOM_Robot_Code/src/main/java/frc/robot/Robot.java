@@ -37,6 +37,7 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 
 
 public class Robot extends TimedRobot {
+
   private DriveTrain m_DriveTrain = new DriveTrain();
   private Elevator m_Elevator = new Elevator();
   
@@ -65,8 +66,15 @@ public class Robot extends TimedRobot {
 
   AnalogInput pressure;
   double pressureDouble;
+
+  ShuffleboardTab camera = Shuffleboard.getTab("Camera Addresses");
+  NetworkTableEntry addressEntry = camera.add("Server Address", "NULL")
+                                         .getEntry();
+  NetworkTableEntry portEntry = camera.add("Server Port", 0)
+                                      .getEntry();
+
   ShuffleboardTab tab = Shuffleboard.getTab("Beginning Game");
-  NetworkTableEntry pressureEntry = tab.add("Pressure", 0)
+  NetworkTableEntry pressureEntry = tab.add("Pressure", 0) 
                                        .withWidget(BuiltInWidgets.kDial)
                                        .withPosition(9, 0)
                                        .withSize(1, 1)
@@ -77,6 +85,7 @@ public class Robot extends TimedRobot {
                                          .withWidget(BuiltInWidgets.kBooleanBox)
                                          .getEntry();
 
+
   NetworkTableEntry cameraEntry;
   ComplexWidget cameraWidget;
   ComplexWidget cameraWidget2;
@@ -86,12 +95,16 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     camera1 = CameraServer.getInstance().startAutomaticCapture(0);
-  
-    // camera2 = CameraServer.getInstance().startAutomaticCapture(1);
-  
+    camera1.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
+    camera1.setResolution(50, 37);
+    camera1.setFPS(15);
+
     server = CameraServer.getInstance().addServer("Camera Stream", 5800);
     server.setSource(camera1);
-    cameraWidget = tab.add("Side", camera1).withPosition(5, 3).withSize(4, 3);
+    addressEntry.setString(server.getListenAddress());
+    portEntry.setNumber(server.getPort());
+
+    // cameraWidget = tab.add("Side", camera1).withPosition(5, 3).withSize(4, 3);
     // cameraWidget2 = tab.add("Center", camera2).withPosition(5, 0).withSize(4, 3);
     Shuffleboard.selectTab("Beginning Game");
     m_driveJoy = new Joystick(RobotMap.driveJoy);
@@ -106,7 +119,7 @@ public class Robot extends TimedRobot {
 
     m_comp = new Compressor();
 
-    m_comp.setClosedLoopControl(false);
+    m_comp.setClosedLoopControl(true);
 
     //CameraServer.getInstance().startAutomaticCapture();
 
@@ -128,11 +141,8 @@ public class Robot extends TimedRobot {
     m_Manipulator.robotPeriodic();
     pressureEntry.setDouble(pressureCalc);
     compressorEntry.setBoolean(m_comp.getClosedLoopControl());
-    if (DriveTrain.camSwitch) {
-      server.setSource(camera2);
-    } else if (!DriveTrain.camSwitch) {
-      server.setSource(camera1);
-    }
+    //SmartDashboard.putBoolean("Camera Boolean", DriveTrain.camSwitch);
+
   }
 
 
@@ -152,8 +162,6 @@ public class Robot extends TimedRobot {
     m_Elevator.autonomousPeriodic();
     m_Gurny.autonomousPeriodic();
     m_Manipulator.autonomousPeriodic();
-
-
   }
 
   @Override
