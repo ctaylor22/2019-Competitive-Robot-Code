@@ -132,6 +132,9 @@ public class DriveTrain  {
 
   //Turning correction pid loop
   PID turnPid = new PID();
+  
+  double turnMagnitudeLimit = .7;
+  double minTurningPower = .2;
 
   //Whether automatic turn radius calculation is active
   boolean m_isTurning = false;
@@ -433,8 +436,14 @@ public class DriveTrain  {
       if (-.1 >= turnCorrect || turnCorrect >= .1) {
         SmartDashboard.putNumber("Turn Correction", turnCorrect);
         aligned.setBoolean(false);
+        //Makes sure turn correction is significant enough to turn the Robot
+        if (turnCorrect > 0) {
+          turnCorrect = Math.max(turnCorrect, minTurningPower)
+        } else if (turnCorrect < 0) {
+          turnCorrect = Math.min(turnCorrect, -minTurningPower)
+        }
         //Constrains return range to [-.5, .5]
-        return Math.max(-.5, Math.min(turnCorrect, .5));
+        return Math.max(-turnMagnitudeLimit, Math.min(turnCorrect, turnMagnitudeLimit));
       } else {
         aligned.setBoolean(true);
         return 0;
