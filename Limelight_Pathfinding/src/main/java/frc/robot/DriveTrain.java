@@ -44,6 +44,7 @@ public class DriveTrain  {
                               .withPosition(3, 0)
                               .withWidget(BuiltInWidgets.kBooleanBox)
                               .getEntry();
+                              
   double steering_adjust = 0.0;
   double last_error = 0.0;
   double heading_error = 0;
@@ -128,41 +129,8 @@ public class DriveTrain  {
                                           .withSize(1, 1)
                                           .withPosition(0, 8)
                                           .getEntry();
-
-
-  //Turning correction pid loop
-  PID turnPid = new PID();
   
-  double turnMagnitudeLimit = .7;
-  double minTurningPower = .2;
-
-  //Whether automatic turn radius calculation is active
-  boolean m_isTurning = false;
-
-  //Hard coded paths for sandstorm
-  double[][] paths = {{1, 1, 1}};
-                    //{turnradius, degress, direction}
-
-  //Ratios between the right and left wheels for each piece in the hard coded paths
-  double[] ratios = {0.0};
-
-  //Path which the limelight or another pather can write to
-  double[] path = {0, 0, 0};
-                  //{turnradius, degress, direction}
-
-  //Ratio between right and left wheel spins on current path
-  double ratio = 0;
-
-  //The encoder values at which the robot *thinks* it will reach its target for left and right wheels respectively
-  double[] encoderGoals = {0, 0};
-
-  //The P value at which the robot will try to achive it's encoder goals on its paths
-  //TODO: Tune this!
-  double pPath = 100;
-
-  int turnPath = 0;
-
-  final double pi = 3.1415926535897932384626433832;
+  double m_orthoTolerance = .075;
 
   public void TalonConfig() {
     //Configs Talon to default
@@ -244,14 +212,9 @@ public class DriveTrain  {
 
     m_limelight = new Limelight(m_joy);
     SmartDashboard.putBoolean("Aligned", false);
-    turnPid.robotInit(1.0, 1.0, 1.0, 1.0, true);
   }
 
   public void autonomousInit() {
-    //Finds ratios for hard coded paths
-    for (int ind = 0; ind < paths.length; ind++) {
-        ratios[ind] = TurnRadius.turnRadiusRatio(paths[ind][0], Constants.wheelOffset, paths[ind][2]);
-      }
     teleopInit();
     m_limelight.autonomousInit();
   }
@@ -260,92 +223,6 @@ public class DriveTrain  {
     // followTurnPath();
     teleopPeriodic();
     m_limelight.autonomousPeriodic();
-  }
-
-  public void followHardPaths(int pathnum) {
-    if (turnPath == paths.length) {
-      turnPath = -1;
-      return;
-    } else {
-      if (followPath()) {
-        turnPath += 1;
-        processHardVariables(paths[pathnum]);
-      }
-    }
-  }
-
-  public void getLimelightPath() {
-    /* Writes needed variables to the path array
-     * The array is formatted as {turnradius, degresstoturn, direction}
-     * direction is 1 if right and -1 if left
-     */
-    //TODO: Write code for the limelight to pick up nedded turn path and format it
-
-    //Call this after path list has been written to
-    processPathVariables();
-  }
-
-  public void processPathVariables() {
-    double[] radiuses = {0, 0};
-    double[] distances = {0, 0};
-    //Rotations of the robot's wheels
-    double[] rotations = {0, 0};
-    double radians = path[1]*(pi/180);
-    //Finds ratio between right and left wheels
-    ratio = TurnRadius.turnRadiusRatio(path[0], Constants.wheelOffset, path[2]);
-    //Finds the radius each side will rotate about depending on turn direction
-    radiuses[0] = path[1]+Constants.wheelOffset*path[2];
-    radiuses[1] = path[1]+Constants.wheelOffset*-path[2];
-    //Finds the distance each side will travel
-    distances[0] = radiuses[0]*(2*pi)*radians;
-    distances[1] = radiuses[1]*(2*pi)*radians;
-    //Finds how many rotations will be needed for wheels on each side
-    rotations[0] = distances[0]/(2*pi*Constants.wheelRadius);
-    rotations[1] = distances[1]/(2*pi*Constants.wheelRadius);
-    //Calculates the encoder goals
-    encoderGoals[0] = (int) m_lMaster.getSelectedSensorPosition()+Constants.ticksPerRotation*rotations[0];
-    encoderGoals[1] = (int) m_rMaster.getSelectedSensorPosition()+Constants.ticksPerRotation*rotations[1];
-  }
-
-  public void processHardVariables(double[] pathlist) {
-    double[] radiuses = {0, 0};
-    double[] distances = {0, 0};
-    //Rotations of the robot's wheels
-    double[] rotations = {0, 0};
-    double radians = pathlist[1]*(pi/180);
-    ratio = TurnRadius.turnRadiusRatio(pathlist[0], Constants.wheelOffset, pathlist[2]);
-    radiuses[0] = pathlist[1]+Constants.wheelOffset*pathlist[2];
-    radiuses[1] = pathlist[1]+Constants.wheelOffset*-pathlist[2];
-    distances[0] = radiuses[0]*(2*pi)*radians;
-    distances[1] = radiuses[1]*(2*pi)*radians;
-    rotations[0] = distances[0]/(2*pi*Constants.wheelRadius);
-    rotations[1] = distances[1]/(2*pi*Constants.wheelRadius);
-    encoderGoals[0] = (int) m_lMaster.getSelectedSensorPosition()+Constants.ticksPerRotation*rotations[0];
-    encoderGoals[1] = (int) m_rMaster.getSelectedSensorPosition()+Constants.ticksPerRotation*rotations[1];
-  }
-
-  public boolean followPath() {
-    double leftVelocity;
-    double rightVelocity;
-    double lefterr = encoderGoals[0] - m_lMaster.getSelectedSensorPosition();
-    double righterr = encoderGoals[1] - m_rMaster.getSelectedSensorPosition();
-    rightVelocity = ratio*righterr*pPath;
-    leftVelocity = 1*lefterr*pPath;
-    if (righterr > 1 && lefterr > 1) {
-      m_rMaster.set(ControlMode.PercentOutput, rightVelocity);
-      m_lMaster.set(ControlMode.PercentOutput, leftVelocity);
-    } else if (righterr > 1) {
-      m_rMaster.set(ControlMode.PercentOutput, rightVelocity);
-      m_lMaster.set(ControlMode.PercentOutput, 0);
-    } else if (lefterr > 1) {
-      m_rMaster.set(ControlMode.PercentOutput, 0);
-      m_lMaster.set(ControlMode.PercentOutput, leftVelocity);
-    } else {
-      m_rMaster.set(ControlMode.PercentOutput, 0);
-      m_lMaster.set(ControlMode.PercentOutput, 0);
-      return true;
-    }
-    return false;
   }
 
   /**
@@ -359,29 +236,18 @@ public class DriveTrain  {
 
   public void teleopPeriodic() {
     //Equation for ARCADE DRIVE
-    double xAxis, yAxis, turnCorrect;
+    double xAxis, yAxis;
     xAxis = 0.35 * m_joy.getRawAxis(Constants.xAxis);
     // * -1 to correct axis sign
     yAxis = -1*m_joy.getRawAxis(Constants.yAxis);
     
-    if (false) {//m_joy.getRawButtonPressed(Constants.limelightLEDon)) {
+    if (m_joy.getRawButton(4)) {
       limelight_table.getEntry("ledMode").setNumber(3);
-      limelightAutoTurn(xAxis, yAxis);
-    } /*else if (m_joy.getRawButton(Constants.makeTurnRadius)) {
-      //TODO: See if limelight is picking up on a new path
-      if (followPath() && m_isTurning) {
-        m_isTurning = false;
-      }
-    }*/ else if (m_joy.getRawButton(4)) {
-      if (true) {//limelight_table.getEntry("tv").getDouble(0) == 1 && Math.abs(limelight_table.getEntry("tx").getDouble(0)) < 0.05) {
-        // auto turn off led if reading a good value and it's within tolerance
-        limelight_table.getEntry("ledMode").setNumber(3);
-      }
-      turnCorrect = findTurnCorrection();
-      xAxis += turnCorrect;
+      aligned.setBoolean(isAligned());
     } else {
       limelight_table.getEntry("ledMode").setNumber(1);
     }
+
     arcadeDrive(xAxis, yAxis);
     m_limelight.teleopPeriodic();
   }
@@ -429,30 +295,13 @@ public class DriveTrain  {
     m_rMaster.set(ControlMode.PercentOutput, rightSide);
   }
 
-  public double findTurnCorrection() {
-    double turnCorrect;
-    if (m_limelight.target) {
-      turnCorrect = -m_limelight.m_orthoError;
-      if (-.1 >= turnCorrect || turnCorrect >= .1) {
-        SmartDashboard.putNumber("Turn Correction", turnCorrect);
-        aligned.setBoolean(false);
-        //Makes sure turn correction is significant enough to turn the Robot
-        if (turnCorrect > 0) {
-          turnCorrect = Math.max(turnCorrect, minTurningPower)
-        } else if (turnCorrect < 0) {
-          turnCorrect = Math.min(turnCorrect, -minTurningPower)
-        }
-        //Constrains return range to [-.5, .5]
-        return Math.max(-turnMagnitudeLimit, Math.min(turnCorrect, turnMagnitudeLimit));
-      } else {
-        aligned.setBoolean(true);
-        return 0;
-      }
-    } else {
-      //Return nothing if the limelight had no target or the error was negligible
-      aligned.setBoolean(false);
-      return 0;
+  public boolean isAligned() {
+    double error = m_limelight.m_orthoError;
+    if (-m_orthoTolerance <= error && error <= m_orthoTolerance) {
+      return true;
     }
+    turn_error.setNumber(error);
+    return false;
   }
 
   public void report() {
