@@ -8,7 +8,11 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -18,6 +22,17 @@ public class Limelight {
     //Inits n such
     Joystick m_Joystick;
 
+    ShuffleboardTab opening = Shuffleboard.getTab("Beginning Game");
+    NetworkTableEntry aligned = opening.add("Aligned", false)
+                                           .withSize(1, 1)
+                                           .withPosition(3, 0)
+                                           .withWidget(BuiltInWidgets.kBooleanBox)
+                                           .getEntry();
+    NetworkTableEntry limelightIsWorking = opening.add("Limelight", false)
+                                           .withSize(1, 1)
+                                           .withPosition(2, 0)
+                                           .withWidget(BuiltInWidgets.kBooleanBox)
+                                           .getEntry();
     NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight"); //LimelightNetworkTable
     NetworkTable messageTable = NetworkTableInstance.getDefault().getTable("visionmessages");
     NetworkTableEntry tx = table.getEntry("tx");
@@ -49,14 +64,13 @@ public class Limelight {
     double ygoal = 4;
     //Robot angle relitive to being orthoganal with targets
     double m_orthoError;
+    double m_orthoTolerance = .04;
 
     // Joystick init
-    public Limelight(Joystick joystick){
+    public Limelight() {}
+
+    public void robotInit(Joystick joystick) {
         m_Joystick = joystick;
-    }
-
-    public void robotInit() {
-
     }
 
     public void autonomousInit() {
@@ -70,7 +84,6 @@ public class Limelight {
     }
 
     public void teleopPeriodic(){
-        double xerror, yerror;
         //Setting variables values
         x = tx.getDouble(0.0);
         y = ty.getDouble(0.0);
@@ -85,38 +98,35 @@ public class Limelight {
             target = true;
         }
         //Switching Limelight Light Modes
-        if (m_Joystick.getRawButtonPressed(8)){
-            //If the limelight is active
-            //Turn on the lights
-            if (lightMode<=3) {lightMode++;} else {lightMode = 0;}
-            ledMode.setNumber(lightMode);
-            System.out.println("Limelight in mode: " + lightMode);
-            //Finding the angle at which the robot approches the targets
-            if (tv.getBoolean(false)) {
-                //If the limelight can see targets
-                //Assumes that if the robot can see one target, it can see both
-                m_area0 = a0.getDouble(0.0);
-                m_area1 = a1.getDouble(0.0);
-                if (m_area0 != 0.0 && m_area1 != 0.0) {
-                    //If the targets have a valid area value (to prevent division by 0)
-                    m_orthoError = findOrthoError(m_area0, m_area1);
-                    ortho.setNumber(m_orthoError);
-                }
+        if (m_Joystick.getRawButtonPressed(4)) {
+            //Turn Limelight on
+            if (lightMode == 1) {
+                lightMode = 3;
+            } else if (lightMode == 3) {
+                lightMode = 1;
             }
-        } else {/*Turn off the lights*/}
-        //If the limelight can see targets
-        //Assumes that if the robot can see one target, it can see both
-        m_area0 = (double) a0.getNumber(0.0);
-        m_area1 = (double) a1.getNumber(0.0);
-        if (m_area0 != 0.0 && m_area1 != 0.0) {
-            //If the targets have a valid area value (to prevent division by 0)
-            m_orthoError = findOrthoError(m_area0, m_area1);
-            ortho.setNumber(m_orthoError);
+            table.getEntry("ledMode").setNumber(lightMode);
         }
-        xerror = x-xgoal;
-        yerror = y-ygoal;
-        xe.setNumber(xerror);
-        ye.setNumber(yerror);
+        //System.out.println("Limelight in mode: " + lightMode);
+            //Finding the angle at which the robot approches the targets
+        if (tv.getDouble(0.0) == 1.0) {
+            limelightIsWorking.setBoolean(true);
+            //If the limelight can see targets
+            m_area0 = a0.getDouble(0.0);
+            m_area1 = a1.getDouble(0.0);
+            System.out.println(m_area0);
+            System.out.println(m_area1);
+            if (m_area0 != 0.0 && m_area1 != 0.0) {
+                //If both targets have a valid area value (to prevent division by 0)
+                m_orthoError = findOrthoError(m_area0, m_area1);
+                ortho.setNumber(m_orthoError);
+                System.out.println(m_orthoError);
+                aligned.setBoolean(isAligned(m_orthoError));
+            }
+        } else {
+            limelightIsWorking.setBoolean(false);
+            aligned.setBoolean(false);
+        }
         //Placing Limelight Values
         SmartDashboard.putNumber("LimelightX", x);
         SmartDashboard.putNumber("LimelightY", y);
@@ -148,6 +158,14 @@ public class Limelight {
             error *= -1;
         }
         return error;
+    }
+
+    private boolean isAligned(double error) {
+        if (-m_orthoTolerance <= error && error <= m_orthoTolerance) {
+            return true;
+        } else {
+            return false;
+        }
     }
     //Guacamole
     

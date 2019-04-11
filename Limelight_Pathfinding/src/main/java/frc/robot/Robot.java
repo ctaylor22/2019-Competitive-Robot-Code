@@ -42,6 +42,7 @@ public class Robot extends TimedRobot {
 
   private Manipulator m_Manipulator = new Manipulator();
   private NavX m_NavX = new NavX();
+  private Limelight m_Limelight = new Limelight();
   Joystick m_driveJoy;
   Joystick m_gJoy;
   Joystick m_eJoy;
@@ -91,7 +92,8 @@ public class Robot extends TimedRobot {
     m_Elevator.robotInit(m_eJoy);
     m_Gurny.robotInit(m_gJoy);
     m_Manipulator.robotInit(m_driveJoy);
-  //  m_Limelight.robotInit(m_driveJoy); //functions work with gurney, got rid of joystick parameter
+    m_Limelight.robotInit(m_driveJoy);
+    //functions work with gurney, got rid of joystick parameter
 
     m_comp = new Compressor();
 
@@ -126,6 +128,7 @@ public class Robot extends TimedRobot {
     m_Elevator.autonomousInit();
     m_Gurny.autonomousInit();
     m_Manipulator.autonomousInit();
+    m_Limelight.teleopInit();
     ledCom(1);
   }
 
@@ -136,6 +139,7 @@ public class Robot extends TimedRobot {
     m_Elevator.autonomousPeriodic();
     m_Gurny.autonomousPeriodic();
     m_Manipulator.autonomousPeriodic();
+    m_Limelight.autonomousPeriodic();
   }
 
   @Override
@@ -144,6 +148,7 @@ public class Robot extends TimedRobot {
     m_Manipulator.teleopInit();
     m_DriveTrain.teleopInit();
     m_Gurny.teleopInit();
+    m_Limelight.teleopInit();
   }
 
 
@@ -153,6 +158,7 @@ public class Robot extends TimedRobot {
     m_Elevator.teleopPeriodic();
     m_Gurny.teleopPeriodic();
     m_Manipulator.teleopPeriodic();
+    m_Limelight.teleopPeriodic();
 
     if (m_driveJoy.getRawButton(Constants.compressor) && compLoop) {
       compLoop = false;

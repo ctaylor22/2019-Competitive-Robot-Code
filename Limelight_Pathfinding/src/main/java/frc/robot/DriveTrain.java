@@ -39,18 +39,12 @@ public class DriveTrain  {
 
   NetworkTable limelight_table = NetworkTableInstance.getDefault().getTable("limelight"); //LimelightNetworkTable
   ShuffleboardTab opening_tab = Shuffleboard.getTab("Beginning Game");
-  NetworkTableEntry aligned = opening_tab.add("Aligned", false)
-                              .withSize(1, 1)
-                              .withPosition(3, 0)
-                              .withWidget(BuiltInWidgets.kBooleanBox)
-                              .getEntry();
                               
   double steering_adjust = 0.0;
   double last_error = 0.0;
   double heading_error = 0;
 
   //Limelight
-  Limelight m_limelight;
   int limelight_warm_up_counter = 0;
   
   // Joysticks/Controllers
@@ -130,7 +124,7 @@ public class DriveTrain  {
                                           .withPosition(0, 8)
                                           .getEntry();
   
-  double m_orthoTolerance = .075;
+
 
   public void TalonConfig() {
     //Configs Talon to default
@@ -209,20 +203,15 @@ public class DriveTrain  {
     dogGearSolenoid = new DoubleSolenoid(RobotMap.dogGearSolenoid1, RobotMap.dogGearSolenoid2);
 
     TalonConfig();
-
-    m_limelight = new Limelight(m_joy);
-    SmartDashboard.putBoolean("Aligned", false);
   }
 
   public void autonomousInit() {
     teleopInit();
-    m_limelight.autonomousInit();
   }
   
   public void autonomousPeriodic() {
     // followTurnPath();
     teleopPeriodic();
-    m_limelight.autonomousPeriodic();
   }
 
   /**
@@ -231,7 +220,6 @@ public class DriveTrain  {
   
   public void teleopInit() {
     dogGearSolenoid.set(DoubleSolenoid.Value.kForward);
-    m_limelight.teleopInit();
   }
 
   public void teleopPeriodic() {
@@ -240,21 +228,11 @@ public class DriveTrain  {
     xAxis = 0.35 * m_joy.getRawAxis(Constants.xAxis);
     // * -1 to correct axis sign
     yAxis = -1*m_joy.getRawAxis(Constants.yAxis);
-    
-    if (m_joy.getRawButton(4)) {
-      limelight_table.getEntry("ledMode").setNumber(3);
-      aligned.setBoolean(isAligned());
-    } else {
-      limelight_table.getEntry("ledMode").setNumber(1);
-    }
 
     arcadeDrive(xAxis, yAxis);
-    m_limelight.teleopPeriodic();
   }
 
   public void limelightAutoTurn(double xAxis, double yAxis) {
-    // turn limelight led on
-
     // if button, limelight turn
     if (m_joy.getRawButton(Constants.limelightAutoTurn) && limelight_table.getEntry("tv").getDouble(0) == 1) {
         double limelight_kP = 0.02;
@@ -295,15 +273,6 @@ public class DriveTrain  {
     m_rMaster.set(ControlMode.PercentOutput, rightSide);
   }
 
-  public boolean isAligned() {
-    double error = m_limelight.m_orthoError;
-    if (-m_orthoTolerance <= error && error <= m_orthoTolerance) {
-      return true;
-    }
-    turn_error.setNumber(error);
-    return false;
-  }
-
   public void report() {
     
     rightEncoderEntry.setDouble(m_rMaster.getSelectedSensorPosition());
@@ -321,7 +290,6 @@ public class DriveTrain  {
   public void testInit() {
     run.reset();
     testDriveEntry.setBoolean(false);
-    m_limelight.testInit();
   }
   public void testPeriodic() {
     m_lSlave1.follow(m_lMaster);
@@ -355,7 +323,5 @@ public class DriveTrain  {
       run.stop();
       run.reset();
      }
-
-     m_limelight.testPeriodic();
   }
 }
