@@ -4,9 +4,6 @@
 
 package frc.robot;
 
-import java.sql.Time;
-import java.util.Map;
-
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.InvertType;
@@ -20,12 +17,10 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.ecommons.RobotMap;
 import frc.ecommons.Constants;
@@ -43,13 +38,14 @@ public class DriveTrain  {
   String highGear = "High Gear";
 
   NetworkTable limelight_table = NetworkTableInstance.getDefault().getTable("limelight"); //LimelightNetworkTable
+  ShuffleboardTab opening_tab = Shuffleboard.getTab("Beginning Game");
+                              
   double steering_adjust = 0.0;
   double last_error = 0.0;
   double heading_error = 0;
+
+  //Limelight
   int limelight_warm_up_counter = 0;
-  boolean m_GurneyInControl = false;
-  double m_Gurney_Left = 0.0;
-  double m_Gurney_Right = 0.0;
   
   // Joysticks/Controllers
   Joystick m_joy;
@@ -69,8 +65,6 @@ public class DriveTrain  {
   //Loops
   boolean dgLoop = false;
   boolean driveTestLoop = false;
-  public static boolean camSwitch = false;
-  boolean camLoop = false;
 
   double driveSpeed = 0.5;
 
@@ -129,35 +123,8 @@ public class DriveTrain  {
                                           .withSize(1, 1)
                                           .withPosition(0, 8)
                                           .getEntry();
+  
 
-
-  //Whether automatic turn radius calculation is active
-  boolean m_isTurning = false;
-
-  //Hard coded paths for sandstorm
-  double[][] paths = {{1, 1, 1}};
-                    //{turnradius, degress, direction}
-
-  //Ratios between the right and left wheels for each piece in the hard coded paths
-  double[] ratios = {0.0};
-
-  //Path which the limelight or another pather can write to
-  double[] path = {0, 0, 0};
-                  //{turnradius, degress, direction}
-
-  //Ratio between right and left wheel spins on current path
-  double ratio = 0;
-
-  //The encoder values at which the robot *thinks* it will reach its target for left and right wheels respectively
-  double[] encoderGoals = {0, 0};
-
-  //The P value at which the robot will try to achive it's encoder goals on its paths
-  //TODO: Tune this!
-  double pPath = 100;
-
-  int turnPath = 0;
-
-  final double pi = 3.1415926535897932384626433832;
 
   public void TalonConfig() {
     //Configs Talon to default
@@ -236,124 +203,15 @@ public class DriveTrain  {
     dogGearSolenoid = new DoubleSolenoid(RobotMap.dogGearSolenoid1, RobotMap.dogGearSolenoid2);
 
     TalonConfig();
-    m_GurneyInControl = false;
-
- 
   }
 
   public void autonomousInit() {
-    //Finds ratios for hard coded paths
-    for (int ind = 0; ind < paths.length; ind++) {
-        ratios[ind] = TurnRadius.turnRadiusRatio(paths[ind][0], Constants.wheelOffset, paths[ind][2]);
-      }
     teleopInit();
-    m_GurneyInControl = false;
   }
   
   public void autonomousPeriodic() {
     // followTurnPath();
     teleopPeriodic();
-  }
-
-  public void followHardPaths(int pathnum) {
-    if (turnPath == paths.length) {
-      turnPath = -1;
-      return;
-    } else {
-      if (followPath()) {
-        turnPath += 1;
-        processHardVariables(paths[pathnum]);
-      }
-    }
-  }
-
-  public void getLimelightPath() {
-    /* Writes needed variables to the path array
-     * The array is formatted as {turnradius, degresstoturn, direction}
-     * direction is 1 if right and -1 if left
-     */
-    //TODO: Write code for the limelight to pick up nedded turn path and format it
-
-    //Call this after path list has been written to
-    processPathVariables();
-  }
-
-  public void processPathVariables() {
-    double[] radiuses = {0, 0};
-    double[] distances = {0, 0};
-    //Rotations of the robot's wheels
-    double[] rotations = {0, 0};
-    double radians = path[1]*(pi/180);
-    //Finds ratio between right and left wheels
-    ratio = TurnRadius.turnRadiusRatio(path[0], Constants.wheelOffset, path[2]);
-    //Finds the radius each side will rotate about depending on turn direction
-    radiuses[0] = path[1]+Constants.wheelOffset*path[2];
-    radiuses[1] = path[1]+Constants.wheelOffset*-path[2];
-    //Finds the distance each side will travel
-    distances[0] = radiuses[0]*(2*pi)*radians;
-    distances[1] = radiuses[1]*(2*pi)*radians;
-    //Finds how many rotations will be needed for wheels on each side
-    rotations[0] = distances[0]/(2*pi*Constants.wheelRadius);
-    rotations[1] = distances[1]/(2*pi*Constants.wheelRadius);
-    //Calculates the encoder goals
-    encoderGoals[0] = (int) m_lMaster.getSelectedSensorPosition()+Constants.ticksPerRotation*rotations[0];
-    encoderGoals[1] = (int) m_rMaster.getSelectedSensorPosition()+Constants.ticksPerRotation*rotations[1];
-  }
-
-  public void processHardVariables(double[] pathlist) {
-    double[] radiuses = {0, 0};
-    double[] distances = {0, 0};
-    //Rotations of the robot's wheels
-    double[] rotations = {0, 0};
-    double radians = pathlist[1]*(pi/180);
-    ratio = TurnRadius.turnRadiusRatio(pathlist[0], Constants.wheelOffset, pathlist[2]);
-    radiuses[0] = pathlist[1]+Constants.wheelOffset*pathlist[2];
-    radiuses[1] = pathlist[1]+Constants.wheelOffset*-pathlist[2];
-    distances[0] = radiuses[0]*(2*pi)*radians;
-    distances[1] = radiuses[1]*(2*pi)*radians;
-    rotations[0] = distances[0]/(2*pi*Constants.wheelRadius);
-    rotations[1] = distances[1]/(2*pi*Constants.wheelRadius);
-    encoderGoals[0] = (int) m_lMaster.getSelectedSensorPosition()+Constants.ticksPerRotation*rotations[0];
-    encoderGoals[1] = (int) m_rMaster.getSelectedSensorPosition()+Constants.ticksPerRotation*rotations[1];
-  }
-
-  public boolean followPath() {
-    double leftVelocity;
-    double rightVelocity;
-    double lefterr = encoderGoals[0] - m_lMaster.getSelectedSensorPosition();
-    double righterr = encoderGoals[1] - m_rMaster.getSelectedSensorPosition();
-    rightVelocity = ratio*righterr*pPath;
-    leftVelocity = 1*lefterr*pPath;
-    if (righterr > 1 && lefterr > 1) {
-      m_rMaster.set(ControlMode.PercentOutput, rightVelocity);
-      m_lMaster.set(ControlMode.PercentOutput, leftVelocity);
-    } else if (righterr > 1) {
-      m_rMaster.set(ControlMode.PercentOutput, rightVelocity);
-      m_lMaster.set(ControlMode.PercentOutput, 0);
-    } else if (lefterr > 1) {
-      m_rMaster.set(ControlMode.PercentOutput, 0);
-      m_lMaster.set(ControlMode.PercentOutput, leftVelocity);
-    } else {
-      m_rMaster.set(ControlMode.PercentOutput, 0);
-      m_lMaster.set(ControlMode.PercentOutput, 0);
-      return true;
-    }
-    return false;
-  }
-
-  public void gurneyTakeControl() {
-    m_Gurney_Left = 0.0;
-    m_Gurney_Right = 0.0;
-    m_GurneyInControl = true;
-  }
-
-  public void gurneyReleaseControl() {
-    m_GurneyInControl = false;
-  }
-
-  public void gurneyControl(double left, double right) {
-    m_Gurney_Left = left;
-    m_Gurney_Right = right;
   }
 
   /**
@@ -362,42 +220,21 @@ public class DriveTrain  {
   
   public void teleopInit() {
     dogGearSolenoid.set(DoubleSolenoid.Value.kForward);
-    m_GurneyInControl = false;
   }
 
-    public void teleopPeriodic() {
-
-      if (m_joy.getPOV() == 90 && !camLoop) {
-        camLoop = true;
-        camSwitch = !camSwitch;
-      } else if (m_joy.getPOV() != 90) {
-        camLoop = false;
-      }
-
+  public void teleopPeriodic() {
     //Equation for ARCADE DRIVE
     double xAxis, yAxis;
     xAxis = 0.35 * m_joy.getRawAxis(Constants.xAxis);
     // * -1 to correct axis sign
     yAxis = -1*m_joy.getRawAxis(Constants.yAxis);
-    
-    //Equation for Arcade Drive
-    double leftSide, rightSide;
-    rightSide = -(yAxis - xAxis);
-    leftSide = yAxis + xAxis;
-    
-    // turn limelight led on
-    if (m_joy.getRawButtonPressed(Constants.limelightLEDon)) {
-      limelight_table.getEntry("ledMode").setNumber(3);
-    } 
-    // auto turn off led if reading a good value and it's within tolerance
-    else if (limelight_table.getEntry("tv").getDouble(0) == 1 && Math.abs(limelight_table.getEntry("tx").getDouble(0)) < 0.05){
-      limelight_table.getEntry("ledMode").setNumber(1);
-    }
 
+    arcadeDrive(xAxis, yAxis);
+  }
+
+  public void limelightAutoTurn(double xAxis, double yAxis) {
     // if button, limelight turn
     if (m_joy.getRawButton(Constants.limelightAutoTurn) && limelight_table.getEntry("tv").getDouble(0) == 1) {
-      limelight_table.getEntry("ledMode").setNumber(3);     
-
         double limelight_kP = 0.02;
         double limelight_kF = 0.1;
         heading_error = limelight_table.getEntry("tx").getDouble(0.0);
@@ -409,32 +246,31 @@ public class DriveTrain  {
         else if (heading_error < -0.5) {
           steering_adjust = limelight_kP*heading_error - limelight_kF;
         }
-        leftSide += steering_adjust;
-        rightSide += steering_adjust;
-
-        // clamp the output to +/- 0.7 
-        double min = -.5;
-        double max = 0.5;
-        leftSide = Math.max(min, Math.min(max, leftSide));
-        rightSide = Math.max(min, Math.min(max, rightSide));
-    } /* if (m_joy.getRawButton(Constants.makeTurnRadius)) {
-      //TODO: See if limelight is picking up on a new path
-      if (followPath() && m_isTurning) {
-        m_isTurning = false;
-      }
-    }*/
-    // else
-    else {
-     
-    }   
-
-    if (!m_GurneyInControl) {
-      m_lMaster.set(ControlMode.PercentOutput, leftSide);
-      m_rMaster.set(ControlMode.PercentOutput, rightSide);
-    } else {
-      m_lMaster.set(ControlMode.PercentOutput, m_Gurney_Left);
-      m_rMaster.set(ControlMode.PercentOutput, m_Gurney_Right);
+      arcadeDrive(xAxis, yAxis, steering_adjust);
     }
+  }
+
+  public void arcadeDrive(double x, double y) {
+    //Equation for Arcade Drive
+    double leftSide, rightSide;
+    rightSide = x - y;
+    leftSide = x + y;
+    m_lMaster.set(ControlMode.PercentOutput, leftSide);
+    m_rMaster.set(ControlMode.PercentOutput, rightSide);
+  }
+
+  public void arcadeDrive(double x, double y, double steering_adjust) {
+    //Equation for Arcade Drive
+    double leftSide, rightSide;
+    rightSide = x - y + steering_adjust;
+    leftSide = x + y + steering_adjust;
+    // clamp the output to +/- 0.7 
+    double min = -.5;
+    double max = 0.5;
+    leftSide = Math.max(min, Math.min(max, leftSide));
+    rightSide = Math.max(min, Math.min(max, rightSide));
+    m_lMaster.set(ControlMode.PercentOutput, leftSide);
+    m_rMaster.set(ControlMode.PercentOutput, rightSide);
   }
 
   public void report() {
@@ -442,7 +278,7 @@ public class DriveTrain  {
     rightEncoderEntry.setDouble(m_rMaster.getSelectedSensorPosition());
     leftEncoderEntry.setDouble(m_lMaster.getSelectedSensorPosition());
 
-    //SmartDashboard.putNumber("Sensor Velocity", m_rMaster.getSelectedSensorVelocity());
+    SmartDashboard.putNumber("Sensor Velocity", m_rMaster.getSelectedSensorVelocity());
     
     txEntry.setDouble(limelight_table.getEntry("tx").getDouble(0.0));
     steeringEntry.setDouble(steering_adjust);
@@ -454,7 +290,6 @@ public class DriveTrain  {
   public void testInit() {
     run.reset();
     testDriveEntry.setBoolean(false);
-    
   }
   public void testPeriodic() {
     m_lSlave1.follow(m_lMaster);
@@ -488,6 +323,5 @@ public class DriveTrain  {
       run.stop();
       run.reset();
      }
-
   }
 }

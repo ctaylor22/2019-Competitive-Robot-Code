@@ -31,7 +31,7 @@ public class Constants {
 
     // X
     // limelight turn
-    public static int limelightAutoTurn = 7;
+    public static int limelightAutoTurn = 3;
 
     // Y
     // limelight led on
@@ -40,8 +40,6 @@ public class Constants {
     // toggles manipulator motor
     public static int manipWheelBackToggle = 5;
     public static int manipWheelForToggle = 6;
-
-    public static int onPushDelivery = 4;
 
     // Select button (small black button just left of the center of the controller)
     // resets the drive shaft encoders' position and the elevator encoder's position to 0
